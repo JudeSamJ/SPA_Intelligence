@@ -55,6 +55,16 @@ def normalize_endpoint(url: str) -> str:
     return f"{u.scheme}://{u.netloc}/" if u.scheme and u.netloc else url.strip()
 
 
+def v1_base_url(endpoint: str) -> str | None:
+    """Foundry / Azure OpenAI 'v1' endpoints (…services.ai.azure.com or a /openai/v1 path) use the plain
+    OpenAI client at <host>/openai/v1/ with no api-version. Return that base URL, else None (classic)."""
+    from urllib.parse import urlparse
+    u = urlparse(endpoint.strip())
+    if "/openai/v1" in u.path or u.netloc.endswith(".services.ai.azure.com"):
+        return f"{u.scheme}://{u.netloc}/openai/v1/"
+    return None
+
+
 def azure_error_hint(status: int | None, detail: str) -> str:
     dep, host = config.MODEL, normalize_endpoint(__import__("os").environ.get("AZURE_OPENAI_ENDPOINT", ""))
     if status == 404:
@@ -135,10 +145,15 @@ class AzureOpenAIAdapter:
             if not config.llm_configured():
                 raise LLMError(config.setup_hint())
             import os
-            from openai import AzureOpenAI
-            self._client = AzureOpenAI(
-                api_key=os.environ["AZURE_OPENAI_API_KEY"], azure_endpoint=normalize_endpoint(os.environ["AZURE_OPENAI_ENDPOINT"]),
-                api_version=os.environ.get("AZURE_OPENAI_API_VERSION") or "2025-04-01-preview", max_retries=1)
+            import openai
+            key, endpoint = os.environ["AZURE_OPENAI_API_KEY"], os.environ["AZURE_OPENAI_ENDPOINT"]
+            base = v1_base_url(endpoint)
+            if base:   # Foundry v1: api-version is not used
+                self._client = openai.OpenAI(api_key=key, base_url=base, max_retries=1)
+            else:
+                self._client = openai.AzureOpenAI(
+                    api_key=key, azure_endpoint=normalize_endpoint(endpoint), max_retries=1,
+                    api_version=os.environ.get("AZURE_OPENAI_API_VERSION") or "2025-04-01-preview")
         return self._client
 
     @staticmethod

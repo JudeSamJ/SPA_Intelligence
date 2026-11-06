@@ -93,3 +93,11 @@ def test_endpoint_normalised_and_404_gives_actionable_hint(monkeypatch):
     with pytest.raises(LLMError, match="deployment NAME") as ei:
         AzureOpenAIAdapter(c).complete("S", [{"role": "user", "content": "q"}], TOOLS)
     assert "dep-x" in str(ei.value) and "https://r.openai.azure.com/" in str(ei.value)
+
+
+def test_foundry_v1_endpoint_detection():
+    full = "https://res.services.ai.azure.com/openai/v1/responses"
+    assert llm.v1_base_url(full) == "https://res.services.ai.azure.com/openai/v1/"
+    assert llm.v1_base_url("https://res.services.ai.azure.com/") == "https://res.services.ai.azure.com/openai/v1/"
+    assert llm.v1_base_url("https://res.openai.azure.com/openai/v1/") == "https://res.openai.azure.com/openai/v1/"
+    assert llm.v1_base_url("https://res.openai.azure.com/") is None   # classic: AzureOpenAI + api-version
