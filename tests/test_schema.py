@@ -108,3 +108,10 @@ def test_locate_quote_whitespace_insensitive():
 def test_roundtrip_json():
     d = run("sample_c.pdf", FakeClient(oracle_input(SAMPLES / "sample_c.pdf")))
     assert ContractData.model_validate_json(d.model_dump_json()) == d
+
+
+def test_quote_match_ignores_punctuation_but_not_fabrication():
+    page = '(2) Layla Hassan, the individual identified in Schedule 1 (the "Buyer").\nBACKGROUND'
+    assert locate_quote([page], "(2) Layla Hassan, the individual identified in Schedule 1 (the \u201cBuyer\u201d).") == 1
+    assert locate_quote([page], "Layla Hassan the individual identified in Schedule 1 (the Buyer)") == 1
+    assert locate_quote([page], "Layla Hassan, the corporate buyer of Schedule 1") is None
