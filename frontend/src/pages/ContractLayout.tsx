@@ -80,8 +80,10 @@ function ExtractControls({ id, force }: { id: string; force: boolean }) {
 export default function ContractLayout() {
   const { id = "" } = useParams();
   const { t } = useTranslation();
-  const q = useContract(id);
   const list = useContracts();
+  const known = list.data?.find((c) => c.id === id);
+  // Only request the detail when the list says it exists and is extracted: avoids a pointless (expected) 409.
+  const q = useContract(id, known ? known.status === "extracted" : list.isFetched);
   const loc = useLocation();
   const [pdfPage, setPdfPage] = useState<number | null>(null);
   const body = useRef<HTMLDivElement>(null);
@@ -105,9 +107,9 @@ export default function ContractLayout() {
   }, []);
   const ctx = useMemo(() => (q.data ? { id, detail: q.data, openPdf } : null), [id, q.data, openPdf]);
 
-  if (q.isLoading) return <Skeleton h={360} />;
-  const summary = list.data?.find((c) => c.id === id);
-  if (q.error instanceof ApiError && q.error.code === "not_extracted") {
+  if (list.isLoading || q.isLoading) return <Skeleton h={360} />;
+  const summary = known;
+  if (summary && summary.status !== "extracted") {
     return (
       <EmptyState title={t("shell.notExtractedTitle")} body={summary?.name}>
         {summary?.scanned_suspect ? (

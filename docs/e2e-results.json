@@ -1,0 +1,717 @@
+{
+  "passed": 142,
+  "total": 142,
+  "failed": [],
+  "results": [
+    {
+      "name": "landing dusk_en_full: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_full: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_full: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing dusk_en_full",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_reduced: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_reduced: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_reduced: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_en_reduced: no video, no sandstorm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing dusk_en_reduced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_full: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_full: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_full: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing dusk_ar_full",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_reduced: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_reduced: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_reduced: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing dusk_ar_reduced: no video, no sandstorm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing dusk_ar_reduced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_full: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_full: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_full: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing day_en_full",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_reduced: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_reduced: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_reduced: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_en_reduced: no video, no sandstorm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing day_en_reduced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_full: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_full: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_full: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing day_ar_full",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_reduced: dir/lang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_reduced: effects mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_reduced: headline visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing day_ar_reduced: no video, no sandstorm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: landing day_ar_reduced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: not-extracted state offers Extract + cost note",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: visible progress while extracting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: percentage-sum warning shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: missing-cancellation flag shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: cancellation row highlighted as not found",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C: plan total chip shows 95% (alert styled)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en a/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en a/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en a/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en a/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en a/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en a/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en a/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en a/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en b/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en b/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en b/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en b/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en b/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en b/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en b/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en b/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en c/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en c/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en c/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en c/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en c/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en c/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_en c/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_en c/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar a/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar a/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar a/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar a/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar a/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar a/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar a/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar a/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar b/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar b/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar b/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar b/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar b/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar b/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar b/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar b/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar c/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar c/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar c/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar c/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar c/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar c/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app dusk_ar c/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app dusk_ar c/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app day_en a/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app day_en a/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app day_en a/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app day_en a/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app day_en a/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app day_en a/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app day_en a/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app day_en a/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app reduced_en c/terms: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app reduced_en c/terms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app reduced_en c/penalty: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app reduced_en c/penalty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app reduced_en c/cashflow: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app reduced_en c/cashflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "app reduced_en c/assistant: renders content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: app reduced_en c/assistant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: cancel/refund refused with 'legal team'",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: handover answer contains the date and the quote",
+      "ok": true,
+      "detail": "Assistant\nThe handover date is 2027-06-30 (page 3: “30 June 2027”).\n📎\nPage 3\n“30 June 2027”"
+    },
+    {
+      "name": "chat: citation chip shows page 3",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: citation opens the PDF panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: PDF opened at page 3",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: outside-contract question says not stated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "API: fixture 1,000,000 / 6% / grace 30 / 90 days = 9863.01",
+      "ok": true,
+      "detail": "{\"delay_days\":90,\"grace_days\":30,\"chargeable_days\":60,\"penalty\":9863.01,\"cap_amount\":null,\"cap_reached\":false,\"pct_of_price\":0.986}"
+    },
+    {
+      "name": "UI shows AED 9,863.01 for the 90-day preset",
+      "ok": true,
+      "detail": "AED 9,863.01"
+    },
+    {
+      "name": "UI amount equals API value after rapid scenario changes",
+      "ok": true,
+      "detail": "AED 48,328.77 | AED 48,328.77 | want AED 48,328.77"
+    },
+    {
+      "name": "scenario table equals API rows",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dial is keyboard accessible (ArrowRight changes days)",
+      "ok": true,
+      "detail": "181"
+    },
+    {
+      "name": "KPI linked equals API",
+      "ok": true,
+      "detail": "AED 980,000"
+    },
+    {
+      "name": "KPI penalty exposure equals API",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "KPI at-risk total equals API",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "at-risk definition comes from the API",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "timeline has a node per dated milestone and a payment dot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chart renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "RTL: sidebar sits on the right of the content",
+      "ok": true,
+      "detail": "1094 vs 16"
+    },
+    {
+      "name": "AR: figures use Western digits by default",
+      "ok": true,
+      "detail": "48,328.77 د.إ"
+    },
+    {
+      "name": "AR: Arabic-Indic digits only after opting in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "route transition: sandstorm overlay shown, then app opened",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload: fake PDF rejected with the server's message",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload: extraction failure is shown (no silent hang)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "toggle: Reduce effects switches the mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "toggle: preference persists after reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "accuracy: shows API results",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: accuracy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "404 page renders with disclaimer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: lite tier (no smooth scroll / WebGL / video)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: no horizontal overflow on landing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: mobile landing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: no horizontal overflow in the app",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: contracts list is a collapsed panel once a contract is open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: mobile app",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fps probe (informational)",
+      "ok": true,
+      "detail": "51.2 fps"
+    },
+    {
+      "name": "no console errors or page errors anywhere",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

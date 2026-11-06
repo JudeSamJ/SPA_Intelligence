@@ -14,8 +14,13 @@ export const useContracts = () =>
     },
   });
 
-export const useContract = (id: string | undefined) =>
-  useQuery({ queryKey: ["contract", id], queryFn: () => api.contract(id!), enabled: !!id, retry: false });
+export const useContract = (id: string | undefined, enabled = true) =>
+  useQuery({
+    queryKey: ["contract", id],
+    queryFn: () => api.contract(id!),
+    enabled: !!id && enabled,
+    retry: false,
+  });
 
 export const useStatus = (id: string | undefined, poll: boolean) =>
   useQuery({

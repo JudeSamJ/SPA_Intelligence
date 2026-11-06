@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { EASE } from "../motion/ease";
 import { gsap, ScrollTrigger } from "../motion/registry";
 import { useMotion } from "../motion/mm";
 import { usePrefs } from "../state/prefs";
@@ -6,7 +7,7 @@ import { Dunes } from "./Dunes";
 import { drawSunsetScene } from "./drawScene";
 import { createGlitch, type GlitchHandle } from "./GlitchShader";
 import { Stars } from "./Stars";
-import { useMediaAvailable } from "./useMediaAvailable";
+import { useHeroMedia } from "./useHeroMedia";
 
 /**
  * Hero background, in priority order:
@@ -23,10 +24,9 @@ export function HeroBackdrop() {
   const handle = useRef<GlitchHandle | null>(null);
   const { theme, tier } = usePrefs();
   const [glReady, setGlReady] = useState(false);
-  const hasMp4 = useMediaAvailable("/media/hero.mp4", "video/");
-  const hasWebm = useMediaAvailable("/media/hero.webm", "video/");
-  const hasVideo = hasMp4 || hasWebm;
-  const hasPoster = useMediaAvailable("/media/hero-poster.jpg", "image/");
+  const media = useHeroMedia();
+  const hasVideo = media.mp4 || media.webm;
+  const hasPoster = media.poster;
   const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
   const useVideo = hasVideo && tier === "full" && !saveData;
 
@@ -63,6 +63,12 @@ export function HeroBackdrop() {
       if (tr !== "full") return;
       const h = handle.current;
       const el = root.current!;
+      // slow cinematic push-in (ExpoScaleEase) on the scene layers; settles and stays put
+      gsap.fromTo(
+        [src.current, gl.current].filter(Boolean),
+        { scale: 1 },
+        { scale: 1.06, duration: 24, ease: EASE.expoScale(1, 1.06) },
+      );
       let visible = true;
       const io = new IntersectionObserver(([e]) => {
         visible = !!e?.isIntersecting;
@@ -169,8 +175,8 @@ export function HeroBackdrop() {
           poster={hasPoster ? "/media/hero-poster.jpg" : undefined}
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
         >
-          <source src="/media/hero.webm" type="video/webm" />
-          <source src="/media/hero.mp4" type="video/mp4" />
+          {media.webm && <source src="/media/hero.webm" type="video/webm" />}
+          {media.mp4 && <source src="/media/hero.mp4" type="video/mp4" />}
         </video>
       )}
       {theme === "dusk" && <Stars count={tier === "lite" ? 28 : 70} />}

@@ -7,6 +7,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -28,6 +29,7 @@ def _err(status: int, code: str, message: str) -> JSONResponse:
 def create_app() -> FastAPI:
     app = FastAPI(title="SPA Intelligence API", version="1.0.0",
                   description="Decision support, not legal advice.")
+    app.add_middleware(GZipMiddleware, minimum_size=1024)   # text assets + JSON; ~70% smaller transfer
     app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_credentials=False,
                        allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type"])
 
@@ -80,9 +82,19 @@ def create_app() -> FastAPI:
 
     if config.SERVE_FRONTEND and (config.FRONTEND_DIST / "index.html").exists():
         dist = config.FRONTEND_DIST
-        for sub in ("assets", "media"):
-            if (dist / sub).exists():
-                app.mount(f"/{sub}", StaticFiles(directory=dist / sub), name=sub)
+        class ImmutableAssets(StaticFiles):
+            """Vite emits content-hashed filenames under /assets, so they can be cached for a year."""
+
+            async def get_response(self, path, scope):
+                resp = await super().get_response(path, scope)
+                if resp.status_code == 200:
+                    resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                return resp
+
+        if (dist / "assets").exists():
+            app.mount("/assets", ImmutableAssets(directory=dist / "assets"), name="assets")
+        if (dist / "media").exists():
+            app.mount("/media", StaticFiles(directory=dist / "media"), name="media")
 
         @app.get("/{path:path}", include_in_schema=False)
         def spa(path: str):

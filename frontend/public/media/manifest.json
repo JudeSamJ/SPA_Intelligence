@@ -1,0 +1,4 @@
+{
+  "_comment": "Which hero media exist. scripts/prepare_media.sh rewrites this after encoding your licensed clip. false = use the procedural WebGL/SVG scene.",
+  "hero": { "mp4": false, "webm": false, "poster": false }
+}

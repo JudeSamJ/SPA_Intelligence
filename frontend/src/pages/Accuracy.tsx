@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ApiError } from "../api/client";
 import { useEvalResults, useEvalRun, useEvalStatus, useHealth } from "../api/hooks";
 import { Alert, EmptyState, ErrorState, Loader, Skeleton } from "../components/ui";
 import { useFmt } from "../i18n/format";
 import { AnimatedNumber } from "../motion/AnimatedNumber";
 import { useQueryClient } from "@tanstack/react-query";
+
+const AccuracyChart = lazy(() => import("../components/AccuracyChart"));
 
 export default function Accuracy() {
   const { t } = useTranslation();
@@ -138,35 +139,9 @@ export default function Accuracy() {
           {t("accuracy.chart")}
         </h2>
         <div style={{ width: "100%", height: Math.max(260, rows.length * 26), direction: "ltr" }}>
-          <ResponsiveContainer>
-            <BarChart data={rows} layout="vertical" margin={{ left: 40, right: 24, top: 4, bottom: 4 }}>
-              <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" horizontal={false} />
-              <XAxis
-                type="number"
-                domain={[0, 100]}
-                tick={{ fill: "var(--muted)", fontSize: 12 }}
-                tickFormatter={(v: number) => `${fmt.num(v)}%`}
-                stroke="var(--line)"
-              />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={190}
-                tick={{ fill: "var(--muted)", fontSize: 12 }}
-                stroke="var(--line)"
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 8,
-                  color: "var(--fg)",
-                }}
-                formatter={(v) => `${fmt.num(Number(v), 1)}%`}
-              />
-              <Bar dataKey="pct" fill="var(--info)" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <Suspense fallback={<Skeleton h={Math.max(260, rows.length * 26)} />}>
+            <AccuracyChart rows={rows} />
+          </Suspense>
         </div>
       </section>
       <section className="card" style={{ overflowX: "auto" }}>

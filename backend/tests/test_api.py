@@ -350,3 +350,8 @@ def test_eval_run_cached_completes(client, seeded, monkeypatch):
     assert client.get("/api/eval/run/status").json()["state"] == "done"
     j = client.get("/api/eval/results").json()
     assert j["overall"]["value_accuracy"] == 1.0 and j["penalty_tests"]["total"] == 14
+
+
+def test_responses_are_gzip_compressed_when_large(client):
+    r = client.get("/openapi.json", headers={"Accept-Encoding": "gzip"})
+    assert r.status_code == 200 and r.headers.get("content-encoding") == "gzip"

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Magnetic } from "../motion/Magnetic";
+import { EASE } from "../motion/ease";
 import { useMotion } from "../motion/mm";
 import { gsap, loadMorph, loadSmoother, Observer, ScrollTrigger } from "../motion/registry";
 import { getScrollY, scrollToTarget, setSmoother } from "../motion/scroll";
@@ -70,7 +71,7 @@ export default function Landing() {
       const tl = gsap.timeline({ onComplete: () => setIntroDone(true) });
       intro.current = tl;
       cleanups.push(splitReveal(title, { rtl, delay: 0.2 }));
-      tl.from("[data-hero-eyebrow]", { y: 20, opacity: 0, duration: 0.8 }, 0.1)
+      tl.from("[data-hero-eyebrow]", { y: 20, opacity: 0, duration: 1.4, ease: EASE.slow }, 0.1)
         .fromTo(
           tag,
           { scrambleText: { text: "", chars: "upperCase", speed: 0.6 } },
@@ -81,7 +82,11 @@ export default function Landing() {
           },
           1.0,
         )
-        .from("[data-hero-cta] > *", { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 }, 1.4)
+        .from(
+          "[data-hero-cta] > *",
+          { y: 40, opacity: 0, stagger: 0.12, duration: 1.1, ease: EASE.bounce },
+          1.4,
+        )
         .from("[data-hero-skip]", { opacity: 0, duration: 0.4 }, 0.5);
       // dhow follows a wavy path along the horizon, mirrored in RTL
       if (tr === "full") {

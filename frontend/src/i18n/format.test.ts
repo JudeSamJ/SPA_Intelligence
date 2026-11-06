@@ -24,11 +24,15 @@ describe("formatters", () => {
   });
 });
 
+// Languages differ in plural categories (Arabic has six), so compare keys with the plural suffix removed.
+const PLURAL = /_(zero|one|two|few|many|other)$/;
 const flat = (o: object, p = ""): string[] =>
-  Object.entries(o).flatMap(([k, v]) => (typeof v === "object" && v ? flat(v, `${p}${k}.`) : [`${p}${k}`]));
+  Object.entries(o).flatMap(([k, v]) =>
+    typeof v === "object" && v ? flat(v, `${p}${k}.`) : [`${p}${k}`.replace(PLURAL, "")],
+  );
 
 describe("translations", () => {
   it("English and Arabic have exactly the same keys", () => {
-    expect(flat(ar).sort()).toEqual(flat(en).sort());
+    expect([...new Set(flat(ar))].sort()).toEqual([...new Set(flat(en))].sort());
   });
 });

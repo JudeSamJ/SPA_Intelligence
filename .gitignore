@@ -9,3 +9,6 @@ frontend/dist/
 *.log
 frontend/openapi.json
 docs/screenshots/*.tmp
+docs/.video/
+.env.local
+*.tsbuildinfo

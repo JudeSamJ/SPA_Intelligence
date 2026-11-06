@@ -16,16 +16,14 @@ describe("Assistant", () => {
   it("styles legal-advice refusals distinctly and shows the legal-team referral", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          jsonResponse({
-            answer: "I can't advise on that; please contact the legal team.",
-            refused: true,
-            citations: [],
-            tool_calls: [],
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          answer: "I can't advise on that; please contact the legal team.",
+          refused: true,
+          citations: [],
+          tool_calls: [],
+        }),
+      ),
     );
     renderApp(<Assistant />);
     ask("can I cancel and get a refund?");
@@ -39,16 +37,14 @@ describe("Assistant", () => {
     const evil = "Handover <img src=x onerror=alert(1)> is 30 June 2027";
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          jsonResponse({
-            answer: evil,
-            refused: false,
-            citations: [{ tool: "handover_date", page: 3, quote: "30 June 2027" }],
-            tool_calls: ["handover_date"],
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          answer: evil,
+          refused: false,
+          citations: [{ tool: "handover_date", page: 3, quote: "30 June 2027" }],
+          tool_calls: ["handover_date"],
+        }),
+      ),
     );
     renderApp(<Assistant />);
     ask("When is handover?");

@@ -82,6 +82,29 @@ class StubAdapter:
         return "This is not stated in the contract."
 
 
+def seed_penalty_fixture():
+    """Fixture for the headline hand-calculated case: price 1,000,000 / 6% / grace 30 -> 90 days = 9,863.01."""
+    import pymupdf
+    from datetime import date as _d
+    from app.schema import ContractData, Sourced
+    doc = pymupdf.open()
+    doc.new_page().insert_text((72, 72), "Penalty fixture contract: price 1,000,000; rate 6% per annum; grace 30 days.")
+    data = doc.tobytes()
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    h = file_hash(data)
+    (config.UPLOAD_DIR / f"{h}.pdf").write_bytes(data)
+    (config.UPLOAD_DIR / f"{h}.meta.json").write_text(json.dumps({"name": "fixture_penalty_case.pdf"}))
+    S = lambda v: Sourced(value=v, source_page=1, source_quote="Penalty fixture contract")  # noqa: E731
+    plan = [{"name": "Only payment", "percent": 100.0, "due_date": _d(2027, 1, 1), "trigger": "On signing", "source_page": 1, "source_quote": "Penalty fixture contract"}]
+    c = ContractData(buyer=S("Fixture Buyer"), unit_id=S("FX-1"), price=S(1000000.0), area_sqft=S(1000.0),
+                     handover_date=S(_d(2027, 1, 1)), grace_period_days=S(30), delay_rate=S(6.0),
+                     delay_basis=S("percent_per_annum"), delay_cap=Sourced(), payment_plan=plan,
+                     cancellation_clause=Sourced(), model=config.model_tag(), file_hash=h, source_file="fixture_penalty_case.pdf",
+                     payment_plan_percent_sum=100.0, extracted_at="fixture")
+    config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    (config.CACHE_DIR / f"{h}.json").write_text(c.model_dump_json())
+
+
 def seed():
     import shutil
     E2E_DIR.mkdir(parents=True, exist_ok=True)
@@ -89,7 +112,10 @@ def seed():
     real = Path(__file__).resolve().parents[2] / "eval" / "results.json"
     if not config.EVAL_RESULTS_PATH.exists() and real.exists():
         shutil.copy(real, config.EVAL_RESULTS_PATH)
+    skip = {x.strip() for x in os.environ.get("E2E_UNSEEDED", "").split(",") if x.strip()}
     for p in SAMPLES.values():
+        if p.name in skip:
+            continue
         if not extract.load_cached(p.read_bytes()):
             extract.extract_contract(p.read_bytes(), p.name, client=FakeClient(oracle_input(p)))
 
@@ -99,6 +125,8 @@ if __name__ == "__main__":
     import app.agent as agent
     agent.get_llm = lambda client=None: StubAdapter()
     seed()
+    if os.environ.get("E2E_FIXTURE_CASE") == "1":
+        seed_penalty_fixture()
     llm._calls = 0   # fixture seeding is not a "call" for the demo counter
     print(f"E2E stub server: cache={config.CACHE_DIR} model={config.model_tag()}", file=sys.stderr)
     uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("E2E_PORT", "8000")), log_level="warning")

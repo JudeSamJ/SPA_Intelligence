@@ -8,17 +8,15 @@ describe("api client", () => {
   it("returns parsed JSON on success", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          jsonResponse({
-            status: "ok",
-            llm_configured: true,
-            model: "m",
-            llm_calls_made: 0,
-            llm_call_cap: 40,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          status: "ok",
+          llm_configured: true,
+          model: "m",
+          llm_calls_made: 0,
+          llm_call_cap: 40,
+        }),
+      ),
     );
     expect((await api.health()).status).toBe("ok");
   });

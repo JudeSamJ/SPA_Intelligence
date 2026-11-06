@@ -1,0 +1,17 @@
+{
+  "name": "spa-intelligence",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SPA Intelligence: FastAPI backend + Vite/React/TypeScript frontend. Decision support, not legal advice.",
+  "scripts": {
+    "dev:backend": "uvicorn backend.api.main:app --reload --port 8000",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "node scripts/dev.mjs",
+    "test": "python -m pytest -q && npm --prefix frontend test",
+    "lint": "npm --prefix frontend run lint",
+    "build": "npm --prefix frontend run build",
+    "gen:api": "npm --prefix frontend run gen:api",
+    "e2e": "node scripts/e2e_check.mjs",
+    "serve": "SERVE_FRONTEND=1 uvicorn backend.api.main:app --port 8000"
+  }
+}

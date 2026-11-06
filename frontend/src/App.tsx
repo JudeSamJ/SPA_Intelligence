@@ -19,11 +19,7 @@ export default function App() {
       <TopBar />
       <main>
         <RouteFade>
-          <Suspense
-            fallback={
-              <div className="skeleton" style={{ height: "60vh", margin: "6rem 1rem 0" }} aria-busy="true" />
-            }
-          >
+          <Suspense fallback={<div style={{ minHeight: "100svh" }} aria-busy="true" />}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/app/*" element={<AppShell />} />

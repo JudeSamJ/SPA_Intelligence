@@ -1,16 +1,5 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Bar,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { ApiError } from "../api/client";
 import { useCashflow } from "../api/hooks";
 import { MilestoneTimeline } from "../components/MilestoneTimeline";
@@ -18,6 +7,8 @@ import { Alert, EmptyState, Skeleton } from "../components/ui";
 import { useFmt } from "../i18n/format";
 import { AnimatedNumber } from "../motion/AnimatedNumber";
 import { useContractCtx } from "./ctx";
+
+const CashflowChart = lazy(() => import("../components/CashflowChart"));
 
 export default function Cashflow() {
   const { t } = useTranslation();
@@ -37,7 +28,6 @@ export default function Cashflow() {
   if (!d) return <Skeleton h={420} />;
   const shown = pending ?? d.at_risk.delay_days;
   const mismatch = Math.abs(d.at_risk.plan_total - d.price) > 0.01;
-  const tick = { fill: "var(--muted)", fontSize: 12 };
   const th = {
     textAlign: "start" as const,
     padding: "0.5rem 0.7rem",
@@ -45,7 +35,6 @@ export default function Cashflow() {
     fontSize: "0.85rem",
   };
   const td = { padding: "0.5rem 0.7rem", borderBlockStart: "1px solid var(--line)" };
-  const data = d.periods.map((p) => ({ ...p, label: fmt.period(p.period) }));
 
   return (
     <div className="data-layer" style={{ display: "grid", gap: "1.2rem" }}>
@@ -133,67 +122,9 @@ export default function Cashflow() {
           {t("cashflow.chart")}
         </h2>
         <div style={{ width: "100%", height: 360, direction: "ltr" }} data-testid="cashflow-chart">
-          <ResponsiveContainer>
-            <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 4, left: 12 }}>
-              <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="label"
-                tick={tick}
-                interval="preserveStartEnd"
-                minTickGap={14}
-                stroke="var(--line)"
-              />
-              <YAxis
-                yAxisId="l"
-                tick={tick}
-                tickFormatter={(v: number) => fmt.num(v)}
-                stroke="var(--line)"
-                width={84}
-              />
-              <YAxis
-                yAxisId="r"
-                orientation="right"
-                tick={tick}
-                tickFormatter={(v: number) => fmt.num(v)}
-                stroke="var(--line)"
-                width={84}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--line)",
-                  color: "var(--fg)",
-                  borderRadius: 8,
-                }}
-                labelStyle={{ color: "var(--fg)" }}
-                formatter={(v) => fmt.aed(Number(v), 2)}
-              />
-              <Legend wrapperStyle={{ color: "var(--fg)" }} />
-              <Bar
-                yAxisId="l"
-                dataKey="safe_amount"
-                name={t("cashflow.timeBased")}
-                stackId="a"
-                fill="var(--info)"
-              />
-              <Bar
-                yAxisId="l"
-                dataKey="at_risk_amount"
-                name={t("cashflow.linkedSeries")}
-                stackId="a"
-                fill="var(--accent-fill)"
-              />
-              <Line
-                yAxisId="r"
-                dataKey="cumulative"
-                name={t("cashflow.cumulative")}
-                type="monotone"
-                stroke="var(--fg)"
-                strokeWidth={2}
-                dot={false}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <Suspense fallback={<Skeleton h={360} />}>
+            <CashflowChart periods={d.periods} />
+          </Suspense>
         </div>
         <details style={{ marginBlockStart: 10 }}>
           <summary style={{ cursor: "pointer" }}>
