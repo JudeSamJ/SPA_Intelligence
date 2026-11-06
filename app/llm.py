@@ -48,6 +48,28 @@ def _count() -> None:
     _calls += 1
 
 
+def normalize_endpoint(url: str) -> str:
+    """Keep only scheme://host (users often paste a full /openai/deployments/... URL)."""
+    from urllib.parse import urlparse
+    u = urlparse(url.strip())
+    return f"{u.scheme}://{u.netloc}/" if u.scheme and u.netloc else url.strip()
+
+
+def azure_error_hint(status: int | None, detail: str) -> str:
+    dep, host = config.MODEL, normalize_endpoint(__import__("os").environ.get("AZURE_OPENAI_ENDPOINT", ""))
+    if status == 404:
+        return (f"Azure returned 404 (not found) for deployment '{dep}' at {host}. Check that "
+                f"AZURE_OPENAI_DEPLOYMENT is the deployment NAME from the Azure portal (Model deployments), "
+                f"not just the model name, that it lives in the resource this endpoint belongs to, and that "
+                f"AZURE_OPENAI_ENDPOINT is only https://<resource>.openai.azure.com/ . No usage was incurred.")
+    if status in (401, 403):
+        return f"Azure rejected the key ({status}). Check AZURE_OPENAI_API_KEY belongs to the resource at {host}."
+    if status == 400:
+        return (f"Azure rejected the request (400): {detail}. If it mentions api-version or an unsupported "
+                f"parameter, set AZURE_OPENAI_API_VERSION to the version shown in your Azure portal.")
+    return f"Azure request failed ({status}): {detail}"
+
+
 def pages_text(pages: list[str]) -> str:
     return "\n\n".join(f"[PAGE {i}]\n{t}" for i, t in enumerate(pages, 1))
 
@@ -115,7 +137,7 @@ class AzureOpenAIAdapter:
             import os
             from openai import AzureOpenAI
             self._client = AzureOpenAI(
-                api_key=os.environ["AZURE_OPENAI_API_KEY"], azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+                api_key=os.environ["AZURE_OPENAI_API_KEY"], azure_endpoint=normalize_endpoint(os.environ["AZURE_OPENAI_ENDPOINT"]),
                 api_version=os.environ.get("AZURE_OPENAI_API_VERSION") or "2025-04-01-preview", max_retries=1)
         return self._client
 
@@ -147,9 +169,15 @@ class AzureOpenAIAdapter:
         kw = {"tool_choice": {"type": "function", "function": {"name": force_tool}}} if force_tool else {}
         fn_tools = [{"type": "function", "function": {"name": t["name"], "description": t["description"],
                                                       "parameters": t["input_schema"]}} for t in tools]
-        resp = client.chat.completions.create(
-            model=config.MODEL, messages=self._convert(system, messages), tools=fn_tools,
-            max_completion_tokens=max_tokens, **kw)
+        try:
+            resp = client.chat.completions.create(
+                model=config.MODEL, messages=self._convert(system, messages), tools=fn_tools,
+                max_completion_tokens=max_tokens, **kw)
+        except Exception as e:
+            status = getattr(e, "status_code", None)
+            if status is None:
+                raise
+            raise LLMError(azure_error_hint(status, str(getattr(e, "message", e))[:300])) from e
         msg = resp.choices[0].message
         reply = LLMReply(text=msg.content or "")
         for tc in (getattr(msg, "tool_calls", None) or []):

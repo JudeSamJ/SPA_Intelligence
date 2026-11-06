@@ -75,3 +75,21 @@ def test_unconfigured_azure_raises_setup_hint(monkeypatch):
     with pytest.raises(LLMError, match=".env"):
         AzureOpenAIAdapter().complete("S", [{"role": "user", "content": "q"}], TOOLS)
     assert llm.calls_made() == 0  # config error must not consume the call budget
+
+
+def test_endpoint_normalised_and_404_gives_actionable_hint(monkeypatch):
+    assert llm.normalize_endpoint("https://r.openai.azure.com/openai/deployments/x/chat?api-version=1") == "https://r.openai.azure.com/"
+    monkeypatch.setattr(config, "MODEL", "dep-x")
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://r.openai.azure.com/openai/deployments/x")
+
+    class NotFound(Exception):
+        status_code = 404
+        message = "Resource not found"
+
+    def boom(**kw):
+        raise NotFound()
+
+    c = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=boom)))
+    with pytest.raises(LLMError, match="deployment NAME") as ei:
+        AzureOpenAIAdapter(c).complete("S", [{"role": "user", "content": "q"}], TOOLS)
+    assert "dep-x" in str(ei.value) and "https://r.openai.azure.com/" in str(ei.value)
