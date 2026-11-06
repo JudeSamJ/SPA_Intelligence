@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from . import config
+from .llm import ToolCall, get_llm
 from .cashflow import milestone_rows, next_payment
 from .schema import ContractData, Sourced
 
@@ -125,39 +126,32 @@ class BuyerAgent:
     def __init__(self, contract: ContractData, client=None):
         self.contract = contract
         self._client = client
-
-    def _get_client(self):
-        if self._client is None:
-            import anthropic
-            if not config.get_api_key():
-                raise RuntimeError("ANTHROPIC_API_KEY is not set (environment or .env).")
-            self._client = anthropic.Anthropic()
-        return self._client
+        self._llm = None
 
     def ask(self, question: str, history: list[dict] | None = None, today: date | None = None) -> AgentReply:
         today = today or date.today()
-        if is_legal_advice_question(question):
+        if is_legal_advice_question(question):      # no LLM call, no cost
             return AgentReply(answer=config.load_rules()["agent"]["refusal_message"], refused=True)
 
-        client = self._get_client()
-        messages = [dict(m) for m in (history or [])] + [{"role": "user", "content": question}]
+        self._llm = self._llm or get_llm(self._client)
+        past = [{"role": m["role"], "content": m["content"]} if m["role"] == "user"
+                else {"role": "assistant", "text": m["content"], "tool_calls": []}
+                for m in (history or [])][-config.AGENT_HISTORY_MESSAGES:]
+        messages = past + [{"role": "user", "content": question}]
         reply = AgentReply(answer="")
         for _ in range(config.AGENT_MAX_TURNS):
-            resp = client.messages.create(model=config.MODEL, max_tokens=1024, system=system_prompt(today),
-                                          tools=TOOLS, messages=messages)
-            uses = [b for b in resp.content if getattr(b, "type", None) == "tool_use"]
-            if not uses:
-                reply.answer = "".join(getattr(b, "text", "") for b in resp.content
-                                       if getattr(b, "type", None) == "text").strip()
+            r = self._llm.complete(system_prompt(today), messages, TOOLS, max_tokens=config.AGENT_MAX_TOKENS)
+            if not r.tool_calls:
+                reply.answer = r.text.strip()
                 return reply
-            messages.append({"role": "assistant", "content": resp.content})
+            messages.append({"role": "assistant", "text": r.text, "tool_calls": r.tool_calls})
             results = []
-            for u in uses:
-                out = run_tool(self.contract, u.name, u.input, today)
-                reply.tool_calls.append(u.name)
-                self._collect_citations(u.name, out, reply)
-                results.append({"type": "tool_result", "tool_use_id": u.id, "content": _wrap(out)})
-            messages.append({"role": "user", "content": results})
+            for tc in r.tool_calls:
+                out = run_tool(self.contract, tc.name, tc.args, today)
+                reply.tool_calls.append(tc.name)
+                self._collect_citations(tc.name, out, reply)
+                results.append({"id": tc.id, "content": _wrap(out)})
+            messages.append({"role": "tool", "results": results})
         reply.answer = "I could not complete that request."
         return reply
 

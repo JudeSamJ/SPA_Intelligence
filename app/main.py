@@ -17,7 +17,8 @@ import streamlit as st  # noqa: E402
 from app import config  # noqa: E402
 from app.agent import BuyerAgent  # noqa: E402
 from app.cashflow import CashflowUnavailable, at_risk_summary, build_schedule, milestone_rows  # noqa: E402
-from app.extract import ExtractionError, extract_contract  # noqa: E402
+from app.extract import extract_contract, load_cached  # noqa: E402
+from app.llm import calls_made  # noqa: E402
 from app.penalty import SimulationUnavailable, penalty_for_contract, simulate  # noqa: E402
 from app.schema import ContractData  # noqa: E402
 
@@ -68,8 +69,6 @@ FIELD_LABELS = {
 def load_contract(label: str, data: bytes):
     try:
         return extract_contract(data, source_name=label), None
-    except ExtractionError as e:
-        return None, str(e)
     except Exception as e:  # network/API errors should show, not crash
         return None, f"{type(e).__name__}: {e}"
 
@@ -95,19 +94,29 @@ with st.sidebar:
         up = st.file_uploader("SPA PDF", type=["pdf"])
         if up:
             pdf_bytes, label = up.getvalue(), up.name
-    st.caption(f"Model: `{config.MODEL}`  \nJurisdiction rules: `{RULES['jurisdiction']}`")
-    if not config.get_api_key():
-        st.caption("⚠️ ANTHROPIC_API_KEY not set: only previously cached extractions can load.")
+    st.caption(f"Model: `{config.model_tag()}`  \nJurisdiction rules: `{RULES['jurisdiction']}`")
+    st.caption(f"LLM calls this session: {calls_made()} / {config.MAX_LLM_CALLS} (cap)")
+    if not config.llm_configured():
+        st.caption("⚠️ " + config.setup_hint() + " Cached extractions still load.")
 
 if pdf_bytes is None:
     st.info("Pick a sample or upload an SPA PDF in the sidebar.")
     st.stop()
 
-with st.spinner("Extracting contract terms (cached after first run)…"):
-    contract, err = load_contract(label, pdf_bytes)
-if err:
-    st.error(f"Could not extract **{label}**: {err}")
-    st.stop()
+contract = load_cached(pdf_bytes)          # free: reads data/cache
+if contract is None:
+    st.info(f"**{label}** has not been extracted with `{config.model_tag()}` yet. Extraction makes 1 LLM call "
+            f"(2 if the first output fails validation); the result is cached afterwards.")
+    if not config.llm_configured():
+        st.error(config.setup_hint())
+        st.stop()
+    if not st.button("Extract with LLM", type="primary"):
+        st.stop()
+    with st.spinner("Extracting contract terms…"):
+        contract, err = load_contract(label, pdf_bytes)
+    if err:
+        st.error(f"Could not extract **{label}**: {err}")
+        st.stop()
 
 tab_terms, tab_pen, tab_cash, tab_chat, tab_acc = st.tabs(
     ["📄 Extracted Terms", "⏱ Penalty Simulator", "💰 Cash-flow", "💬 Buyer Assistant", "🎯 Accuracy"])
@@ -278,12 +287,12 @@ with tab_acc:
     st.subheader("Extraction accuracy")
     p = config.EVAL_RESULTS_PATH
     if not p.exists():
-        st.info("No evaluation results yet. Run `python eval/run_eval.py` (needs ANTHROPIC_API_KEY) to generate them.")
+        st.info("No evaluation results yet. Run `python eval/run_eval.py` (needs LLM settings in `.env`) to generate them.")
     else:
         res = json.loads(p.read_text())
         st.caption(f"Model `{res.get('model')}` · {res.get('generated_at')} · files: {', '.join(res.get('files', []))}")
-        if res.get("model") != config.MODEL:
-            st.warning(f"These results were produced with `{res.get('model')}`, not the current `{config.MODEL}`.")
+        if res.get("model") != config.model_tag():
+            st.warning(f"These results were produced with `{res.get('model')}`, not the current `{config.model_tag()}`.")
         o = res["overall"]
         a1, a2, a3 = st.columns(3)
         a1.metric("Value accuracy", f"{o['value_accuracy']:.1%}", help=f"{o['checks']} checks")

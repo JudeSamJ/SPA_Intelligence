@@ -17,7 +17,7 @@ def seeded(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "CACHE_DIR", tmp_path)
     for p in sorted(SAMPLES.glob("*.pdf")):
         extract_contract(p.read_bytes(), p.name, client=FakeClient(oracle_input(p)))
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
 
 
 @pytest.mark.parametrize("idx", [0, 1, 2])
@@ -46,6 +46,7 @@ def test_chat_refuses_legal_question_without_api(seeded):
 
 def test_unseeded_no_key_shows_error_not_fake_data(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "CACHE_DIR", tmp_path)
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
     at = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=30).run()
-    assert not at.exception and any("ANTHROPIC_API_KEY" in e.value for e in at.error)
+    assert not at.exception and any(".env" in e.value for e in at.error)
+    assert not at.button  # no extraction button / no API call when unconfigured

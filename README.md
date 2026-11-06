@@ -1,6 +1,6 @@
 # SPA Intelligence
 
-Streamlit demo that analyses property Sale and Purchase Agreements (SPAs): upload a PDF and get key terms
+Streamlit demo (Azure OpenAI by default, Anthropic optional) that analyses property Sale and Purchase Agreements (SPAs): upload a PDF and get key terms
 (each with page number and exact source quote), a deterministic delay-penalty simulator, a cash-flow view,
 a buyer Q&A assistant that answers only from the extracted contract, and an accuracy table.
 
@@ -20,7 +20,7 @@ a buyer Q&A assistant that answers only from the extracted contract, and an accu
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # then put your ANTHROPIC_API_KEY in .env (or export it)
+cp .env.example .env        # then fill AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in .env
 python scripts/generate_samples.py   # regenerates samples/*.pdf and ground_truth.json
 ```
 
@@ -29,12 +29,20 @@ python scripts/generate_samples.py   # regenerates samples/*.pdf and ground_trut
 ```bash
 streamlit run app/main.py        # the app
 pytest                           # unit tests (penalty, cash-flow, schema, agent, eval, UI smoke)
-python eval/run_eval.py          # extraction accuracy vs ground_truth.json -> eval/results.json (needs API key)
-python scripts/agent_smoke.py    # 6 live buyer-agent questions (needs API key)
+python eval/run_eval.py --yes    # extraction accuracy -> eval/results.json (without --yes it only shows the call count)
+python scripts/agent_smoke.py    # 6 live buyer-agent questions (~10 calls)
 ```
 
-Change the model in one place: `MODEL` in `app/config.py`. Extractions are cached in `data/cache/<sha256>.json`
+The provider and model come from `.env` (`LLM_PROVIDER`, `AZURE_OPENAI_DEPLOYMENT`, `ANTHROPIC_MODEL`); `MODEL` in `app/config.py` is the single constant. Extractions are cached in `data/cache/<sha256>.json`
 (a cache entry is ignored when the model differs; set `SPA_CACHE_DIR` to relocate the cache).
+
+## Protecting the API key (usage controls)
+
+- Extraction runs only when you click **Extract with LLM** (1 call, 2 if validation fails) and is cached per file hash and model; cached files never call the API again.
+- A hard cap of `LLM_MAX_CALLS` (default 40) per process; the sidebar shows calls used.
+- `eval/run_eval.py` refuses to call the API without `--yes`, and tells you the number of calls first.
+- Legal-advice questions are refused locally with no call. Agent answers are capped at 600 tokens, 4 tool round-trips and 6 history messages.
+- Azure has no native PDF input here, so the PDF's text (with `[PAGE n]` markers) is sent instead; Anthropic receives the PDF as a document block.
 
 ## Architecture
 
@@ -48,6 +56,7 @@ rules/uae.yaml feeds penalty, cashflow and agent.   eval/run_eval.py scores extr
 | File | Role |
 |---|---|
 | `app/schema.py` | `Sourced`, `Milestone`, `ContractData`; a non-null value must carry page and quote |
+| `app/llm.py` | provider-neutral layer: Azure OpenAI and Anthropic adapters, call cap |
 | `app/extract.py` | PDF to `ContractData`, caching, deterministic checks and warnings |
 | `app/penalty.py` | `delay_penalty`, `delay_penalty_fixed_per_sqft`, `simulate` (rates and caps in percent; accrual only after grace; half-up rounding to 2 dp) |
 | `app/cashflow.py` | period schedule, "at risk" definition (see its docstring and `rules/uae.yaml`), next payment |

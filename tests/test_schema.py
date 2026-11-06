@@ -94,7 +94,7 @@ def test_cache_hit_avoids_second_call():
 def test_cache_invalidated_when_model_changes(monkeypatch):
     inp = oracle_input(SAMPLES / "sample_a.pdf")
     run("sample_a.pdf", FakeClient(inp))
-    monkeypatch.setattr(config, "MODEL", "another-model")
+    monkeypatch.setattr(config, "MODEL", "another-model")  # model_tag() changes
     c = FakeClient(inp)
     run("sample_a.pdf", c)
     assert len(c.calls) == 1

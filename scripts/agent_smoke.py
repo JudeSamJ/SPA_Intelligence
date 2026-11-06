@@ -1,4 +1,4 @@
-"""Live smoke test of the buyer agent with 6 questions (needs ANTHROPIC_API_KEY).
+"""Live smoke test of the buyer agent with 6 questions (needs LLM settings in .env; ~10 calls).
 
     python scripts/agent_smoke.py [samples/sample_a.pdf]
 """
@@ -21,8 +21,8 @@ QUESTIONS = [
     ("What is the grace period before compensation starts?", "factual"),
 ]
 
-if not config.get_api_key():
-    sys.exit("ANTHROPIC_API_KEY is not set (environment or .env).")
+if not config.llm_configured():
+    sys.exit(config.setup_hint())
 path = sys.argv[1] if len(sys.argv) > 1 else str(config.SAMPLES_DIR / "sample_a.pdf")
 agent = BuyerAgent(extract_file(path))
 for q, kind in QUESTIONS:

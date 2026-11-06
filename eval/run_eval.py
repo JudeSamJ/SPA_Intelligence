@@ -2,9 +2,10 @@
 
 Scoring: exact match for numbers/dates/enums, normalised-string match for names/ids, and a
 check that every quote appears verbatim (whitespace/case-normalised) in the PDF text.
-Needs ANTHROPIC_API_KEY (real extraction); cached results are reused unless --no-cache.
+Cached extractions are reused (free). Uncached files cost 1 LLM call each (2 on a retry), so the
+script refuses to call the API unless you pass --yes.
 
-    python eval/run_eval.py [--no-cache]
+    python eval/run_eval.py [--yes] [--no-cache]
 """
 from __future__ import annotations
 
@@ -19,7 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from app import config  # noqa: E402
-from app.extract import ExtractionError, extract_contract, normalize_text, pdf_pages  # noqa: E402
+from app.llm import LLMError  # noqa: E402
+from app.extract import ExtractionError, extract_contract, load_cached, normalize_text, pdf_pages  # noqa: E402
 
 SCALAR_FIELDS = ["buyer", "unit_id", "price", "area_sqft", "handover_date", "grace_period_days",
                  "delay_rate", "delay_basis", "delay_cap"]
@@ -127,19 +129,23 @@ def print_table(agg: dict, penalty: dict) -> None:
 
 def main(argv: list[str]) -> int:
     use_cache = "--no-cache" not in argv
-    if not config.get_api_key():
-        cached = list(config.CACHE_DIR.glob("*.json")) if config.CACHE_DIR.exists() else []
-        if not use_cache or not cached:
-            print("ERROR: ANTHROPIC_API_KEY is not set (environment or .env) and there are no cached extractions.\n"
-                  "Set the key and re-run: python eval/run_eval.py", file=sys.stderr)
-            return 2
     truth = json.loads(config.GROUND_TRUTH_PATH.read_text())
+    todo = [f for f in truth if not (use_cache and load_cached((config.SAMPLES_DIR / f).read_bytes()))]
+    if todo:
+        if not config.llm_configured():
+            print(f"ERROR: {config.setup_hint()}", file=sys.stderr)
+            return 2
+        if "--yes" not in argv:
+            print(f"{len(todo)} file(s) are not cached: {', '.join(todo)}.\n"
+                  f"This will make {len(todo)} LLM call(s) (up to {2 * len(todo)} with retries) on "
+                  f"{config.model_tag()}.\nRe-run with --yes to proceed.", file=sys.stderr)
+            return 3
     per_file: dict[str, dict] = {}
     for fname, t in truth.items():
         pdf = (config.SAMPLES_DIR / fname).read_bytes()
         try:
             contract = extract_contract(pdf, fname, use_cache=use_cache)
-        except ExtractionError as e:
+        except LLMError as e:
             print(f"[{fname}] extraction failed: {e}", file=sys.stderr)
             return 1
         per_file[fname] = compare(contract, t, pdf)
@@ -148,7 +154,7 @@ def main(argv: list[str]) -> int:
     agg = aggregate(per_file)
     penalty = penalty_test_pass_rate()
     print_table(agg, penalty)
-    out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "model": config.MODEL,
+    out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "model": config.model_tag(),
            "files": list(per_file), **agg, "penalty_tests": penalty,
            "per_file": {f: {k: bool(v["correct"]) for k, v in c.items()} for f, c in per_file.items()}}
     config.EVAL_RESULTS_PATH.write_text(json.dumps(out, indent=2))
