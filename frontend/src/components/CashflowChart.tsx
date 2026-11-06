@@ -12,27 +12,33 @@ import {
 } from "recharts";
 import type { Period } from "../api/client";
 import { useFmt } from "../i18n/format";
+import { useMedia } from "../state/useMedia";
 
 /** Stacked bars (time-based vs construction/handover-linked) + cumulative line. Lazy-loaded: it carries Recharts. */
 export default function CashflowChart({ periods }: { periods: Period[] }) {
   const { t } = useTranslation();
   const fmt = useFmt();
+  const narrow = useMedia("(max-width: 640px)");
   const tick = { fill: "var(--muted)", fontSize: 12 };
   const data = periods.map((p) => ({ ...p, label: fmt.period(p.period) }));
   return (
     <ResponsiveContainer>
-      <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 4, left: 12 }}>
+      <ComposedChart
+        data={data}
+        margin={{ top: 10, right: narrow ? 4 : 12, bottom: 4, left: narrow ? 0 : 12 }}
+      >
         <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="label" tick={tick} interval="preserveStartEnd" minTickGap={14} stroke="var(--line)" />
         <YAxis
           yAxisId="l"
           tick={tick}
-          tickFormatter={(v: number) => fmt.num(v)}
+          tickFormatter={(v: number) => (narrow ? fmt.compact(v) : fmt.num(v))}
           stroke="var(--line)"
-          width={84}
+          width={narrow ? 46 : 84}
         />
         <YAxis
           yAxisId="r"
+          hide={narrow}
           orientation="right"
           tick={tick}
           tickFormatter={(v: number) => fmt.num(v)}
@@ -49,7 +55,7 @@ export default function CashflowChart({ periods }: { periods: Period[] }) {
           labelStyle={{ color: "var(--fg)" }}
           formatter={(v) => fmt.aed(Number(v), 2)}
         />
-        <Legend wrapperStyle={{ color: "var(--fg)" }} />
+        <Legend wrapperStyle={{ color: "var(--fg)", fontSize: narrow ? 12 : 14 }} />
         <Bar
           yAxisId="l"
           dataKey="safe_amount"

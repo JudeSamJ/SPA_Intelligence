@@ -16,6 +16,9 @@ export function makeFormatters(lang: "en" | "ar", arabicDigits: boolean, aedLabe
     }).format(n);
   const aed = (n: number, decimals = 2) =>
     lang === "ar" ? `${num(n, decimals)} ${aedLabel}` : `${aedLabel} ${num(n, decimals)}`;
+  /** 490000 -> "490K" (axis labels on phones) */
+  const compact = (n: number) =>
+    new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(n);
   const pct = (n: number, decimals = 0) => `${num(n, decimals)}%`;
   /** up to 2 decimals, trailing zeros trimmed (20 -> "20", 12.5 -> "12.5") */
   const flex = (n: number) =>
@@ -32,7 +35,7 @@ export function makeFormatters(lang: "en" | "ar", arabicDigits: boolean, aedLabe
     const out = `${String(d).padStart(2, "0")} ${month} ${y}`;
     return useArab ? toArabicIndic(out) : out;
   };
-  return { num, aed, pct, date, flex };
+  return { num, aed, pct, date, flex, compact };
 }
 
 export function useFmt() {

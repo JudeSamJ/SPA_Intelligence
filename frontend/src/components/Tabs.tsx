@@ -39,20 +39,7 @@ export function Tabs({ base }: { base: string }) {
   }, [active]);
 
   return (
-    <div
-      ref={wrap}
-      role="tablist"
-      aria-label={t("shell.tabs")}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        gap: 4,
-        padding: 4,
-        borderRadius: 999,
-        background: "var(--surface-2)",
-        flexWrap: "wrap",
-      }}
-    >
+    <div ref={wrap} role="tablist" aria-label={t("shell.tabs")} className="tabs">
       <span
         ref={pill}
         aria-hidden="true"
@@ -72,15 +59,7 @@ export function Tabs({ base }: { base: string }) {
           to={`${base}/${k}`}
           role="tab"
           aria-selected={active === k}
-          style={{
-            position: "relative",
-            zIndex: 1,
-            padding: "0.5rem 1rem",
-            borderRadius: 999,
-            textDecoration: "none",
-            fontWeight: 600,
-            color: active === k ? "var(--on-accent)" : "var(--fg)",
-          }}
+          style={{ color: active === k ? "var(--on-accent)" : "var(--fg)" }}
         >
           {t(`tabs.${k}`)}
         </NavLink>

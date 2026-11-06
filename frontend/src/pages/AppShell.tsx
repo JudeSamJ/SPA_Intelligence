@@ -23,7 +23,7 @@ export default function AppShell() {
   const q = useContracts();
   const root = useRef<HTMLDivElement>(null);
   const narrow = useMedia("(max-width: 900px)");
-  const hasContract = /\/contracts\//.test(useLocation().pathname);
+  const atHome = /^\/app\/?$/.test(useLocation().pathname);
   useMotion(root, ({ tier, dirSign }) => {
     if (tier === "reduced") return;
     gsap.from("[data-shell-side]", { x: -40 * dirSign, opacity: 0, duration: 0.7, ease: "dune" });
@@ -55,7 +55,7 @@ export default function AppShell() {
       <aside data-shell-side aria-label={t("shell.contracts")}>
         {/* Narrow screens: a fixed-height collapsible panel, so the list loading never pushes the content down (CLS). */}
         {narrow ? (
-          <details open={!hasContract} className="card" style={{ padding: "0.6rem 0.9rem" }}>
+          <details open={atHome} className="card" style={{ padding: "0.6rem 0.9rem" }}>
             <summary style={{ cursor: "pointer", fontWeight: 700 }}>{t("shell.contracts")}</summary>
             <div style={{ paddingBlockStart: 10 }}>{sidebar}</div>
           </details>

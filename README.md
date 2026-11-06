@@ -73,7 +73,7 @@ cd frontend && npm install && cd ..
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (94) + vitest (73)
+npm test             # pytest (94) + vitest (75)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -146,6 +146,29 @@ No footage is shipped (see `frontend/public/media/CREDITS.md`). The hero falls b
 6 MB) into `frontend/public/media` and updates `manifest.json`; then add the licence to `CREDITS.md`. The video is paused when
 off-screen and skipped for reduced effects, mobile/lite and data-saver.
 
+## Responsive design (phones and tablets)
+
+The whole app is built to work from 320 px phones up to desktop (breakpoints: 640 px phone, 860 px header, 900 px app shell,
+1000 px for the side-by-side skyline steps).
+
+- **Header:** one row on wide screens. On phones it shows the brand, the theme toggle and a **menu** button; the menu holds
+  navigation, language, "Reduce effects" and the Arabic-digits option (closes on Escape, outside tap or navigation). Nothing is
+  pushed off-screen.
+- **Tables become cards on phones:** the extracted terms, payment plan, scenarios, cash-flow periods and accuracy tables show one
+  card per row with "label: value" lines (labels come from `data-label`), so no sideways scrolling to find the page number or quote.
+- **Touch:** on touch devices every control is at least 44 px tall, controls have no tap delay, inputs are 16 px (no iOS zoom on focus),
+  and fixed bars respect safe areas (`viewport-fit=cover`).
+- **Layout:** tabs become a 2x2 grid; the contract list is a collapsible panel that is closed once a contract is open; charts are
+  shorter, drop the second axis and use compact numbers (490K); scenes size to their content instead of reserving a full screen;
+  landscape phones get a tighter hero.
+- **Effects on phones:** touch and small screens use the "lite" tier (no smooth scrolling, WebGL, video or pinning).
+- **Arabic:** the mobile layout mirrors fully (menu, cards, tabs).
+
+Verified by emulation (Playwright, touch and mobile flags) at 320x640, 360x740, 390x844, 430x932, 768x1024 and 740x360 landscape
+on all 7 routes: no horizontal overflow, no off-screen header controls, no cut-off elements, no tap targets under 32 px, and no
+sideways-scrolling tables. **This is emulation, not a real device:** I have not tested on physical iOS or Android hardware or in
+Safari, so please check on your phone.
+
 ## Internationalisation
 
 English and Arabic (`frontend/src/i18n/*.json`), with `<html lang dir>` switched on toggle, logical CSS properties, and
@@ -158,9 +181,9 @@ need one before release.** A test keeps the EN/AR key sets identical (allowing A
 | Check | Result |
 |---|---|
 | `pytest` | 94 passed (API tests mock the LLM; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01) |
-| `vitest` | 73 passed (API client, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
+| `vitest` | 75 passed (API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
-| Playwright e2e (`scripts/e2e_check.mjs`, 159 checks) | 159/159: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; plain orange cursor; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
+| Playwright e2e (`scripts/e2e_check.mjs`, 166 checks) | 166/166: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
 
 **Lighthouse 12** (headless Chromium, production build with gzip; single runs; `docs/lighthouse.json`):

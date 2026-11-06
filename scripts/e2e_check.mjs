@@ -298,6 +298,53 @@ console.log("C9. Palm animation is time-based (scroll speed cannot affect it); c
   await ctx.close();
 }
 
+console.log("C10. mobile responsiveness: 6 viewports x 7 routes (overflow, header, tap targets, card tables, menu)");
+{
+  const VPS = [["320x640", 320, 640], ["360x740", 360, 740], ["390x844", 390, 844], ["430x932", 430, 932], ["768x1024 tablet", 768, 1024], ["740x360 landscape", 740, 360]];
+  const ROUTES = [["landing", "/"], ["app home", "/app"], ["terms", `/app/contracts/${A}/terms`], ["penalty", `/app/contracts/${A}/penalty`], ["cashflow", `/app/contracts/${A}/cashflow`], ["assistant", `/app/contracts/${A}/assistant`], ["accuracy", "/app/accuracy"]];
+  const probe = () => ({
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+    header: [...document.querySelectorAll("[data-testid=topbar] button, [data-testid=topbar] a")].filter((e) => e.getBoundingClientRect().width > 0).filter((e) => { const r = e.getBoundingClientRect(); return r.right > window.innerWidth + 1 || r.left < -1; }).length,
+    small: [...document.querySelectorAll("a, button, input, select, summary, [role=tab], [role=slider]")].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden" && (r.height < 32 || r.width < 32) && !e.classList.contains("sr-only") && !["file", "checkbox", "range"].includes(e.type); }).length,
+    cutOff: [...document.querySelectorAll("body *")].filter((e) => { const r = e.getBoundingClientRect(); if (!(r.width > 0 && r.right > window.innerWidth + 1) || getComputedStyle(e).position === "fixed") return false; for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o === "auto" || o === "scroll" || o === "hidden") return false; } return true; }).length,
+    tableScroll: [...document.querySelectorAll("table.rtable")].filter((t) => t.parentElement.scrollWidth > t.parentElement.clientWidth + 1).length,
+  });
+  const problems = [];
+  for (const [vn, w, h] of VPS) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+    await ctx.addInitScript(() => { if (!localStorage.getItem("seeded")) { localStorage.setItem("seeded", "1"); localStorage.setItem("spa.reduce", "0"); } });
+    for (const [rn, path] of ROUTES) {
+      const page = await ctx.newPage(); watch(page, `mobile ${vn} ${rn}`);
+      await page.goto(BASE + path); await sleep(rn === "landing" ? 3200 : 2400);
+      const m = await page.evaluate(probe);
+      const bad = [m.overflow > 1 && `overflow ${m.overflow}px`, m.header && `${m.header} header control(s) off-screen`, m.small && `${m.small} tap target(s) < 32px`, m.cutOff && `${m.cutOff} element(s) cut off`, w <= 640 && m.tableScroll && `${m.tableScroll} table(s) still scroll sideways`].filter(Boolean);
+      if (bad.length) problems.push(`${vn} ${rn}: ${bad.join(", ")}`);
+      await page.close();
+    }
+    await ctx.close();
+  }
+  check("mobile: no overflow, off-screen header controls, tiny tap targets or cut-off elements on any route/viewport", problems.length === 0, problems.slice(0, 6).join(" | "));
+
+  // the menu: open, contents, language switch, escape, navigation
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  await ctx.addInitScript(() => { if (!localStorage.getItem("seeded")) { localStorage.setItem("seeded", "1"); localStorage.setItem("spa.reduce", "0"); } });
+  const page = await ctx.newPage(); watch(page, "mobile menu");
+  await page.goto(`${BASE}/app`); await sleep(2200);
+  check("mobile: header shows brand, theme toggle and a menu button only", (await page.locator("[data-testid=topbar] button").count()) === 2 && (await page.getByRole("link", { name: "Accuracy" }).count()) === 0);
+  await page.getByTestId("menu-button").click(); await sleep(300);
+  check("mobile: menu opens with navigation, language and reduce-effects", await page.getByTestId("menu-panel").isVisible() && await page.getByRole("link", { name: "Accuracy" }).isVisible() && await page.getByRole("button", { name: /Reduce effects/ }).isVisible());
+  await page.keyboard.press("Escape"); await sleep(200);
+  check("mobile: Escape closes the menu", (await page.getByTestId("menu-panel").count()) === 0);
+  await page.getByTestId("menu-button").click(); await page.getByRole("link", { name: "Accuracy" }).click(); await page.waitForURL(/accuracy/, { timeout: 5000 }); await sleep(800);
+  check("mobile: choosing a menu link navigates and closes the menu", /accuracy/.test(page.url()) && (await page.getByTestId("menu-panel").count()) === 0);
+  await page.getByTestId("menu-button").click(); await page.getByRole("button", { name: "Language" }).click(); await sleep(700);
+  check("mobile: language switch from the menu flips the page to RTL", (await page.evaluate(() => document.documentElement.dir)) === "rtl");
+  await page.goto(`${BASE}/app/contracts/${A}/terms`); await sleep(2500);
+  check("mobile: contracts list is collapsed once a contract is open; tabs form a 2x2 grid", (await page.locator("details.card").first().evaluate((d) => d.open)) === false && (await page.locator(".tabs").evaluate((t) => getComputedStyle(t).display)) === "grid");
+  await shot(page, "mobile_ar_terms");
+  await ctx.close();
+}
+
 // ------------------------------------------------------------------ D. FPS (software-rendered headless: indicative only)
 console.log("D. frame-rate probe on the landing page");
 {

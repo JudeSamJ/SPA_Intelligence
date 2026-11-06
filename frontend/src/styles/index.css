@@ -274,3 +274,210 @@ button:disabled,
 .data-layer {
   filter: none !important;
 }
+
+/* =====================================================================================================
+   Touch and small screens
+   ===================================================================================================== */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a,
+summary,
+label,
+[role="tab"] {
+  touch-action: manipulation; /* no 300 ms tap delay, no double-tap zoom on controls */
+}
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+h1,
+h2,
+h3,
+p,
+td,
+th,
+li {
+  overflow-wrap: anywhere;
+}
+input,
+textarea,
+select {
+  font-size: 16px;
+} /* iOS Safari zooms the page on focus when a field is smaller than 16px */
+
+/* Safe areas (notches / home indicator): needs viewport-fit=cover in index.html */
+body {
+  padding-block-end: calc(2.6rem + env(safe-area-inset-bottom, 0px));
+}
+:root[data-banner="hidden"] body {
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+}
+
+/* Touch devices: every control is at least 44px tall (WCAG target-size guidance) */
+@media (pointer: coarse) {
+  .tap,
+  .chip {
+    min-height: 44px;
+  }
+  .chip {
+    padding-inline: 0.95rem;
+  }
+  .btn {
+    min-height: 48px;
+  }
+  summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  input[type="range"] {
+    height: 32px;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Tabs: a tidy 2x2 grid on phones */
+.tabs {
+  position: relative;
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.tabs a {
+  position: relative;
+  z-index: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    border-radius: 24px;
+  }
+  .tabs a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    text-align: center;
+    padding-inline: 0.5rem;
+  }
+
+  /* Wide tables become stacked cards: one card per row, "label: value" lines (labels come from data-label) */
+  .rtable {
+    min-width: 0 !important;
+  }
+  .rtable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .rtable,
+  .rtable tbody,
+  .rtable tr {
+    display: block;
+    width: 100%;
+  }
+  .rtable tr {
+    padding: 0.55rem 0.9rem;
+    border-top: 1px solid var(--line);
+  }
+  .rtable tbody tr:first-child {
+    border-top: 0;
+  }
+  .rtable th[scope="row"] {
+    display: block;
+    padding: 0.15rem 0 0.35rem !important;
+    border: 0 !important;
+    font-size: 1.02rem;
+    text-align: start;
+  }
+  .rtable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.28rem 0 !important;
+    border: 0 !important;
+    text-align: end;
+  }
+  .rtable td::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    text-align: start;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .rtable td[dir="auto"] {
+    text-align: start;
+  }
+}
+
+/* Charts: shorter, and the secondary (right) axis is dropped on narrow screens (see the chart components) */
+@media (max-width: 640px) {
+  .chart-box {
+    height: 300px !important;
+  }
+  .hide-narrow {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .falcon {
+    top: 14% !important;
+    width: 46px !important;
+    inset-inline-end: 7% !important;
+  }
+  .dhow {
+    width: 64px !important;
+  }
+}
+@media (pointer: coarse) {
+  .banner-x {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* Phones: scenes size to their content instead of reserving a full screen of empty space */
+@media (max-width: 640px) {
+  .scene {
+    min-height: auto !important;
+    padding-block: 3.5rem;
+  }
+  #palm > div[style*="padding: 6rem"] {
+    padding-block: 2rem 1rem !important;
+  }
+}
+/* Landscape phones: the fixed header and banner already use a lot of height, so tighten the hero */
+@media (max-height: 480px) and (orientation: landscape) {
+  #hero > div:last-of-type {
+    padding-block: 5.5rem 2.5rem !important;
+  }
+  #hero h1 {
+    font-size: clamp(1.8rem, 6vh, 3rem) !important;
+    margin-block: 0.6rem !important;
+  }
+}

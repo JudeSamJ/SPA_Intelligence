@@ -153,7 +153,7 @@ export default function Terms() {
             {sort === "page" ? t("terms.sortByField") : t("terms.sortByPage")}
           </button>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
+        <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
           <thead>
             <tr>
               <th scope="col" style={th}>
@@ -183,10 +183,10 @@ export default function Terms() {
                   <th scope="row" style={{ ...td, textAlign: "start", fontWeight: 600 }}>
                     {t(`terms.fields.${k}`)}
                   </th>
-                  <td style={td} data-testid={`value-${k}`} dir="auto">
+                  <td style={td} data-label={t("terms.value")} data-testid={`value-${k}`} dir="auto">
                     <ScrambleValue text={d.text} />
                   </td>
-                  <td style={td} className="num">
+                  <td style={td} className="num" data-label={t("terms.page")}>
                     {item.source_page ? (
                       <button
                         className="chip"
@@ -199,7 +199,7 @@ export default function Terms() {
                       "–"
                     )}
                   </td>
-                  <td style={{ ...td, color: "var(--muted)" }} dir="auto">
+                  <td style={{ ...td, color: "var(--muted)" }} data-label={t("terms.quote")} dir="auto">
                     <span
                       style={{
                         display: "-webkit-box",
@@ -247,7 +247,7 @@ export default function Terms() {
             <Alert tone="danger">{t("terms.notTotal100", { total: fmt.pct(sum, 2) })}</Alert>
           </div>
         )}
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
+        <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
           <thead>
             <tr>
               {["milestone", "percent", "amount", "due", "trigger", "type", "page"].map((h) => (
@@ -268,20 +268,22 @@ export default function Terms() {
                 <th scope="row" style={{ ...td, textAlign: "start", fontWeight: 600 }} dir="auto">
                   {p.milestone}
                 </th>
-                <td style={td} className="num">
+                <td data-label={t("terms.percent")} style={td} className="num">
                   {fmt.pct(p.percent, p.percent % 1 ? 2 : 0)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("terms.amount")} style={td} className="num">
                   {fmt.aed(p.amount, 2)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("terms.due")} style={td} className="num">
                   {p.due_date ? fmt.date(p.due_date) : "–"}
                 </td>
-                <td style={{ ...td, color: "var(--muted)" }} dir="auto">
+                <td data-label={t("terms.trigger")} style={{ ...td, color: "var(--muted)" }} dir="auto">
                   {p.trigger ?? "–"}
                 </td>
-                <td style={td}>{t(`terms.types.${p.type}`)}</td>
-                <td style={td}>
+                <td data-label={t("terms.type")} style={td}>
+                  {t(`terms.types.${p.type}`)}
+                </td>
+                <td data-label={t("terms.page")} style={td}>
                   <button
                     className="chip num"
                     title={p.source_quote}

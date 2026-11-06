@@ -25,7 +25,9 @@
     "openApp": "Open the app",
     "home": "Home",
     "days": "days",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "menu": "Menu",
+    "closeMenu": "Close menu"
   },
   "nav": {
     "home": "Home",

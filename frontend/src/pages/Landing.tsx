@@ -501,6 +501,7 @@ export default function Landing() {
           </svg>
           <div
             data-dhow
+            className="dhow"
             aria-hidden="true"
             style={{
               position: "absolute",
@@ -515,6 +516,7 @@ export default function Landing() {
           </div>
           <div
             data-falcon
+            className="falcon"
             aria-hidden="true"
             style={{
               position: "absolute",
@@ -616,6 +618,7 @@ export default function Landing() {
         {/* ---------------- PALM ---------------- */}
         <section
           id="palm"
+          className="scene"
           aria-labelledby="palm-title"
           style={{
             position: "relative",
@@ -632,7 +635,7 @@ export default function Landing() {
               position: "relative",
               display: "grid",
               gap: "2rem",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
               alignItems: "center",
               maxWidth: 1200,
               margin: "0 auto",
@@ -798,6 +801,7 @@ export default function Landing() {
         {/* ---------------- ROADMAP (horizontal scroll) ---------------- */}
         <section
           id="roadmap"
+          className="scene"
           aria-labelledby="road-title"
           style={{
             position: "relative",

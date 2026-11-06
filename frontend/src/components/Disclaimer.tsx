@@ -59,7 +59,7 @@ export function DisclaimerBar() {
         insetInline: 0,
         bottom: 0,
         zIndex: 85,
-        padding: "0.55rem 3rem",
+        padding: "0.55rem 3.4rem calc(0.55rem + env(safe-area-inset-bottom, 0px))",
         textAlign: "center",
         background: "var(--surface)",
         color: "var(--fg)",
@@ -74,6 +74,7 @@ export function DisclaimerBar() {
       {t("banner.text")}
       <button
         data-testid="disclaimer-dismiss"
+        className="banner-x"
         aria-label={t("banner.dismiss")}
         title={t("banner.dismiss")}
         onClick={() => setHidden(true)}
@@ -82,8 +83,8 @@ export function DisclaimerBar() {
           insetInlineEnd: 10,
           top: "50%",
           transform: "translateY(-50%)",
-          width: 30,
-          height: 30,
+          width: 36,
+          height: 36,
           borderRadius: "50%",
           border: "1px solid var(--line)",
           background: "transparent",

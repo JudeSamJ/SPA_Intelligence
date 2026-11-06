@@ -145,7 +145,7 @@ export default function Accuracy() {
         </div>
       </section>
       <section className="card" style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }}>
+        <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }}>
           <thead>
             <tr>
               <th scope="col" style={th}>
@@ -168,13 +168,13 @@ export default function Accuracy() {
                 <th scope="row" style={{ ...td, textAlign: "start" }}>
                   {v.name}
                 </th>
-                <td style={td} className="num">
+                <td data-label={t("accuracy.correct")} style={td} className="num">
                   {fmt.num(v.correct)}/{fmt.num(v.total)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("accuracy.accuracy")} style={td} className="num">
                   {fmt.pct(v.pct, 0)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("accuracy.quoteCol")} style={td} className="num">
                   {v.quote_total ? `${fmt.num(v.quote_valid)}/${fmt.num(v.quote_total)}` : "–"}
                 </td>
               </tr>

@@ -154,7 +154,7 @@ export default function Penalty() {
         <h2 className="display" style={{ margin: 0, padding: "0.8rem", fontSize: "1.25rem" }}>
           {t("penalty.scenarios")}
         </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
+        <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
           <thead>
             <tr>
               {["delay", "grace", "chargeable", "amount", "capAmount"].map((h) => (
@@ -171,23 +171,24 @@ export default function Penalty() {
                 data-testid="scenario-row"
                 style={{ background: r.delay_days === current ? "var(--surface-2)" : undefined }}
               >
-                <td style={td} className="num">
+                <td data-label={t("penalty.delay")} style={td} className="num">
                   {fmt.num(r.delay_days)} {t("penalty.daysUnit")}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("penalty.grace")} style={td} className="num">
                   {fmt.num(r.grace_days)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("penalty.chargeable")} style={td} className="num">
                   {fmt.num(r.chargeable_days)}
                 </td>
                 <td
+                  data-label={t("penalty.amount")}
                   style={{ ...td, fontWeight: 700 }}
                   className="num"
                   data-testid={`scenario-${r.delay_days}`}
                 >
                   {fmt.aed(r.penalty, 2)}
                 </td>
-                <td style={td} className="num">
+                <td data-label={t("penalty.capAmount")} style={td} className="num">
                   {r.cap_amount != null ? fmt.aed(r.cap_amount, 0) : t("penalty.noCap")}
                 </td>
               </tr>
@@ -200,20 +201,25 @@ export default function Penalty() {
         <h2 className="display" style={{ margin: 0, padding: "0.8rem", fontSize: "1.25rem" }}>
           {t("penalty.terms")}
         </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
+        <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
           <tbody>
             {termRows.map(([label, value, page, quote]) => (
               <tr key={label}>
                 <th scope="row" style={{ ...td, textAlign: "start", width: "28%" }}>
                   {label}
                 </th>
-                <td style={{ ...td, fontWeight: 600 }} className="num" dir="auto">
+                <td
+                  data-label={t("terms.value")}
+                  style={{ ...td, fontWeight: 600 }}
+                  className="num"
+                  dir="auto"
+                >
                   {value}
                 </td>
-                <td style={{ ...td, color: "var(--muted)" }} dir="auto">
+                <td data-label={t("terms.quote")} style={{ ...td, color: "var(--muted)" }} dir="auto">
                   <span title={quote ?? ""}>{quote ?? ""}</span>
                 </td>
-                <td style={td}>
+                <td data-label={t("terms.page")} style={td}>
                   {page ? (
                     <button
                       className="chip num"

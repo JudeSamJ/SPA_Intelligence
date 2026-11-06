@@ -121,7 +121,11 @@ export default function Cashflow() {
         <h2 className="display" style={{ margin: "0 0 0.6rem", fontSize: "1.25rem" }}>
           {t("cashflow.chart")}
         </h2>
-        <div style={{ width: "100%", height: 360, direction: "ltr" }} data-testid="cashflow-chart">
+        <div
+          style={{ width: "100%", height: 360, direction: "ltr" }}
+          className="chart-box"
+          data-testid="cashflow-chart"
+        >
           <Suspense fallback={<Skeleton h={360} />}>
             <CashflowChart periods={d.periods} />
           </Suspense>
@@ -131,7 +135,7 @@ export default function Cashflow() {
             {t("cashflow.chart")} ({t("cashflow.period")})
           </summary>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }}>
+            <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }}>
               <thead>
                 <tr>
                   <th scope="col" style={th}>
@@ -157,16 +161,16 @@ export default function Cashflow() {
                     <th scope="row" style={{ ...td, textAlign: "start" }} className="num">
                       {fmt.period(p.period)}
                     </th>
-                    <td style={td} className="num">
+                    <td data-label={t("cashflow.due")} style={td} className="num">
                       {fmt.aed(p.amount_due, 2)}
                     </td>
-                    <td style={td} className="num">
+                    <td data-label={t("cashflow.linkedSeries")} style={td} className="num">
                       {fmt.aed(p.at_risk_amount, 2)}
                     </td>
-                    <td style={td} className="num">
+                    <td data-label={t("cashflow.cumulative")} style={td} className="num">
                       {fmt.aed(p.cumulative, 2)}
                     </td>
-                    <td style={td} className="num">
+                    <td data-label={t("cashflow.cumPct")} style={td} className="num">
                       {fmt.pct(p.cumulative_pct, 2)}
                     </td>
                   </tr>
