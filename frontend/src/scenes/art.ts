@@ -42,13 +42,15 @@ export function palmPaths(): { trunk: string; crescent: string; fronds: string[]
 
 /** Burj-style stepped, tapering tower inside generic skyline; coordinates in a 1600x600 viewBox. */
 export const TOWER_TIERS: Array<{ w: number; h: number }> = [
-  { w: 150, h: 120 },
-  { w: 124, h: 120 },
-  { w: 98, h: 110 },
-  { w: 74, h: 100 },
-  { w: 50, h: 80 },
-  { w: 30, h: 56 },
+  { w: 150, h: 84 },
+  { w: 124, h: 84 },
+  { w: 98, h: 80 },
+  { w: 74, h: 72 },
+  { w: 50, h: 62 },
+  { w: 30, h: 46 },
 ];
+/** Which of the 4 landing steps lights each tier (index 0 = bottom tier). Step 1 lights the base, step 4 the crown. */
+export const BAND_OF_TIER = [0, 0, 1, 2, 3, 3];
 export function towerRects(cx: number, baseY: number) {
   let y = baseY;
   return TOWER_TIERS.map((t, i) => {

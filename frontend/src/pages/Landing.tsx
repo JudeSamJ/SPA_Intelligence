@@ -133,30 +133,43 @@ export default function Landing() {
   );
 
   // --- palm scene: DrawSVG + plane on the crescent path (pinned + scrubbed) -------------------------------
+  // Smooth by construction: a long scroll distance (slow draw per pixel), eased segments, sequential phases, and
+  // scrub:true under ScrollSmoother (it already smooths; scrub:1 on top of it double-smooths and feels jumpy).
   useMotion(
     root,
     ({ tier: tr, rtl, desktop }) => {
       if (!ready || tr === "reduced") return;
       const q = gsap.utils.selector(root.current!);
+      const pin = desktop && tr === "full";
       gsap.set(q("#palm .draw"), { drawSVG: "0%" });
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: "#palm",
           start: "top top",
-          end: desktop && tr === "full" ? "+=130%" : "+=60%",
-          pin: desktop && tr === "full",
-          scrub: tr === "full" ? 1 : true,
+          end: pin ? "+=280%" : "+=100%",
+          pin,
+          scrub: tr === "full" ? true : 0.6,
           anticipatePin: 1,
         },
       });
-      tl.to(q("#palm .draw"), { drawSVG: "100%", stagger: 0.05, duration: 1 })
-        .from(
-          q("#palm .palm-copy > *"),
-          { y: 30, opacity: 0, stagger: 0.2, duration: 0.6, ease: "power3.out" },
-          0.2,
+      tl.from(
+        q("#palm .palm-copy > *"),
+        { y: 30, opacity: 0, stagger: 0.6, duration: 1.2, ease: "power2.out" },
+        0.2,
+      )
+        .to(q("#palm .trunk"), { drawSVG: "100%", duration: 1.8, ease: "power1.inOut" }, 0)
+        .to(
+          q("#palm .frond"),
+          { drawSVG: "100%", duration: 1, stagger: { each: 0.26, from: "start" }, ease: "power1.inOut" },
+          1.4,
         )
-        .fromTo("#plane", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.5)
+        .to(
+          q("#palm .crescent, #palm .ring"),
+          { drawSVG: "100%", duration: 2.4, stagger: 0.45, ease: "power1.inOut" },
+          4.4,
+        )
+        .fromTo("#plane", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 7)
         .to(
           "#plane",
           {
@@ -168,61 +181,162 @@ export default function Landing() {
               start: rtl ? 1 : 0,
               end: rtl ? 0 : 1,
             },
-            duration: 1.4,
+            duration: 3,
+            ease: "power1.inOut",
           },
-          0.5,
+          7,
         )
-        .to("#palm-marker", { attr: { r: 9 }, duration: 0.3, ease: "back.out(2)" }, 1.4);
+        .to("#palm-marker", { attr: { r: 9 }, duration: 0.5, ease: "back.out(2)" }, 10.2);
       return () => void tl.scrollTrigger?.kill();
     },
     [ready],
   );
 
-  // --- skyline: pinned, floors light up as features scroll by; sky shifts golden -> night; snap to labels ---
+  // --- skyline: pinned; each step's card appears beside the tower tier it lights up, alternating sides ---------
   useMotion(
     root,
-    ({ tier: tr, desktop }) => {
+    ({ tier: tr, desktop, rtl }) => {
       if (!ready || tr === "reduced") return;
-      const q = gsap.utils.selector(root.current!);
-      const pin = desktop && tr === "full";
+      const R = root.current!;
+      const q = gsap.utils.selector(R);
+      const wide = desktop && tr === "full" && window.innerWidth >= 1000;
+      const cards = q("[data-feature]") as HTMLElement[];
+      const conns = q("[data-conn]") as HTMLElement[];
+      const content = R.querySelector<HTMLElement>("#sky-content")!;
+      const ol = content.querySelector<HTMLElement>("ol")!;
+      const sideOf = (i: number) => ((i % 2 === 0) === !rtl ? "left" : "right");
+      const clear = () => {
+        for (const prop of ["position", "inset", "maxWidth", "pointerEvents"])
+          ol.style.removeProperty(
+            prop === "maxWidth" ? "max-width" : prop === "pointerEvents" ? "pointer-events" : prop,
+          );
+        cards.forEach((c) =>
+          ["position", "width", "top", "left", "right"].forEach((p) => c.style.removeProperty(p)),
+        );
+        conns.forEach((c) => (c.style.display = "none"));
+      };
+      // Place each card beside the tower tier of its band, measured from the real SVG (relative to #sky-content).
+      // Batched to avoid layout thrashing on this heavy page: ONE read phase, then writes, then one read, then writes.
+      let lastKey = "";
+      const place = () => {
+        if (!wide) return clear();
+        // ---- read phase (no style writes before this point)
+        const cr = content.getBoundingClientRect();
+        const key = `${Math.round(cr.width)}x${Math.round(cr.height)}x${cards.map((c) => c.offsetHeight).join(",")}`;
+        if (key === lastKey) return; // layout unchanged since the last placement (ScrollTrigger refreshes often at load)
+        const t0 = R.querySelector<SVGGElement>('#burj [data-tier="0"]')!.getBoundingClientRect();
+        const tiers = [...R.querySelectorAll<SVGGElement>("#burj [data-tier]")].map((g) => ({
+          band: Number(g.getAttribute("data-band")),
+          r: g.getBoundingClientRect(),
+        }));
+        const gap = 64;
+        const plan = cards.map((_, i) => {
+          const rects = tiers.filter((t) => t.band === i).map((t) => t.r);
+          const side = sideOf(i);
+          const room = side === "left" ? t0.left - cr.left - gap - 24 : cr.right - t0.right - gap - 24;
+          const w = Math.max(220, Math.min(340, room));
+          const centre =
+            (Math.min(...rects.map((r) => r.top)) + Math.max(...rects.map((r) => r.bottom))) / 2 - cr.top;
+          // each connector reaches its own tier edge (upper tiers are narrower than the base)
+          const reach =
+            side === "left"
+              ? Math.min(...rects.map((r) => r.left)) - (t0.left - gap)
+              : t0.right + gap - Math.max(...rects.map((r) => r.right));
+          const x = side === "left" ? t0.left - cr.left - gap - w : t0.right - cr.left + gap;
+          return { side, w, centre, reach, x };
+        });
+        // ---- write phase 1: widths and horizontal positions
+        ol.style.position = "absolute";
+        ol.style.inset = "0";
+        ol.style.maxWidth = "none";
+        ol.style.pointerEvents = "none";
+        cards.forEach((c, i) => {
+          const pl = plan[i]!;
+          c.style.position = "absolute";
+          c.style.width = `${pl.w}px`;
+          c.style.left = `${pl.x}px`;
+          c.style.right = "auto";
+          const k = conns[i]!;
+          k.style.display = "block";
+          k.style.width = `${Math.max(gap, pl.reach)}px`;
+          k.style.left = pl.side === "left" ? "100%" : "auto";
+          k.style.right = pl.side === "left" ? "auto" : "100%";
+          k.style.transformOrigin = pl.side === "left" ? "left center" : "right center";
+        });
+        // ---- read phase 2 (card heights depend on the widths just written), then write phase 2: vertical positions
+        const heights = cards.map((c) => c.offsetHeight);
+        cards.forEach((c, i) => {
+          c.style.top = `${Math.min(Math.max(plan[i]!.centre - heights[i]! / 2, 96), cr.height - heights[i]! - 56)}px`;
+        });
+        lastKey = key;
+      };
+      place();
+      ScrollTrigger.addEventListener("refreshInit", place);
+      void document.fonts?.ready.then(place);
+      if (wide) gsap.set(cards, { autoAlpha: 0 });
+
+      const TOTAL = 0.6 + (FEATURES.length - 1) * 1.25 + 0.8 + 0.7; // = the timeline's real length (5.85)
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: "#skyline",
           start: "top top",
-          end: pin ? "+=320%" : "+=140%",
-          pin,
-          scrub: tr === "full" ? 1 : true,
+          end: wide ? "+=380%" : "+=150%",
+          pin: wide,
+          scrub: tr === "full" ? true : 0.6,
           anticipatePin: 1,
-          snap: pin
-            ? { snapTo: "labels", duration: { min: 0.2, max: 0.6 }, delay: 0.1, ease: "power1.inOut" }
+          invalidateOnRefresh: true,
+          snap: wide
+            ? { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, delay: 0.05, ease: "power1.inOut" }
             : undefined,
         },
       });
-      tl.fromTo(
-        "#sky-scene",
-        { "--sky-top": "#2d2a5a", "--sky-bot": "#f0a35a" },
-        { "--sky-top": "#0b1b2b", "--sky-bot": "#3b2250", duration: 4 },
-        0,
-      ).fromTo("#sky-progress", { scaleY: 0 }, { scaleY: 1, duration: 4 }, 0);
+      tl.addLabel("start", 0)
+        .fromTo(
+          "#sky-scene",
+          { "--sky-top": "#2d2a5a", "--sky-bot": "#f0a35a" },
+          { "--sky-top": "#0b1b2b", "--sky-bot": "#3b2250", duration: TOTAL },
+          0,
+        )
+        .fromTo("#sky-progress", { scaleY: 0 }, { scaleY: 1, duration: TOTAL }, 0);
       FEATURES.forEach((_, i) => {
-        tl.addLabel(`f${i}`, i)
-          // highlight by scale + border, never by fading the text (keeps contrast >= 4.5:1 at every scroll position)
-          .to(q(`[data-feature]`), { scale: 0.97, borderColor: "rgba(243,234,211,.25)", duration: 0.2 }, i)
-          .to(q(`[data-feature="${i}"]`), { scale: 1.02, borderColor: "#d4a24c", duration: 0.3 }, i)
+        const T = 0.6 + i * 1.25;
+        const side = sideOf(i);
+        tl.addLabel(`f${i}`, T);
+        // highlight by scale + border, never by fading text (keeps contrast >= 4.5:1 at every scroll position)
+        tl.to(
+          cards.filter((_, j) => j !== i),
+          { scale: 0.97, borderColor: "rgba(243,234,211,.25)", duration: 0.25 },
+          T,
+        ).to(cards[i]!, { scale: 1.03, borderColor: "#d4a24c", duration: 0.35 }, T);
+        if (wide) {
+          tl.fromTo(
+            cards[i]!,
+            { autoAlpha: 0, x: side === "left" ? -80 : 80 },
+            { autoAlpha: 1, x: 0, duration: 0.7, ease: "power2.out" },
+            T,
+          ).fromTo(conns[i]!, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, T + 0.25);
+        }
+        // light this band's floors, glow the tier, then let the glow settle as the next band takes over
+        tl.to(
+          q(`#burj [data-win][data-band="${i}"]`),
+          { opacity: 0.95, stagger: { each: 0.03, from: "random" }, duration: 0.7 },
+          T,
+        )
+          .to(q(`#burj [data-glow][data-band="${i}"]`), { opacity: 0.6, duration: 0.45 }, T)
+          .to(q(`#burj [data-glow][data-band="${i}"]`), { opacity: 0.22, duration: 0.7 }, T + 0.8)
           .to(
-            q(`#burj [data-win][data-band="${i}"], #burj [data-band="${i}"] ~ [data-win]`),
-            { opacity: 0.95, stagger: { each: 0.04, from: "random" }, duration: 0.6 },
-            i,
-          )
-          .to(
-            q("[data-win]:not(#burj [data-win])").slice(i * 20, i * 20 + 40),
+            (q("[data-win]:not(#burj [data-win])") as Element[]).slice(i * 14, i * 14 + 30),
             { opacity: 0.8, stagger: 0.02, duration: 0.5 },
-            i + 0.2,
+            T + 0.2,
           );
       });
-      tl.to("#burj-beacon", { opacity: 1, duration: 0.3 }, 3.6).addLabel("end", 4);
-      return () => void tl.scrollTrigger?.kill();
+      tl.to("#burj-beacon", { opacity: 1, duration: 0.3 }, TOTAL - 0.7).addLabel("end", TOTAL);
+      return () => {
+        ScrollTrigger.removeEventListener("refreshInit", place);
+        clear();
+        tl.scrollTrigger?.kill();
+      };
     },
     [ready],
   );
@@ -526,7 +640,7 @@ export default function Landing() {
           <div className="grain" style={{ position: "absolute", inset: 0 }} aria-hidden="true" />
           <div
             aria-hidden="true"
-            style={{ position: "absolute", insetInline: 0, bottom: 0, height: "82%", color: "#150f24" }}
+            style={{ position: "absolute", insetInline: 0, bottom: 0, height: "90%", color: "#150f24" }}
           >
             <Skyline initialTheme={theme} className="" />
           </div>
@@ -537,16 +651,15 @@ export default function Landing() {
               top: 0,
               bottom: 0,
               background:
-                "linear-gradient(180deg, rgba(11,27,43,.7), rgba(11,27,43,.25) 55%, rgba(11,27,43,.6))",
+                "linear-gradient(180deg, rgba(11,27,43,.62), rgba(11,27,43,.12) 55%, rgba(11,27,43,.5))",
               pointerEvents: "none",
             }}
           />
           <div
+            id="sky-content"
             style={{
               position: "relative",
-              maxWidth: 1200,
-              margin: "0 auto",
-              padding: "6.5rem 1.5rem 3rem",
+              padding: "6.5rem 2rem 3rem",
               display: "grid",
               gap: "1.2rem",
               alignContent: "start",
@@ -556,7 +669,12 @@ export default function Landing() {
             <h2
               id="sky-title"
               className="display"
-              style={{ fontSize: "clamp(1.8rem,4.4vw,3.2rem)", margin: 0, maxWidth: "20ch" }}
+              style={{
+                fontSize: "clamp(1.8rem,3.6vw,2.8rem)",
+                margin: 0,
+                maxWidth: "18ch",
+                textShadow: "0 2px 18px rgba(11,27,43,.85)",
+              }}
             >
               {t("landing.skyTitle")}
             </h2>
@@ -576,11 +694,25 @@ export default function Landing() {
                   data-feature={i}
                   className="glass"
                   style={{
+                    position: "relative",
                     padding: "0.9rem 1.1rem",
-                    background: "rgba(11,27,43,.82)",
+                    background: "rgba(11,27,43,.86)",
                     borderColor: i === 0 ? "#d4a24c" : "rgba(243,234,211,.25)",
+                    pointerEvents: "auto",
                   }}
                 >
+                  <span
+                    data-conn
+                    aria-hidden="true"
+                    style={{
+                      display: "none",
+                      position: "absolute",
+                      top: "50%",
+                      height: 2,
+                      background: "linear-gradient(90deg,#d4a24c,#ffe3a0)",
+                      borderRadius: 2,
+                    }}
+                  />
                   <h3 className="display" style={{ margin: 0, fontSize: "1.25rem" }}>
                     <span className="num" style={{ color: "var(--gold)" }}>{`0${i + 1}`}</span>{" "}
                     {t(`landing.features.${f}.title`)}

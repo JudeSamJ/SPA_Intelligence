@@ -97,6 +97,9 @@ body {
   /* room for the always-visible disclaimer bar */
   padding-block-end: 2.6rem;
 }
+:root[data-banner="hidden"] body {
+  padding-block-end: 0;
+}
 h1,
 h2,
 h3,

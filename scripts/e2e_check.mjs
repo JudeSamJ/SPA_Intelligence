@@ -215,6 +215,53 @@ console.log("C6. mobile viewport (lite effects tier): landing + app");
   await ctx.close();
 }
 
+console.log("C7. disclaimer is dismissible, restorable and remembered");
+{
+  const ctx = await ctxFor(); const page = await ctx.newPage(); watch(page, "banner");
+  await page.goto(`${BASE}/app/contracts/${A}/terms`); await sleep(1800);
+  check("banner shown by default", await page.getByTestId("disclaimer").isVisible());
+  await page.getByTestId("disclaimer-dismiss").click(); await sleep(300);
+  check("banner can be dismissed", (await page.getByTestId("disclaimer").count()) === 0 && await page.getByTestId("disclaimer-show").isVisible());
+  check("dismissed banner frees the bottom padding", (await page.evaluate(() => getComputedStyle(document.body).paddingBottom)) === "0px");
+  await page.reload(); await sleep(1500);
+  check("dismissal is remembered after reload", (await page.getByTestId("disclaimer").count()) === 0 && await page.getByTestId("disclaimer-show").isVisible());
+  await page.getByTestId("disclaimer-show").click(); await sleep(300);
+  check("banner can be restored with one click", await page.getByTestId("disclaimer").isVisible());
+  await ctx.close();
+}
+
+console.log("C8. skyline: tower lights up step by step with cards on alternating sides");
+{
+  const ctx = await ctxFor(); const page = await ctx.newPage(); watch(page, "skyline");
+  await page.goto(`${BASE}/`); await sleep(4500);
+  const top = await page.evaluate(() => document.getElementById("skyline").parentElement.offsetTop);
+  // scroll like a user (wheel increments), not by teleporting: scroll-snapping and smoothing behave differently on jumps
+  const wheelTo = async (y) => { for (let i = 0; i < 260; i++) { const cur = await page.evaluate(() => window.scrollY); if (Math.abs(cur - y) < 60) break; await page.mouse.wheel(0, Math.sign(y - cur) * Math.min(220, Math.abs(y - cur))); await sleep(28); } await sleep(1800); };
+  const state = () => page.evaluate(() => {
+    const tower = document.querySelector("#burj [data-tier=\"0\"]").getBoundingClientRect(); const cx = tower.left + tower.width / 2;
+    const cards = [...document.querySelectorAll("[data-feature]")].map((c) => { const r = c.getBoundingClientRect(); return { visible: +getComputedStyle(c).opacity > 0.9 && getComputedStyle(c).visibility !== "hidden", side: r.left + r.width / 2 < cx ? "left" : "right", y: Math.round(r.top + r.height / 2) }; });
+    const lit = (b) => [...document.querySelectorAll(`#burj [data-win][data-band="${b}"]`)].filter((w) => +getComputedStyle(w).opacity > 0.5).length;
+    return { cards, lit: [0, 1, 2, 3].map(lit) };
+  });
+  await wheelTo(top + 5);
+  const s0 = await state();
+  await wheelTo(top + 900 * 3.8 * 0.4);
+  const s1 = await state();
+  await wheelTo(top + 900 * 3.8 * 0.99);
+  const s2 = await state();
+  await shot(page, "skyline_final");   // the finished scene: all four bands lit, all four steps shown
+  const reachedEnd = await page.evaluate(() => window.scrollY);
+  await wheelTo(top + 900 * 3.8 + 700);   // keep scrolling: the section must let go (no snap-back trap)
+  const after = await page.evaluate(() => window.scrollY);
+  check("skyline: scrolling past the end is not pulled back by snapping", after > top + 900 * 3.8 + 300, `${reachedEnd} -> ${after}`);
+  check("skyline: nothing lit and no cards at the start", s0.lit.every((n) => n === 0) && s0.cards.every((c) => !c.visible), JSON.stringify(s0));
+  check("skyline: mid-scroll lights lower bands only, cards 1-2 shown", s1.lit[0] > 0 && s1.lit[3] === 0 && s1.cards[0].visible && !s1.cards[3].visible, JSON.stringify(s1));
+  check("skyline: at the end all 4 bands are lit and all 4 cards shown", s2.lit.every((n) => n > 0) && s2.cards.every((c) => c.visible), JSON.stringify(s2));
+  check("skyline: cards alternate left / right of the tower", s2.cards.map((c) => c.side).join() === "left,right,left,right", s2.cards.map((c) => c.side).join());
+  check("skyline: step 1 is lowest and step 4 highest (matches the tower bands)", s2.cards[0].y > s2.cards[1].y && s2.cards[1].y > s2.cards[2].y && s2.cards[2].y > s2.cards[3].y, s2.cards.map((c) => c.y).join());
+  await ctx.close();
+}
+
 // ------------------------------------------------------------------ D. FPS (software-rendered headless: indicative only)
 console.log("D. frame-rate probe on the landing page");
 {

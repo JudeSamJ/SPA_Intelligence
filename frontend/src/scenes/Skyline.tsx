@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { genericTowers, skylineSilhouetteD, towerRects } from "./art";
+import { BAND_OF_TIER, genericTowers, skylineSilhouetteD, towerRects } from "./art";
 
 /**
  * Generic Dubai-style skyline with ONE original stepped tapering tower (Burj-style silhouette).
@@ -11,11 +11,9 @@ export const SKY_D = {
 };
 export function Skyline({
   className,
-  bands = 4,
   initialTheme = "dusk",
 }: {
   className?: string;
-  bands?: number;
   initialTheme?: "day" | "dusk";
 }) {
   const d0 = useRef(SKY_D[initialTheme]).current;
@@ -67,36 +65,57 @@ export function Skyline({
           ))}
         </g>
       ))}
+      <defs>
+        <linearGradient id="tower-glow" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stopColor="#ffcf7a" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#ffe9b8" stopOpacity="0.35" />
+        </linearGradient>
+      </defs>
       <g id="burj">
-        {tiers.map((t) => (
-          <g key={t.i} data-tier={t.i} data-band={t.i % bands}>
-            <rect x={t.x} y={t.y} width={t.w} height={t.h} fill="currentColor" />
-            {Array.from({ length: Math.floor(t.h / 14) }, (_, r) => (
+        {tiers.map((t) => {
+          const band = BAND_OF_TIER[t.i] ?? 0;
+          return (
+            <g key={t.i} data-tier={t.i} data-band={band}>
+              <rect x={t.x} y={t.y} width={t.w} height={t.h} fill="currentColor" />
+              {/* warm glow over the whole tier: this is what visibly "lights up" the tower */}
               <rect
-                key={r}
-                data-win
-                data-band={t.i % bands}
-                x={t.x + t.w * 0.18}
-                y={t.y + 7 + r * 14}
-                width={t.w * 0.64}
-                height={4}
-                fill="#f6d58a"
+                data-glow
+                data-band={band}
+                x={t.x}
+                y={t.y}
+                width={t.w}
+                height={t.h}
+                fill="url(#tower-glow)"
                 opacity="0"
               />
-            ))}
-          </g>
-        ))}
+              {Array.from({ length: Math.floor(t.h / 12) }, (_, r) => (
+                <rect
+                  key={r}
+                  data-win
+                  data-band={band}
+                  x={t.x + t.w * 0.16}
+                  y={t.y + 6 + r * 12}
+                  width={t.w * 0.68}
+                  height={5}
+                  fill="#ffe3a0"
+                  opacity="0"
+                />
+              ))}
+            </g>
+          );
+        })}
         <path
-          d={`M${towerCx} ${(tiers.at(-1)?.y ?? 300) - 4} L${towerCx} ${(tiers.at(-1)?.y ?? 300) - 150}`}
+          id="burj-spire"
+          d={`M${towerCx} ${(tiers.at(-1)?.y ?? 300) - 2} L${towerCx} ${(tiers.at(-1)?.y ?? 300) - 92}`}
           stroke="currentColor"
           strokeWidth="5"
         />
         <circle
           id="burj-beacon"
           cx={towerCx}
-          cy={(tiers.at(-1)?.y ?? 300) - 150}
-          r="5"
-          fill="#ff9d5c"
+          cy={(tiers.at(-1)?.y ?? 300) - 92}
+          r="6"
+          fill="#ffb066"
           opacity="0"
         />
       </g>

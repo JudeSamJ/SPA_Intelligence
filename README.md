@@ -4,7 +4,7 @@ Decision support for UAE off-plan **Sale and Purchase Agreements (SPAs)**: uploa
 **page and exact source quote** for each, a deterministic **delay-penalty simulator**, a **cash-flow** view, a
 **buyer assistant** that answers only from the extracted contract, and an **accuracy** table.
 
-> **Decision support, not legal advice.** The banner is fixed on every screen of the app.
+> **Decision support, not legal advice.** The banner is shown on every screen of the app; you can dismiss it and restore it from the corner tab.
 
 Design principle: **cinematic outside, clear inside.** The landing page, transitions, loaders and empty/error states use
 heavy GSAP, WebGL and canvas effects. The data layer (terms, penalty and cash-flow figures, chat answers) only gets
@@ -17,7 +17,7 @@ entrance animations: no continuous distortion, and every number settles on the e
 3. No fake or hardcoded numbers in the UI: everything rendered comes from API responses. Skyline, dunes, particles are decorative only.
 4. Jurisdiction rules live in `rules/uae.yaml` (day-count, scenarios, the "at risk" definition, legal-advice patterns).
 5. The buyer agent answers only from the selected contract's JSON, cites the quote, refuses legal-advice questions ("please contact the legal team"), and treats contract text as data, not instructions.
-6. The disclaimer is visible on every screen.
+6. The disclaimer is shown on every screen by default. It can be dismissed (the choice is remembered), and a small scales tab stays in the corner so it is always one click away.
 7. API keys stay on the server. The browser bundle contains no key names (checked on every build).
 
 ## Architecture
@@ -73,7 +73,7 @@ cd frontend && npm install && cd ..
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (94) + vitest (71)
+npm test             # pytest (94) + vitest (73)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -110,7 +110,7 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 
 | Plugin / tool | Where it is used |
 |---|---|
-| ScrollTrigger | pinned and scrubbed Palm, skyline and roadmap scenes; snap to feature labels; batch reveals; progress bar |
+| ScrollTrigger | pinned and scrubbed Palm, skyline and roadmap scenes (the Palm is sequenced: trunk, fronds one by one, crescent, then the plane); the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
 | ScrollSmoother | smooth scrolling and `data-speed` parallax on the **landing page only** (off on data pages, touch, lite and reduced) |
 | ScrollToPlugin | anchor navigation ("See how it works"), jump to the PDF panel from a citation |
 | SplitText | hero headline reveal (Arabic is split by words/lines only, never characters) |
@@ -156,9 +156,9 @@ need one before release.** A test keeps the EN/AR key sets identical (allowing A
 | Check | Result |
 |---|---|
 | `pytest` | 94 passed (API tests mock the LLM; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01) |
-| `vitest` | 71 passed (API client, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
+| `vitest` | 73 passed (API client, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
-| Playwright e2e (`scripts/e2e_check.mjs`, 142 checks) | 142/142: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
+| Playwright e2e (`scripts/e2e_check.mjs`, 153 checks) | 153/153: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
 
 **Lighthouse 12** (headless Chromium, production build with gzip; single runs; `docs/lighthouse.json`):
@@ -170,10 +170,10 @@ need one before release.** A test keeps the EN/AR key sets identical (allowing A
 | Cash-flow | 99 / 100 | 70 / 100 |
 | Assistant | 100 / 100 | 88 / 100 |
 | Accuracy | 99 / 100 | 79 / 100 |
-| Landing | 97 / 100 | 79 / 100 |
+| Landing | 93 / 100 | 75 / 100 |
 
 Accessibility is 100 and best-practices 100 everywhere; CLS is at most 0.03 on desktop and 0.016 on mobile. The mobile profile
-(4x CPU slowdown, slow 4G) varies by roughly 8 points between runs and **cash-flow (70), accuracy and landing (79) are below
+(4x CPU slowdown, slow 4G) varies by roughly 8 points between runs and **cash-flow (70), accuracy (79) and landing (75) are below
 the 80 target on mobile**: the cost is the chain of requests and lazy chunks, not layout shift. The frame-rate probe measured
 about 51 fps on the landing page in headless software-rendered Chromium; that is not representative of a GPU laptop and
 was not measured on one.

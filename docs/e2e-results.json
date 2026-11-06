@@ -1,6 +1,6 @@
 {
-  "passed": 142,
-  "total": 142,
+  "passed": 153,
+  "total": 153,
   "failed": [],
   "results": [
     {
@@ -704,9 +704,64 @@
       "detail": ""
     },
     {
+      "name": "banner shown by default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "banner can be dismissed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dismissed banner frees the bottom padding",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dismissal is remembered after reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "banner can be restored with one click",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "skyline: scrolling past the end is not pulled back by snapping",
+      "ok": true,
+      "detail": "7844 -> 8504"
+    },
+    {
+      "name": "skyline: nothing lit and no cards at the start",
+      "ok": true,
+      "detail": "{\"cards\":[{\"visible\":false,\"side\":\"left\",\"y\":757},{\"visible\":false,\"side\":\"right\",\"y\":589},{\"visible\":false,\"side\":\"left\",\"y\":487},{\"visible\":false,\"side\":\"right\",\"y\":365}],\"lit\":[0,0,0,0]}"
+    },
+    {
+      "name": "skyline: mid-scroll lights lower bands only, cards 1-2 shown",
+      "ok": true,
+      "detail": "{\"cards\":[{\"visible\":true,\"side\":\"left\",\"y\":733},{\"visible\":false,\"side\":\"right\",\"y\":565},{\"visible\":false,\"side\":\"left\",\"y\":463},{\"visible\":false,\"side\":\"right\",\"y\":341}],\"lit\":[14,0,0,0]}"
+    },
+    {
+      "name": "skyline: at the end all 4 bands are lit and all 4 cards shown",
+      "ok": true,
+      "detail": "{\"cards\":[{\"visible\":true,\"side\":\"left\",\"y\":733},{\"visible\":true,\"side\":\"right\",\"y\":565},{\"visible\":true,\"side\":\"left\",\"y\":463},{\"visible\":true,\"side\":\"right\",\"y\":341}],\"lit\":[14,6,6,8]}"
+    },
+    {
+      "name": "skyline: cards alternate left / right of the tower",
+      "ok": true,
+      "detail": "left,right,left,right"
+    },
+    {
+      "name": "skyline: step 1 is lowest and step 4 highest (matches the tower bands)",
+      "ok": true,
+      "detail": "733,565,463,341"
+    },
+    {
       "name": "fps probe (informational)",
       "ok": true,
-      "detail": "51.2 fps"
+      "detail": "52.8 fps"
     },
     {
       "name": "no console errors or page errors anywhere",

@@ -1,6 +1,10 @@
 {
   "brand": "SPA Intelligence",
-  "banner": { "text": "Decision support, not legal advice." },
+  "banner": {
+    "text": "Decision support, not legal advice.",
+    "dismiss": "Dismiss disclaimer",
+    "show": "Show disclaimer: decision support, not legal advice"
+  },
   "common": {
     "aed": "AED",
     "loading": "Loading…",
@@ -23,7 +27,11 @@
     "days": "days",
     "mainNav": "Main navigation"
   },
-  "nav": { "home": "Home", "app": "App", "accuracy": "Accuracy" },
+  "nav": {
+    "home": "Home",
+    "app": "App",
+    "accuracy": "Accuracy"
+  },
   "landing": {
     "eyebrow": "UAE off-plan property contracts",
     "title": "Read your contract the way you read the skyline",
@@ -54,15 +62,30 @@
     },
     "roadmapTitle": "What is coming next",
     "roadmap": {
-      "docint": { "title": "Document Intelligence parsing", "body": "Scanned pages and complex layouts." },
-      "cross": { "title": "Cross-document check", "body": "Compare the SPA with related documents." },
+      "docint": {
+        "title": "Document Intelligence parsing",
+        "body": "Scanned pages and complex layouts."
+      },
+      "cross": {
+        "title": "Cross-document check",
+        "body": "Compare the SPA with related documents."
+      },
       "bilingual": {
         "title": "Arabic–English check",
         "body": "Spot differences between the two language versions."
       },
-      "rulebook": { "title": "Rulebook check", "body": "Check terms against the jurisdiction rules." },
-      "whatsapp": { "title": "WhatsApp assistant", "body": "Ask your contract questions in a chat." },
-      "evalset": { "title": "Real evaluation set", "body": "Accuracy measured on real, labelled contracts." }
+      "rulebook": {
+        "title": "Rulebook check",
+        "body": "Check terms against the jurisdiction rules."
+      },
+      "whatsapp": {
+        "title": "WhatsApp assistant",
+        "body": "Ask your contract questions in a chat."
+      },
+      "evalset": {
+        "title": "Real evaluation set",
+        "body": "Accuracy measured on real, labelled contracts."
+      }
     },
     "ctaTitle": "Ready to read your contract?",
     "ctaBody": "Open the app, pick a sample, or upload your own PDF."

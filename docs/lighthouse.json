@@ -1,5 +1,5 @@
 {
-  "note": "Lighthouse 12 on headless Chromium, production build served by FastAPI with gzip. desktop = --preset=desktop; mobile = Lighthouse's default throttled mobile profile (4x CPU, slow 4G). Single runs; mobile varies by about +-8 points run to run.",
+  "note": "Lighthouse 12 on headless Chromium, production build served by FastAPI with gzip. desktop = --preset=desktop; mobile = Lighthouse's default throttled mobile profile (4x CPU, slow 4G). Single runs; mobile varies by about +-8 points run to run. Landing re-measured after the skyline/Palm rework; the other routes were measured just before it and are unaffected by it.",
   "results": {
     "accuracy_desktop": {
       "performance": 99,
@@ -56,21 +56,21 @@
       "cls": "0"
     },
     "landing_desktop": {
-      "performance": 97,
+      "performance": 93,
       "accessibility": 100,
       "best_practices": 100,
       "fcp": "0.6 s",
-      "lcp": "0.7 s",
-      "tbt": "130 ms",
-      "cls": "0.028"
+      "lcp": "0.8 s",
+      "tbt": "210 ms",
+      "cls": "0.013"
     },
     "landing_mobile": {
-      "performance": 79,
+      "performance": 75,
       "accessibility": 100,
       "best_practices": 100,
-      "fcp": "2.8 s",
+      "fcp": "2.7 s",
       "lcp": "3.4 s",
-      "tbt": "350 ms",
+      "tbt": "480 ms",
       "cls": "0.016"
     },
     "penalty_desktop": {
