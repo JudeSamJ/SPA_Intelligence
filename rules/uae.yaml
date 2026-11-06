@@ -1,0 +1,52 @@
+# Jurisdiction rules for UAE (Dubai off-plan sales). Nothing here is legal advice;
+# these are configurable parameters for the deterministic calculators and the agent.
+jurisdiction: "UAE (Dubai)"
+currency: "AED"
+
+penalty:
+  day_count_basis: 365            # days per year for pro-rata accrual
+  # Compensation accrues only on days of delay AFTER the grace period has expired.
+  scenarios_days: [30, 90, 180, 365]
+
+cashflow:
+  default_period: "quarter"       # month | quarter
+  default_delay_scenario_days: 180
+  # "At risk" (see app/cashflow.py docstring):
+  #   at_risk = (sum of payments whose milestone is construction- or handover-linked)
+  #           + (delay-penalty exposure from the simulator for the chosen delay scenario)
+  # A milestone is construction/handover-linked when its name or trigger text contains
+  # one of these keywords (case-insensitive). All other milestones are time-based.
+  at_risk:
+    handover_keywords: ["handover", "hand over", "notice of completion", "possession"]
+    construction_keywords:
+      - "construction"
+      - "excavation"
+      - "foundation"
+      - "podium"
+      - "slab"
+      - "structur"
+      - "piling"
+      - "site clearance"
+      - "roof"
+      - "external walls"
+      - "completion of"
+      - "commencement of"
+
+agent:
+  # Questions matching these patterns are legal-advice questions: the agent must refuse.
+  legal_advice_patterns:
+    - "\\bcancel"
+    - "\\brefund"
+    - "\\bterminat"
+    - "\\bsue\\b"
+    - "\\bwill i win\\b"
+    - "\\bwin (the|my) (case|dispute)"
+    - "\\blawsuit"
+    - "\\bcompensation claim"
+    - "\\bis (it|this) (legal|enforceable|valid)"
+    - "\\bshould i (sign|walk away|pursue|take legal)"
+    - "\\bwithhold payment"
+    - "\\bstop paying"
+  refusal_message: "I can't advise on that; please contact the legal team."
+
+disclaimer: "Decision support, not legal advice."

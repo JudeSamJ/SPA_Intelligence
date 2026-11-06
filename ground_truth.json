@@ -1,0 +1,152 @@
+{
+  "sample_a.pdf": {
+    "buyer": "Layla Hassan Al Mansoori",
+    "unit_id": "MCR-1204",
+    "price": 2450000,
+    "area_sqft": 1180.0,
+    "handover_date": "2027-06-30",
+    "grace_period_days": 60,
+    "delay_rate": 6.0,
+    "delay_basis": "percent_per_annum",
+    "delay_cap": 10.0,
+    "has_cancellation_clause": true,
+    "payment_plan": [
+      {
+        "name": "Booking / Signing",
+        "percent": 20.0,
+        "due_date": "2025-03-15",
+        "trigger": "On signing of this Agreement"
+      },
+      {
+        "name": "First Instalment",
+        "percent": 20.0,
+        "due_date": "2025-09-15",
+        "trigger": "Six months after signing"
+      },
+      {
+        "name": "Second Instalment",
+        "percent": 20.0,
+        "due_date": "2026-03-15",
+        "trigger": "Twelve months after signing"
+      },
+      {
+        "name": "Third Instalment",
+        "percent": 20.0,
+        "due_date": "2026-12-15",
+        "trigger": "Upon completion of the structural works"
+      },
+      {
+        "name": "Final Instalment",
+        "percent": 20.0,
+        "due_date": "2027-06-30",
+        "trigger": "Upon notice of completion and handover"
+      }
+    ]
+  },
+  "sample_b.pdf": {
+    "buyer": "Rajesh Kumar Menon",
+    "unit_id": "PHT-B-0807",
+    "price": 1875000,
+    "area_sqft": 1025.5,
+    "handover_date": "2028-03-31",
+    "grace_period_days": 90,
+    "delay_rate": 7.0,
+    "delay_basis": "fixed_per_sqft_per_year",
+    "delay_cap": null,
+    "has_cancellation_clause": true,
+    "payment_plan": [
+      {
+        "name": "Booking Deposit",
+        "percent": 10.0,
+        "due_date": "2025-08-01",
+        "trigger": "On signing of this Agreement"
+      },
+      {
+        "name": "Second Payment",
+        "percent": 10.0,
+        "due_date": "2025-11-01",
+        "trigger": "Within 90 days of signing"
+      },
+      {
+        "name": "Excavation Milestone",
+        "percent": 10.0,
+        "due_date": "2026-02-01",
+        "trigger": "On commencement of excavation works"
+      },
+      {
+        "name": "Foundation Milestone",
+        "percent": 15.0,
+        "due_date": "2026-06-01",
+        "trigger": "On completion of foundation and basement slab"
+      },
+      {
+        "name": "Podium Milestone",
+        "percent": 15.0,
+        "due_date": "2026-12-01",
+        "trigger": "On completion of podium slab"
+      },
+      {
+        "name": "Structure Milestone",
+        "percent": 10.0,
+        "due_date": "2027-08-01",
+        "trigger": "On completion of structural frame to roof level"
+      },
+      {
+        "name": "Handover Payment",
+        "percent": 30.0,
+        "due_date": "2028-03-31",
+        "trigger": "On notice of completion and handover of the Unit"
+      }
+    ]
+  },
+  "sample_c.pdf": {
+    "buyer": "Fatima Zahra Bin Rashid",
+    "unit_id": "DBV-VILLA-37",
+    "price": 3980000,
+    "area_sqft": 3120.0,
+    "handover_date": "2027-12-31",
+    "grace_period_days": 30,
+    "delay_rate": 4.5,
+    "delay_basis": "percent_per_annum",
+    "delay_cap": 5.0,
+    "has_cancellation_clause": false,
+    "payment_plan": [
+      {
+        "name": "Booking Deposit",
+        "percent": 20.0,
+        "due_date": "2025-11-10",
+        "trigger": "On signing of this Agreement"
+      },
+      {
+        "name": "First Instalment",
+        "percent": 15.0,
+        "due_date": "2026-03-10",
+        "trigger": "On completion of site clearance and piling"
+      },
+      {
+        "name": "Second Instalment",
+        "percent": 15.0,
+        "due_date": "2026-08-10",
+        "trigger": "On completion of ground floor slab"
+      },
+      {
+        "name": "Third Instalment",
+        "percent": 15.0,
+        "due_date": "2027-01-10",
+        "trigger": "On completion of first floor slab"
+      },
+      {
+        "name": "Fourth Instalment",
+        "percent": 15.0,
+        "due_date": "2027-07-10",
+        "trigger": "On completion of external walls and roofing"
+      },
+      {
+        "name": "Handover Payment",
+        "percent": 15.0,
+        "due_date": "2027-12-31",
+        "trigger": "On notice of completion and handover of the Villa"
+      }
+    ]
+  }
+}
