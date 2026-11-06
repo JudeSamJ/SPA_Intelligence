@@ -63,3 +63,4 @@ class ContractData(ExtractionOutput):
     source_file: Optional[str] = None
     file_hash: Optional[str] = None
     model: Optional[str] = None
+    extracted_at: Optional[str] = None   # local time of the LLM extraction

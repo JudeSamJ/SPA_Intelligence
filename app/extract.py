@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime
 import json
 import re
 import sys
@@ -178,7 +179,8 @@ def extract_contract(pdf_bytes: bytes, source_name: str | None = None, client=No
     if use_cache and (hit := load_cached(pdf_bytes)):
         return hit
     out = extract_from_llm(pdf_bytes, client)
-    data = ContractData(**out.model_dump(), source_file=source_name, file_hash=h, model=config.model_tag())
+    data = ContractData(**out.model_dump(), source_file=source_name, file_hash=h, model=config.model_tag(),
+                        extracted_at=datetime.now().isoformat(timespec="seconds"))
     data = postprocess(data, pdf_pages(pdf_bytes))
     config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cp.write_text(data.model_dump_json(indent=2))

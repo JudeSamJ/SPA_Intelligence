@@ -50,3 +50,35 @@ def test_unseeded_no_key_shows_error_not_fake_data(tmp_path, monkeypatch):
     at = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=30).run()
     assert not at.exception and any(".env" in e.value for e in at.error)
     assert not at.button  # no extraction button / no API call when unconfigured
+
+
+def _fake_llm(monkeypatch, path):
+    from app import extract
+    from app.llm import AnthropicAdapter
+    monkeypatch.setattr(config, "PROVIDER", "azure_openai")
+    for k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT"):
+        monkeypatch.setenv(k, "x")
+    monkeypatch.setattr(extract, "get_llm", lambda client=None: AnthropicAdapter(FakeClient(oracle_input(path))))
+
+
+def test_extract_button_shows_confirmation_and_hides_button(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "CACHE_DIR", tmp_path)
+    _fake_llm(monkeypatch, SAMPLES / "sample_a.pdf")
+    at = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=30).run()
+    assert [b.label for b in at.button] == ["Extract with LLM"]
+    at.button[0].click().run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert not any(b.label == "Extract with LLM" for b in at.button)      # button removed after starting
+    assert any("Extracted sample_a.pdf at" in s.value and "1 LLM call" in s.value for s in at.success)
+    assert at.toast and "Extraction complete" in at.toast[0].value
+
+
+def test_rerun_extraction_replaces_cache_and_confirms(seeded, monkeypatch):
+    _fake_llm(monkeypatch, SAMPLES / "sample_a.pdf")
+    at = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=30).run()
+    assert any("Loaded from cache" in c.value for c in at.caption)           # cached: no call made
+    btn = [b for b in at.button if b.label == "Re-run extraction now"]
+    assert btn
+    btn[0].click().run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert any("Re-extracted sample_a.pdf at" in s.value for s in at.success)

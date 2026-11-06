@@ -66,9 +66,9 @@ FIELD_LABELS = {
 }
 
 
-def load_contract(label: str, data: bytes):
+def load_contract(label: str, data: bytes, use_cache: bool = True):
     try:
-        return extract_contract(data, source_name=label), None
+        return extract_contract(data, source_name=label, use_cache=use_cache), None
     except Exception as e:  # network/API errors should show, not crash
         return None, f"{type(e).__name__}: {e}"
 
@@ -103,20 +103,51 @@ if pdf_bytes is None:
     st.info("Pick a sample or upload an SPA PDF in the sidebar.")
     st.stop()
 
+def run_extraction(force: bool):
+    """Run the LLM extraction with a visible progress panel. Returns ContractData or None."""
+    before = calls_made()
+    with st.status(f"Extracting **{label}** with `{config.model_tag()}`…", expanded=True) as status:
+        st.write("① Reading PDF text and sending it to the model")
+        st.write("② Waiting for the model's structured answer (this is the LLM call)…")
+        c, err = load_contract(label, pdf_bytes, use_cache=not force)
+        if err:
+            status.update(label="Extraction failed", state="error", expanded=True)
+            st.error(err)
+            return None
+        used = calls_made() - before
+        st.write(f"③ Validated, verified quotes against the PDF, checked totals: {len(c.warnings)} warning(s)")
+        status.update(label=f"✅ Extraction complete: {used} LLM call(s) used", state="complete", expanded=False)
+    msg = (f"{'Re-extracted' if force else 'Extracted'} {label} at {c.extracted_at} with `{c.model}`: "
+           f"{used} LLM call(s) this time, {calls_made()}/{config.MAX_LLM_CALLS} this session.")
+    st.session_state[f"extract_log_{c.file_hash}"] = msg
+    st.toast(f"Extraction complete ({used} LLM call)", icon="✅")
+    return c
+
+
 contract = load_cached(pdf_bytes)          # free: reads data/cache
 if contract is None:
-    st.info(f"**{label}** has not been extracted with `{config.model_tag()}` yet. Extraction makes 1 LLM call "
-            f"(2 if the first output fails validation); the result is cached afterwards.")
-    if not config.llm_configured():
-        st.error(config.setup_hint())
+    holder = st.empty()
+    with holder.container():
+        st.info(f"**{label}** has not been extracted with `{config.model_tag()}` yet. Extraction makes 1 LLM call "
+                f"(2 if the first output fails validation); the result is cached afterwards.")
+        if not config.llm_configured():
+            st.error(config.setup_hint())
+            st.stop()
+        clicked = st.button("Extract with LLM", type="primary")
+    if not clicked:
         st.stop()
-    if not st.button("Extract with LLM", type="primary"):
+    holder.empty()                          # remove the button/info once started
+    contract = run_extraction(force=False)
+    if contract is None:
         st.stop()
-    with st.spinner("Extracting contract terms…"):
-        contract, err = load_contract(label, pdf_bytes)
-    if err:
-        st.error(f"Could not extract **{label}**: {err}")
-        st.stop()
+else:
+    with st.expander("🔄 Re-run extraction"):
+        st.caption(f"Extracted {contract.extracted_at or 'earlier'} with `{contract.model}`. Re-running makes "
+                   f"1 LLM call (2 if validation fails) and replaces the cached result.")
+        if not config.llm_configured():
+            st.caption(config.setup_hint())
+        elif st.button("Re-run extraction now"):
+            contract = run_extraction(force=True) or contract
 
 tab_terms, tab_pen, tab_cash, tab_chat, tab_acc = st.tabs(
     ["📄 Extracted Terms", "⏱ Penalty Simulator", "💰 Cash-flow", "💬 Buyer Assistant", "🎯 Accuracy"])
@@ -124,6 +155,11 @@ tab_terms, tab_pen, tab_cash, tab_chat, tab_acc = st.tabs(
 # ------------------------------------------------------------------ Extracted terms
 with tab_terms:
     st.subheader(f"{label}")
+    log = st.session_state.get(f"extract_log_{contract.file_hash}")
+    if log:
+        st.success(log, icon="✅")
+    elif contract.extracted_at:
+        st.caption(f"Loaded from cache: extracted {contract.extracted_at} with `{contract.model}` (no LLM call made).")
     if contract.warnings:
         for w in contract.warnings:
             st.error(w, icon="🚨")
