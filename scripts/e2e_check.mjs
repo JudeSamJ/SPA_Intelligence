@@ -262,21 +262,35 @@ console.log("C8. skyline: tower lights up step by step with cards on alternating
   await ctx.close();
 }
 
-console.log("C9. Palm drawing cannot be skipped by a fast flick; cursor is a plain orange arrow");
+console.log("C9. Palm animation is time-based (scroll speed cannot affect it); cursor is a plain orange arrow");
 {
-  const ctx = await ctxFor(); const page = await ctx.newPage(); watch(page, "palm");
-  await page.goto(`${BASE}/`); await sleep(4500);
-  const top = await page.evaluate(() => document.getElementById("palm").parentElement.offsetTop);
-  await page.evaluate((y) => window.scrollTo(0, y), top - 5); await sleep(1500); await page.mouse.move(700, 450);
-  await page.evaluate(() => { window.__s = []; const els = [...document.querySelectorAll("#palm .draw")]; const tot = els.reduce((a, e) => a + e.getTotalLength(), 0); const t0 = performance.now(); const sample = () => { let vis = 0; for (const e of els) { const da = getComputedStyle(e).strokeDasharray; vis += da === "none" ? e.getTotalLength() : parseFloat(da) || 0; } window.__s.push([performance.now() - t0, vis / tot]); if (performance.now() - t0 < 9000) setTimeout(sample, 30); }; sample(); });
-  for (let i = 0; i < 28; i++) { await page.mouse.wheel(0, 170); await sleep(22); }   // a hard fling, far past the end of the scene
-  await sleep(7500);
-  const smp = await page.evaluate(() => window.__s); const v = smp.map((x) => x[1]);
-  let maxJump = 0; for (let i = 1; i < v.length; i++) maxJump = Math.max(maxJump, Math.abs(v[i] - v[i - 1]));
-  const first = smp.find((x) => x[1] > 0.01)?.[0], done = smp.find((x) => x[1] > 0.985)?.[0];
-  check("palm: a fast flick advances the drawing by <= 6% per 30 ms (was ~14%)", maxJump <= 0.06, `max step ${(maxJump * 100).toFixed(1)}%`);
-  check("palm: a fast flick still takes >= 1.5 s to draw (was ~0.55 s)", first != null && done != null && done - first >= 1500, `${Math.round(done - first)} ms`);
-  check("palm: drawing completes", v.at(-1) > 0.98, String(v.at(-1)));
+  const ctx = await ctxFor();
+  const measure = async (mode) => {
+    const page = await ctx.newPage(); watch(page, `palm ${mode}`);
+    await page.goto(`${BASE}/`); await sleep(4500);
+    const pinned = await page.evaluate(() => /pin-spacer/.test(document.getElementById("palm").parentElement.className));
+    // progress proxy: mean frond scale (0..1) via the SVG transform API, sampled every animation frame
+    await page.evaluate(() => { window.__s = []; const fr = [...document.querySelectorAll("#palm .frond")]; const t0 = performance.now(); const tick = () => { const now = performance.now(); let sc = 0; for (const e of fr) sc += e.transform.baseVal.numberOfItems ? e.transform.baseVal.consolidate().matrix.a : 1; window.__s.push([now - t0, sc / fr.length]); if (now - t0 < 12000) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+    if (mode === "flick") for (let i = 0; i < 40; i++) { await page.mouse.wheel(0, 170); await sleep(22); }
+    else for (let i = 0; i < 70; i++) { await page.mouse.wheel(0, 60); await sleep(55); }
+    await sleep(9000);
+    const smp = await page.evaluate(() => window.__s); const v = smp.map((x) => x[1]);
+    let maxStep = 0; for (let i = 1; i < v.length; i++) maxStep = Math.max(maxStep, Math.abs(v[i] - v[i - 1]));
+    const first = smp.find((x) => x[1] > 0.02)?.[0], done = smp.find((x) => x[1] > 0.99)?.[0];
+    // scroll far away and back: it must stay drawn (no replay, no flicker)
+    await page.evaluate(() => window.scrollTo(0, 0)); await sleep(1500);
+    await page.evaluate(() => window.scrollTo(0, document.getElementById("palm").getBoundingClientRect().top + window.scrollY)); await sleep(1500);
+    const after = await page.evaluate(() => { const fr = [...document.querySelectorAll("#palm .frond")]; return fr.reduce((a, e) => a + e.transform.baseVal.consolidate().matrix.a, 0) / fr.length; });
+    await page.close();
+    return { pinned, dur: done - first, maxStep, final: v.at(-1), after };
+  };
+  const slow = await measure("slow"); const flick = await measure("flick");
+  check("palm: section is not pinned (no pin-spacer)", !slow.pinned && !flick.pinned);
+  check("palm: growth takes about the same time for a slow scroll and a hard flick", Math.abs(slow.dur - flick.dur) < 400 && slow.dur > 1000 && slow.dur < 2600, `${Math.round(slow.dur)} ms vs ${Math.round(flick.dur)} ms`);
+  check("palm: no frame advances the growth by more than 5%", slow.maxStep <= 0.05 && flick.maxStep <= 0.05, `${(slow.maxStep * 100).toFixed(1)}% / ${(flick.maxStep * 100).toFixed(1)}%`);
+  check("palm: fully grown, and stays grown after scrolling away and back", slow.final > 0.98 && flick.final > 0.98 && slow.after > 0.98 && flick.after > 0.98, `${slow.after.toFixed(2)} / ${flick.after.toFixed(2)}`);
+  const page = await ctx.newPage(); watch(page, "cursor");
+  await page.goto(`${BASE}/`); await sleep(3000);
   const cur = await page.evaluate(() => ({ body: getComputedStyle(document.body).cursor.startsWith("url("), btn: getComputedStyle(document.querySelector("button")).cursor.startsWith("url("), custom: document.body.classList.contains("has-custom-cursor") }));
   check("cursor: body and buttons use the orange arrow image, no custom ring/dot", cur.body && cur.btn && !cur.custom, JSON.stringify(cur));
   await page.goto(`${BASE}/app/contracts/${A}/assistant`); await sleep(2200);

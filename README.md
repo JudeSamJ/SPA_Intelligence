@@ -110,7 +110,7 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 
 | Plugin / tool | Where it is used |
 |---|---|
-| ScrollTrigger | pinned scenes. The Palm uses a speed-limited follower (`motion/follow.ts`) so a hard flick cannot skip the drawing (it is sequenced: trunk, fronds one by one, crescent, then the plane); skyline and roadmap are scrubbed; the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
+| ScrollTrigger | pinned and scrubbed skyline and roadmap scenes; for the Palm it only *starts* a time-based animation when the scene enters view (the island grows from the sea: ripples, trunk, fronds sprout, crescent sweeps, plane flies), so scroll speed and direction cannot affect it; the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
 | ScrollSmoother | smooth scrolling and `data-speed` parallax on the **landing page only** (off on data pages, touch, lite and reduced) |
 | ScrollToPlugin | anchor navigation ("See how it works"), jump to the PDF panel from a citation |
 | SplitText | hero headline reveal (Arabic is split by words/lines only, never characters) |
@@ -160,7 +160,7 @@ need one before release.** A test keeps the EN/AR key sets identical (allowing A
 | `pytest` | 94 passed (API tests mock the LLM; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01) |
 | `vitest` | 73 passed (API client, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
-| Playwright e2e (`scripts/e2e_check.mjs`, 158 checks) | 158/158: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; a hard flick cannot skip the Palm drawing; plain orange cursor; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
+| Playwright e2e (`scripts/e2e_check.mjs`, 159 checks) | 159/159: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; plain orange cursor; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
 
 **Lighthouse 12** (headless Chromium, production build with gzip; single runs; `docs/lighthouse.json`):

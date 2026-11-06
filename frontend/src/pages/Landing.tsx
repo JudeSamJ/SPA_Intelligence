@@ -5,7 +5,6 @@ import { EASE } from "../motion/ease";
 import { useMotion } from "../motion/mm";
 import { gsap, loadMorph, loadSmoother, Observer, ScrollTrigger } from "../motion/registry";
 import { getScrollY, scrollToTarget, setSmoother } from "../motion/scroll";
-import { scrubFollow } from "../motion/follow";
 import { splitReveal } from "../motion/split";
 import { useGo } from "../motion/Transition";
 import { Dhow, Falcon } from "../scenes/Silhouettes";
@@ -147,36 +146,47 @@ export default function Landing() {
     [ready],
   );
 
-  // --- palm scene: DrawSVG + plane on the crescent path (pinned + scrubbed) -------------------------------
-  // Smooth by construction: a long scroll distance (slow draw per pixel), eased segments, sequential phases, and a
-  // speed-limited follower (motion/follow.ts). A plain scrub follows the scroll position exactly, so a fast downward
-  // flick took the whole drawing from nothing to finished in ~0.5 s (measured: ~14% per 30 ms); `scrub: <seconds>`
-  // did not help (550 -> 645 ms). The follower caps how fast the drawing can advance, whatever the flick.
+  // --- palm scene: the island GROWS out of the sea. Time-based, NOT scroll-scrubbed and NOT pinned. ------------
+  // Earlier versions scrubbed the drawing to the scroll position inside a pinned section; any scroll speed or direction
+  // change then showed up directly as skipped/glitchy frames. Now the scroll only *starts* the animation (once, when the
+  // scene enters the viewport); it plays over a fixed duration on the GSAP ticker, so scroll behaviour cannot affect it.
   useMotion(
     root,
-    ({ tier: tr, rtl, desktop }) => {
+    ({ tier: tr, rtl }) => {
       if (!ready || tr === "reduced") return;
       const q = gsap.utils.selector(root.current!);
-      const pin = desktop && tr === "full";
+      const fronds = q("#palm .frond") as unknown as SVGPathElement[];
+      // initial (hidden) state
       gsap.set(q("#palm .draw"), { drawSVG: "0%" });
-      const tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
-      tl.from(
-        q("#palm .palm-copy > *"),
-        { y: 30, opacity: 0, stagger: 0.6, duration: 1.2, ease: "power2.out" },
-        0.2,
-      )
-        .to(q("#palm .trunk"), { drawSVG: "100%", duration: 1.8, ease: "power1.inOut" }, 0)
+      gsap.set(fronds, {
+        scale: 0,
+        opacity: 0,
+        svgOrigin: (_i: number, el: Element) => (el as SVGElement).dataset.origin ?? "400 600",
+      });
+      gsap.set(q("#palm .palm-copy > *"), { opacity: 0, y: 24 });
+      gsap.set(["#plane", ".palm-glow"], { opacity: 0 });
+      gsap.set(q("#palm .ripple"), { scale: 0.4, opacity: 0, svgOrigin: "400 752" });
+
+      const intro = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
+      intro
+        .to(".palm-glow", { opacity: 1, duration: 2.4, ease: "sine.inOut" }, 0)
+        .to(q("#palm .palm-copy > *"), { opacity: 1, y: 0, duration: 0.9, stagger: 0.28 }, 0.1)
+        .to(q("#palm .trunk"), { drawSVG: "100%", duration: 1.5, ease: "power2.inOut" }, 0.3)
+        // fronds sprout from the trunk, base to tip, with a soft spring
         .to(
-          q("#palm .frond"),
-          { drawSVG: "100%", duration: 1, stagger: { each: 0.26, from: "start" }, ease: "power1.inOut" },
-          1.4,
+          fronds,
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.8,
+            ease: "back.out(1.5)",
+            stagger: { each: 0.1, from: "start" },
+          },
+          1.0,
         )
-        .to(
-          q("#palm .crescent, #palm .ring"),
-          { drawSVG: "100%", duration: 2.4, stagger: 0.45, ease: "power1.inOut" },
-          4.4,
-        )
-        .fromTo("#plane", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 7)
+        .to(q("#palm .crescent"), { drawSVG: "100%", duration: 2, ease: "power2.inOut" }, 2.5)
+        .to(q("#palm .ring"), { drawSVG: "100%", duration: 1.8, stagger: 0.3, ease: "power2.inOut" }, 3.0)
+        .to("#plane", { opacity: 1, duration: 0.5 }, 4.4)
         .to(
           "#plane",
           {
@@ -188,28 +198,46 @@ export default function Landing() {
               start: rtl ? 1 : 0,
               end: rtl ? 0 : 1,
             },
-            duration: 3,
+            duration: 4.2,
             ease: "power1.inOut",
           },
-          7,
+          4.4,
         )
-        .to("#palm-marker", { attr: { r: 9 }, duration: 0.5, ease: "back.out(2)" }, 10.2);
-      // speed-limited follower instead of a plain scrub: see motion/follow.ts
-      const follower = scrubFollow(
-        tl,
+        .to("#palm-marker", { attr: { r: 9 }, duration: 0.6, ease: "back.out(2)" }, 5.4);
+
+      // ambient sea ripples + marker pulse: cheap, looping, only while the scene is on screen
+      const ambient = gsap.timeline({ paused: true });
+      ambient.to(
+        q("#palm .ripple"),
         {
-          trigger: "#palm",
-          start: "top top",
-          end: pin ? "+=280%" : "+=100%",
-          pin,
-          anticipatePin: tr === "full" ? 0 : 1,
+          scale: 2.4,
+          opacity: 0,
+          duration: 3.6,
+          ease: "sine.out",
+          stagger: { each: 1.2, repeat: -1 },
+          startAt: { opacity: 0.55, scale: 0.4 },
         },
-        { maxPerSecond: 0.22 },
+        0,
       );
-      const stopWarm = prewarm(tl, follower.resync);
+
+      const st = ScrollTrigger.create({
+        trigger: "#palm",
+        start: "top 70%",
+        end: "bottom 10%",
+        onEnter: () => {
+          if (intro.progress() === 0) intro.play();
+          ambient.play();
+        },
+        onEnterBack: () => ambient.play(),
+        onLeave: () => ambient.pause(),
+        onLeaveBack: () => ambient.pause(),
+      });
+      const stopWarm = prewarm(intro);
       return () => {
         stopWarm();
-        follower.stop();
+        st.kill();
+        intro.kill();
+        ambient.kill();
       };
     },
     [ready],
