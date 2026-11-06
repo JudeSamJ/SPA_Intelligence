@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { DisclaimerBar } from "./components/Disclaimer";
 import { TopBar } from "./components/TopBar";
-import { Cursor } from "./motion/Cursor";
 import { RouteFade, TransitionProvider } from "./motion/Transition";
 import { loadDevtools } from "./motion/registry";
 
@@ -15,7 +14,6 @@ void loadDevtools(); // dev-only (?devtools=1); compiled away in production buil
 export default function App() {
   return (
     <TransitionProvider>
-      <Cursor />
       <TopBar />
       <main>
         <RouteFade>

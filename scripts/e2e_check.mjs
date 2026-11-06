@@ -262,6 +262,28 @@ console.log("C8. skyline: tower lights up step by step with cards on alternating
   await ctx.close();
 }
 
+console.log("C9. Palm drawing cannot be skipped by a fast flick; cursor is a plain orange arrow");
+{
+  const ctx = await ctxFor(); const page = await ctx.newPage(); watch(page, "palm");
+  await page.goto(`${BASE}/`); await sleep(4500);
+  const top = await page.evaluate(() => document.getElementById("palm").parentElement.offsetTop);
+  await page.evaluate((y) => window.scrollTo(0, y), top - 5); await sleep(1500); await page.mouse.move(700, 450);
+  await page.evaluate(() => { window.__s = []; const els = [...document.querySelectorAll("#palm .draw")]; const tot = els.reduce((a, e) => a + e.getTotalLength(), 0); const t0 = performance.now(); const sample = () => { let vis = 0; for (const e of els) { const da = getComputedStyle(e).strokeDasharray; vis += da === "none" ? e.getTotalLength() : parseFloat(da) || 0; } window.__s.push([performance.now() - t0, vis / tot]); if (performance.now() - t0 < 9000) setTimeout(sample, 30); }; sample(); });
+  for (let i = 0; i < 28; i++) { await page.mouse.wheel(0, 170); await sleep(22); }   // a hard fling, far past the end of the scene
+  await sleep(7500);
+  const smp = await page.evaluate(() => window.__s); const v = smp.map((x) => x[1]);
+  let maxJump = 0; for (let i = 1; i < v.length; i++) maxJump = Math.max(maxJump, Math.abs(v[i] - v[i - 1]));
+  const first = smp.find((x) => x[1] > 0.01)?.[0], done = smp.find((x) => x[1] > 0.985)?.[0];
+  check("palm: a fast flick advances the drawing by <= 6% per 30 ms (was ~14%)", maxJump <= 0.06, `max step ${(maxJump * 100).toFixed(1)}%`);
+  check("palm: a fast flick still takes >= 1.5 s to draw (was ~0.55 s)", first != null && done != null && done - first >= 1500, `${Math.round(done - first)} ms`);
+  check("palm: drawing completes", v.at(-1) > 0.98, String(v.at(-1)));
+  const cur = await page.evaluate(() => ({ body: getComputedStyle(document.body).cursor.startsWith("url("), btn: getComputedStyle(document.querySelector("button")).cursor.startsWith("url("), custom: document.body.classList.contains("has-custom-cursor") }));
+  check("cursor: body and buttons use the orange arrow image, no custom ring/dot", cur.body && cur.btn && !cur.custom, JSON.stringify(cur));
+  await page.goto(`${BASE}/app/contracts/${A}/assistant`); await sleep(2200);
+  check("cursor: text fields keep the text caret", (await page.locator("form input").evaluate((e) => getComputedStyle(e).cursor)) === "text");
+  await ctx.close();
+}
+
 // ------------------------------------------------------------------ D. FPS (software-rendered headless: indicative only)
 console.log("D. frame-rate probe on the landing page");
 {

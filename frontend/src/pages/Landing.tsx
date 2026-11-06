@@ -5,16 +5,31 @@ import { EASE } from "../motion/ease";
 import { useMotion } from "../motion/mm";
 import { gsap, loadMorph, loadSmoother, Observer, ScrollTrigger } from "../motion/registry";
 import { getScrollY, scrollToTarget, setSmoother } from "../motion/scroll";
+import { scrubFollow } from "../motion/follow";
 import { splitReveal } from "../motion/split";
 import { useGo } from "../motion/Transition";
 import { Dhow, Falcon } from "../scenes/Silhouettes";
 import { HeroBackdrop } from "../scenes/HeroBackdrop";
-import { GoldTrail } from "../scenes/GoldTrail";
 import { MashrabiyaBand, MashrabiyaLoader } from "../scenes/Mashrabiya";
 import { Marquee } from "../scenes/Marquee";
 import { Palm } from "../scenes/Palm";
 import { Skyline, SKY_D } from "../scenes/Skyline";
 import { usePrefs } from "../state/prefs";
+
+/**
+ * First-pass smoothness: GSAP initialises DrawSVG (path lengths) and MotionPath (path parsing) lazily, the first time a
+ * tween renders. In a scrubbed scene that lands in the middle of the user's first downward scroll as a hitch, while
+ * later passes (and scrolling back up) reuse the cached values. Rendering the whole timeline once while idle moves
+ * that cost out of the scroll.
+ */
+function prewarm(tl: gsap.core.Timeline, resync?: () => void): () => void {
+  const id = window.setTimeout(() => {
+    tl.progress(1, true).progress(0, true);
+    if (resync) resync();
+    else tl.scrollTrigger?.update();
+  }, 900);
+  return () => window.clearTimeout(id);
+}
 
 const FEATURES = ["extraction", "penalty", "cashflow", "assistant"] as const;
 const ROADMAP = ["docint", "cross", "bilingual", "rulebook", "whatsapp", "evalset"] as const;
@@ -133,8 +148,10 @@ export default function Landing() {
   );
 
   // --- palm scene: DrawSVG + plane on the crescent path (pinned + scrubbed) -------------------------------
-  // Smooth by construction: a long scroll distance (slow draw per pixel), eased segments, sequential phases, and
-  // scrub:true under ScrollSmoother (it already smooths; scrub:1 on top of it double-smooths and feels jumpy).
+  // Smooth by construction: a long scroll distance (slow draw per pixel), eased segments, sequential phases, and a
+  // speed-limited follower (motion/follow.ts). A plain scrub follows the scroll position exactly, so a fast downward
+  // flick took the whole drawing from nothing to finished in ~0.5 s (measured: ~14% per 30 ms); `scrub: <seconds>`
+  // did not help (550 -> 645 ms). The follower caps how fast the drawing can advance, whatever the flick.
   useMotion(
     root,
     ({ tier: tr, rtl, desktop }) => {
@@ -142,17 +159,7 @@ export default function Landing() {
       const q = gsap.utils.selector(root.current!);
       const pin = desktop && tr === "full";
       gsap.set(q("#palm .draw"), { drawSVG: "0%" });
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: "#palm",
-          start: "top top",
-          end: pin ? "+=280%" : "+=100%",
-          pin,
-          scrub: tr === "full" ? true : 0.6,
-          anticipatePin: 1,
-        },
-      });
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
       tl.from(
         q("#palm .palm-copy > *"),
         { y: 30, opacity: 0, stagger: 0.6, duration: 1.2, ease: "power2.out" },
@@ -187,7 +194,23 @@ export default function Landing() {
           7,
         )
         .to("#palm-marker", { attr: { r: 9 }, duration: 0.5, ease: "back.out(2)" }, 10.2);
-      return () => void tl.scrollTrigger?.kill();
+      // speed-limited follower instead of a plain scrub: see motion/follow.ts
+      const follower = scrubFollow(
+        tl,
+        {
+          trigger: "#palm",
+          start: "top top",
+          end: pin ? "+=280%" : "+=100%",
+          pin,
+          anticipatePin: tr === "full" ? 0 : 1,
+        },
+        { maxPerSecond: 0.22 },
+      );
+      const stopWarm = prewarm(tl, follower.resync);
+      return () => {
+        stopWarm();
+        follower.stop();
+      };
     },
     [ready],
   );
@@ -283,8 +306,8 @@ export default function Landing() {
           start: "top top",
           end: wide ? "+=380%" : "+=150%",
           pin: wide,
-          scrub: tr === "full" ? true : 0.6,
-          anticipatePin: 1,
+          scrub: tr === "full" ? 1.2 : 0.6,
+          anticipatePin: tr === "full" ? 0 : 1,
           invalidateOnRefresh: true,
           snap: wide
             ? { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, delay: 0.05, ease: "power1.inOut" }
@@ -332,7 +355,9 @@ export default function Landing() {
           );
       });
       tl.to("#burj-beacon", { opacity: 1, duration: 0.3 }, TOTAL - 0.7).addLabel("end", TOTAL);
+      const stopWarm = prewarm(tl);
       return () => {
+        stopWarm();
         ScrollTrigger.removeEventListener("refreshInit", place);
         clear();
         tl.scrollTrigger?.kill();
@@ -359,7 +384,7 @@ export default function Landing() {
           pin: true,
           scrub: 1,
           invalidateOnRefresh: true,
-          anticipatePin: 1,
+          anticipatePin: tr === "full" ? 0 : 1,
         },
       });
       return () => void tw.scrollTrigger?.kill();
@@ -410,7 +435,6 @@ export default function Landing() {
 
   return (
     <div id="smooth-wrapper" ref={root} style={{ color: LIGHT }}>
-      <GoldTrail />
       <div id="smooth-content">
         {/* ---------------- HERO ---------------- */}
         <section

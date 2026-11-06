@@ -110,7 +110,7 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 
 | Plugin / tool | Where it is used |
 |---|---|
-| ScrollTrigger | pinned and scrubbed Palm, skyline and roadmap scenes (the Palm is sequenced: trunk, fronds one by one, crescent, then the plane); the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
+| ScrollTrigger | pinned scenes. The Palm uses a speed-limited follower (`motion/follow.ts`) so a hard flick cannot skip the drawing (it is sequenced: trunk, fronds one by one, crescent, then the plane); skyline and roadmap are scrubbed; the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
 | ScrollSmoother | smooth scrolling and `data-speed` parallax on the **landing page only** (off on data pages, touch, lite and reduced) |
 | ScrollToPlugin | anchor navigation ("See how it works"), jump to the PDF panel from a citation |
 | SplitText | hero headline reveal (Arabic is split by words/lines only, never characters) |
@@ -126,15 +126,17 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 | PhysicsPropsPlugin | falling dust on error states |
 | CustomEase / CustomWiggle / CustomBounce | `dune` settle ease; warning-card wiggle; CTA bounce |
 | RoughEase / SlowMo / ExpoScaleEase | glitch jitter; hero eyebrow reveal; slow push-in on the hero scene |
-| quickTo / quickSetter, stagger, utils | magnetic buttons, 3D tilt cards, custom cursor, gold-dust trail, table row entrances |
+| quickTo / quickSetter, stagger, utils | magnetic buttons, 3D tilt cards, table row entrances |
 | GSDevTools, MotionPathHelper | **dev only** (`?devtools=1` in `vite dev`); absent from production bundles (verified) |
+
+The cursor is a plain orange arrow (CSS image cursor; text fields keep the text caret); there is no custom cursor or trail.
 
 Other effects: ogl WebGL glitch shader (RGB split, scanlines, noise, displacement, heat haze, pointer parallax) on the hero and
 route transitions; canvas **sandstorm** route transition; SVG `feTurbulence` heat haze; twinkling stars (dusk); grain overlay;
 glass panels; hero **video** with a procedural fallback. Glitch is limited to the hero, transitions, logo and loaders, never data.
 
 Safeguards: `prefers-reduced-motion` **and** a persisted "Reduce effects" toggle switch everything heavy to simple fades
-(no video, WebGL, smooth scroll, particles, cursor); mobile/low-power uses a "lite" tier; glitch bursts stay well under
+(no video, WebGL, smooth scroll, particles); mobile/low-power uses a "lite" tier; glitch bursts stay well under
 3 flashes per second; all ScrollTriggers/tweens are reverted on unmount.
 
 ## Adding hero video
@@ -158,7 +160,7 @@ need one before release.** A test keeps the EN/AR key sets identical (allowing A
 | `pytest` | 94 passed (API tests mock the LLM; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01) |
 | `vitest` | 73 passed (API client, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
-| Playwright e2e (`scripts/e2e_check.mjs`, 153 checks) | 153/153: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
+| Playwright e2e (`scripts/e2e_check.mjs`, 158 checks) | 158/158: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; a hard flick cannot skip the Palm drawing; plain orange cursor; UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
 
 **Lighthouse 12** (headless Chromium, production build with gzip; single runs; `docs/lighthouse.json`):
