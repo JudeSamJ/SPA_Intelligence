@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-11-06T09:28:55+00:00",
+  "model": "azure_openai/gpt-5.4-mini",
+  "files": [
+    "sample_a.pdf",
+    "sample_b.pdf",
+    "sample_c.pdf"
+  ],
+  "fields": {
+    "buyer": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "unit_id": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "price": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "area_sqft": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "handover_date": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "grace_period_days": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "delay_rate": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "delay_basis": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "delay_cap": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "payment_plan.count": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 3,
+      "quote_total": 3,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "payment_plan.percents": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 0,
+      "quote_total": 0,
+      "accuracy": 1.0,
+      "quote_accuracy": null
+    },
+    "payment_plan.dates": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 0,
+      "quote_total": 0,
+      "accuracy": 1.0,
+      "quote_accuracy": null
+    },
+    "payment_plan.triggers": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 0,
+      "quote_total": 0,
+      "accuracy": 1.0,
+      "quote_accuracy": null
+    },
+    "cancellation_clause.present": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 2,
+      "quote_total": 2,
+      "accuracy": 1.0,
+      "quote_accuracy": 1.0
+    },
+    "warning.percent_sum": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 0,
+      "quote_total": 0,
+      "accuracy": 1.0,
+      "quote_accuracy": null
+    },
+    "warning.missing_cancellation": {
+      "correct": 3,
+      "total": 3,
+      "quote_valid": 0,
+      "quote_total": 0,
+      "accuracy": 1.0,
+      "quote_accuracy": null
+    }
+  },
+  "overall": {
+    "value_accuracy": 1.0,
+    "checks": 48,
+    "quote_accuracy": 1.0,
+    "quotes_checked": 32
+  },
+  "penalty_tests": {
+    "passed": 14,
+    "failed": 0,
+    "total": 14,
+    "pass_rate": 1.0
+  },
+  "per_file": {
+    "sample_a.pdf": {
+      "buyer": true,
+      "unit_id": true,
+      "price": true,
+      "area_sqft": true,
+      "handover_date": true,
+      "grace_period_days": true,
+      "delay_rate": true,
+      "delay_basis": true,
+      "delay_cap": true,
+      "payment_plan.count": true,
+      "payment_plan.percents": true,
+      "payment_plan.dates": true,
+      "payment_plan.triggers": true,
+      "cancellation_clause.present": true,
+      "warning.percent_sum": true,
+      "warning.missing_cancellation": true
+    },
+    "sample_b.pdf": {
+      "buyer": true,
+      "unit_id": true,
+      "price": true,
+      "area_sqft": true,
+      "handover_date": true,
+      "grace_period_days": true,
+      "delay_rate": true,
+      "delay_basis": true,
+      "delay_cap": true,
+      "payment_plan.count": true,
+      "payment_plan.percents": true,
+      "payment_plan.dates": true,
+      "payment_plan.triggers": true,
+      "cancellation_clause.present": true,
+      "warning.percent_sum": true,
+      "warning.missing_cancellation": true
+    },
+    "sample_c.pdf": {
+      "buyer": true,
+      "unit_id": true,
+      "price": true,
+      "area_sqft": true,
+      "handover_date": true,
+      "grace_period_days": true,
+      "delay_rate": true,
+      "delay_basis": true,
+      "delay_cap": true,
+      "payment_plan.count": true,
+      "payment_plan.percents": true,
+      "payment_plan.dates": true,
+      "payment_plan.triggers": true,
+      "cancellation_clause.present": true,
+      "warning.percent_sum": true,
+      "warning.missing_cancellation": true
+    }
+  }
+}
