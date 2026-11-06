@@ -40,6 +40,13 @@ def normalize_text(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().lower()
 
 
+def quote_key(s: str) -> str:
+    """Quote-matching key: lowercase letters and digits only, so quote marks, dashes, bullets and
+    spacing differences (curly vs straight, line breaks) do not cause false 'not found' warnings.
+    A fabricated quote still fails because its words are not in the PDF."""
+    return re.sub(r"[\W_]+", "", normalize_text(s))
+
+
 def pdf_pages(pdf_bytes: bytes) -> list[str]:
     with pymupdf.open(stream=pdf_bytes, filetype="pdf") as doc:
         return [p.get_text() for p in doc]
@@ -47,10 +54,10 @@ def pdf_pages(pdf_bytes: bytes) -> list[str]:
 
 def locate_quote(pages: list[str], quote: str | None, hint_page: int | None = None) -> int | None:
     """Return the 1-based page containing the quote (hint page first), else None."""
-    q = normalize_text(quote or "")
+    q = quote_key(quote or "")
     if not q:
         return None
-    norm = [normalize_text(p) for p in pages]
+    norm = [quote_key(p) for p in pages]
     if hint_page and 1 <= hint_page <= len(norm) and q in norm[hint_page - 1]:
         return hint_page
     for i, p in enumerate(norm, 1):

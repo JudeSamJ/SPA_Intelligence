@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from app import config  # noqa: E402
 from app.llm import LLMError  # noqa: E402
-from app.extract import ExtractionError, extract_contract, load_cached, normalize_text, pdf_pages  # noqa: E402
+from app.extract import ExtractionError, extract_contract, load_cached, normalize_text, pdf_pages, quote_key  # noqa: E402
 
 SCALAR_FIELDS = ["buyer", "unit_id", "price", "area_sqft", "handover_date", "grace_period_days",
                  "delay_rate", "delay_basis", "delay_cap"]
@@ -44,13 +44,13 @@ def _quote_ok(pages_norm: list[str], quote: str | None) -> bool | None:
     """True/False if a quote exists; None if no quote to check."""
     if not quote:
         return None
-    q = normalize_text(quote)
+    q = quote_key(quote)
     return any(q in p for p in pages_norm)
 
 
 def compare(contract, truth: dict, pdf_bytes: bytes) -> dict:
     """Return {check_name: {"correct": bool, "quote_ok": bool|None}} for one contract."""
-    pages_norm = [normalize_text(p) for p in pdf_pages(pdf_bytes)]
+    pages_norm = [quote_key(p) for p in pdf_pages(pdf_bytes)]
     res: dict[str, dict] = {}
     for f in SCALAR_FIELDS:
         item = getattr(contract, f)
