@@ -95,7 +95,11 @@ with st.sidebar:
         if up:
             pdf_bytes, label = up.getvalue(), up.name
     st.caption(f"Model: `{config.model_tag()}`  \nJurisdiction rules: `{RULES['jurisdiction']}`")
-    st.caption(f"LLM calls this session: {calls_made()} / {config.MAX_LLM_CALLS} (cap)")
+    calls_slot = st.empty()   # updated again after an extraction so the count is never stale
+
+    def show_calls():
+        calls_slot.caption(f"LLM calls this session: {calls_made()} / {config.MAX_LLM_CALLS} (cap)")
+    show_calls()
     if not config.llm_configured():
         st.caption("⚠️ " + config.setup_hint() + " Cached extractions still load.")
 
@@ -120,6 +124,7 @@ def run_extraction(force: bool):
     msg = (f"{'Re-extracted' if force else 'Extracted'} {label} at {c.extracted_at} with `{c.model}`: "
            f"{used} LLM call(s) this time, {calls_made()}/{config.MAX_LLM_CALLS} this session.")
     st.session_state[f"extract_log_{c.file_hash}"] = msg
+    show_calls()
     st.toast(f"Extraction complete ({used} LLM call)", icon="✅")
     return c
 

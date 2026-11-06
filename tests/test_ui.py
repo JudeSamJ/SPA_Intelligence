@@ -71,6 +71,7 @@ def test_extract_button_shows_confirmation_and_hides_button(tmp_path, monkeypatc
     assert not any(b.label == "Extract with LLM" for b in at.button)      # button removed after starting
     assert any("Extracted sample_a.pdf at" in s.value and "1 LLM call" in s.value for s in at.success)
     assert at.toast and "Extraction complete" in at.toast[0].value
+    assert any("LLM calls this session: 1 / " in c.value for c in at.sidebar.caption)   # sidebar count updated
 
 
 def test_rerun_extraction_replaces_cache_and_confirms(seeded, monkeypatch):
