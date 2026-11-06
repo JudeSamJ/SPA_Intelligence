@@ -53,6 +53,18 @@ def pdf_pages(pdf_bytes: bytes) -> list[str]:
         return [p.get_text() for p in doc]
 
 
+SCANNED_MAX_AVG_CHARS = 80   # fewer extractable characters per page than this => likely a scanned image PDF
+
+
+def pdf_stats(pdf_bytes: bytes) -> dict:
+    """Page count and average extractable characters per page (scan heuristic)."""
+    pages = pdf_pages(pdf_bytes)
+    total = sum(len(p.strip()) for p in pages)
+    avg = total / len(pages) if pages else 0.0
+    return {"pages": len(pages), "avg_chars_per_page": round(avg, 1),
+            "scanned_suspect": len(pages) > 0 and avg < SCANNED_MAX_AVG_CHARS}
+
+
 def locate_quote(pages: list[str], quote: str | None, hint_page: int | None = None) -> int | None:
     """Return the 1-based page containing the quote (hint page first), else None."""
     q = quote_key(quote or "")

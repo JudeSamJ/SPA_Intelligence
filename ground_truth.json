@@ -101,7 +101,7 @@
   },
   "sample_c.pdf": {
     "buyer": "Fatima Zahra Bin Rashid",
-    "unit_id": "DBV-VILLA-37",
+    "unit_id": "OTC-2106",
     "price": 3980000,
     "area_sqft": 3120.0,
     "handover_date": "2027-12-31",
@@ -127,13 +127,13 @@
         "name": "Second Instalment",
         "percent": 15.0,
         "due_date": "2026-08-10",
-        "trigger": "On completion of ground floor slab"
+        "trigger": "On completion of podium slab"
       },
       {
         "name": "Third Instalment",
         "percent": 15.0,
         "due_date": "2027-01-10",
-        "trigger": "On completion of first floor slab"
+        "trigger": "On completion of structural frame to level 21"
       },
       {
         "name": "Fourth Instalment",
@@ -145,7 +145,7 @@
         "name": "Handover Payment",
         "percent": 15.0,
         "due_date": "2027-12-31",
-        "trigger": "On notice of completion and handover of the Villa"
+        "trigger": "On notice of completion and handover of the Unit"
       }
     ]
   }

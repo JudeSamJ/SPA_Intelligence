@@ -27,6 +27,8 @@ TRUTH = {
     "sample_a": {
         "file": "sample_a.pdf",
         "project": "Marina Crest Residences",
+        "district": "Dubai Marina",
+        "unit_type": "Unit",
         "developer": "Crestline Developments LLC",
         "buyer": "Layla Hassan Al Mansoori",
         "unit_id": "MCR-1204",
@@ -51,6 +53,8 @@ TRUTH = {
     "sample_b": {
         "file": "sample_b.pdf",
         "project": "Palm Horizon Towers",
+        "district": "Palm Jumeirah",
+        "unit_type": "Unit",
         "developer": "Horizon Gulf Properties PJSC",
         "buyer": "Rajesh Kumar Menon",
         "unit_id": "PHT-B-0807",
@@ -76,11 +80,13 @@ TRUTH = {
     },
     "sample_c": {
         "file": "sample_c.pdf",
-        "project": "Desert Bloom Villas",
+        "project": "Old Town Crescent Residences",
+        "district": "Downtown",
+        "unit_type": "Unit",
         "developer": "Sandstone Estates FZ-LLC",
         "buyer": "Fatima Zahra Bin Rashid",
-        "unit_id": "DBV-VILLA-37",
-        "floor": "ground and first",
+        "unit_id": "OTC-2106",
+        "floor": "21st (penthouse)",
         "price": 3980000,
         "area_sqft": 3120.0,
         "spa_date": "2025-11-10",
@@ -94,10 +100,10 @@ TRUTH = {
         "payment_plan": [
             {"name": "Booking Deposit", "percent": 20.0, "due_date": "2025-11-10", "trigger": "On signing of this Agreement"},
             {"name": "First Instalment", "percent": 15.0, "due_date": "2026-03-10", "trigger": "On completion of site clearance and piling"},
-            {"name": "Second Instalment", "percent": 15.0, "due_date": "2026-08-10", "trigger": "On completion of ground floor slab"},
-            {"name": "Third Instalment", "percent": 15.0, "due_date": "2027-01-10", "trigger": "On completion of first floor slab"},
+            {"name": "Second Instalment", "percent": 15.0, "due_date": "2026-08-10", "trigger": "On completion of podium slab"},
+            {"name": "Third Instalment", "percent": 15.0, "due_date": "2027-01-10", "trigger": "On completion of structural frame to level 21"},
             {"name": "Fourth Instalment", "percent": 15.0, "due_date": "2027-07-10", "trigger": "On completion of external walls and roofing"},
-            {"name": "Handover Payment", "percent": 15.0, "due_date": "2027-12-31", "trigger": "On notice of completion and handover of the Villa"},
+            {"name": "Handover Payment", "percent": 15.0, "due_date": "2027-12-31", "trigger": "On notice of completion and handover of the Unit"},
         ],
     },
 }
@@ -138,7 +144,7 @@ def build_styles():
 # ---------------------------------------------------------------------------
 def clauses(t: dict) -> list[tuple[str, list[str]]]:
     """Return [(heading, [paragraphs])] with page-break markers ('PAGEBREAK')."""
-    unit = "Villa" if t["unit_id"].startswith("DBV") else "Unit"
+    unit = t["unit_type"]
     price = aed(t["price"])
     grace = t["grace_period_days"]
     hd = long_date(t["handover_date"])
@@ -176,7 +182,7 @@ def clauses(t: dict) -> list[tuple[str, list[str]]]:
     out.append(("1. DEFINITIONS AND INTERPRETATION", [
         f"1.1 In this Agreement the following expressions have the meanings set opposite them: <b>\"Agreement\"</b> means this "
         f"Sale and Purchase Agreement together with its Schedules; <b>\"Project\"</b> means the development known as "
-        f"{t['project']} situated in the Emirate of Dubai, United Arab Emirates; <b>\"{unit}\"</b> means the property "
+        f"{t['project']} situated in {t['district']}, Dubai, United Arab Emirates; <b>\"{unit}\"</b> means the property "
         f"identified in Schedule 1; <b>\"Purchase Price\"</b> has the meaning given in Clause 2.2; <b>\"Handover Date\"</b> "
         f"has the meaning given in Clause 5.1; <b>\"Grace Period\"</b> has the meaning given in Clause 5.2; and "
         f"<b>\"Notice of Completion\"</b> means written notice from the Seller to the Buyer that the {unit} is ready for "
@@ -318,10 +324,10 @@ def clauses(t: dict) -> list[tuple[str, list[str]]]:
 
 
 def story_for(t: dict, st: dict) -> list:
-    unit = "Villa" if t["unit_id"].startswith("DBV") else "Unit"
+    unit = t["unit_type"]
     s: list = []
     s.append(Paragraph("SALE AND PURCHASE AGREEMENT", st["title"]))
-    s.append(Paragraph(f"{t['project']}, Dubai, United Arab Emirates", st["sub"]))
+    s.append(Paragraph(f"{t['project']}, {t['district']}, Dubai, United Arab Emirates", st["sub"]))
     s.append(Paragraph(f"Dated {long_date(t['spa_date'])}", st["sub"]))
     s.append(Spacer(1, 8))
     s.append(Paragraph("PARTIES", st["h"]))
@@ -409,7 +415,7 @@ def build_pdf(t: dict) -> Path:
     path = SAMPLES / t["file"]
     doc = SimpleDocTemplate(str(path), pagesize=A4, leftMargin=22 * mm, rightMargin=22 * mm,
                             topMargin=20 * mm, bottomMargin=22 * mm,
-                            title=f"SPA {t['unit_id']}", author="Synthetic sample")
+                            title=f"SPA {t['unit_id']}", author="Synthetic sample", invariant=1)
     doc.build(story_for(t, build_styles()), onFirstPage=footer, onLaterPages=footer)
     return path
 
@@ -421,7 +427,7 @@ def main() -> None:
         p = build_pdf(t)
         print("wrote", p.relative_to(ROOT))
         truth_out[t["file"]] = {k: v for k, v in t.items()
-                                if k not in ("file", "project", "developer", "floor", "spa_date")}
+                                if k not in ("file", "project", "district", "unit_type", "developer", "floor", "spa_date")}
     (ROOT / "ground_truth.json").write_text(json.dumps(truth_out, indent=2))
     print("wrote ground_truth.json")
 

@@ -24,6 +24,15 @@ AGENT_HISTORY_MESSAGES = 6   # chat history sent back to the model
 # Hard safety cap on LLM calls per Python process (protects a shared company key).
 MAX_LLM_CALLS = int(os.environ.get("LLM_MAX_CALLS") or 40)
 
+UPLOAD_DIR = Path(os.environ.get("SPA_UPLOAD_DIR") or ROOT / "data" / "uploads")
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+MAX_UPLOAD_PAGES = 300
+CORS_ORIGINS = [o.strip() for o in (os.environ.get("CORS_ORIGINS") or "http://localhost:5173").split(",")
+                if o.strip() and o.strip() != "*"]          # explicit origins only, never a wildcard
+SERVE_FRONTEND = os.environ.get("SERVE_FRONTEND") == "1"
+FRONTEND_DIST = ROOT / "frontend" / "dist"
+UPLOAD_RATE = (int(os.environ.get("RATE_UPLOADS") or 10), 60)   # requests, window seconds
+CHAT_RATE = (int(os.environ.get("RATE_CHAT") or 30), 60)
 SAMPLES_DIR = ROOT / "samples"
 CACHE_DIR = Path(os.environ.get("SPA_CACHE_DIR") or ROOT / "data" / "cache")
 RULES_DIR = ROOT / "rules"

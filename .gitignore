@@ -3,3 +3,9 @@ __pycache__/
 .env
 data/cache/
 .pytest_cache/
+data/uploads/
+node_modules/
+frontend/dist/
+*.log
+frontend/openapi.json
+docs/screenshots/*.tmp

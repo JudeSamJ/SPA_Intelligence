@@ -20,6 +20,10 @@ class LLMError(RuntimeError):
     pass
 
 
+class LLMCapError(LLMError):
+    """The per-process LLM call cap was reached."""
+
+
 @dataclass
 class ToolCall:
     id: str
@@ -43,7 +47,7 @@ def calls_made() -> int:
 def _count() -> None:
     global _calls
     if _calls >= config.MAX_LLM_CALLS:
-        raise LLMError(f"LLM call cap reached ({config.MAX_LLM_CALLS} per process) to protect the API key. "
+        raise LLMCapError(f"LLM call cap reached ({config.MAX_LLM_CALLS} per process) to protect the API key. "
                        f"Restart the app or raise LLM_MAX_CALLS in .env if this is intended.")
     _calls += 1
 

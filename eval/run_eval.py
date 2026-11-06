@@ -127,10 +127,46 @@ def print_table(agg: dict, penalty: dict) -> None:
           f"({(penalty['pass_rate'] or 0):.0%})")
 
 
+class EvalNeedsLLM(RuntimeError):
+    """Some sample is not cached and the caller did not allow LLM calls."""
+
+    def __init__(self, files: list[str]):
+        super().__init__(f"{len(files)} file(s) not cached: {', '.join(files)}")
+        self.files = files
+
+
+def uncached_files(use_cache: bool = True) -> list[str]:
+    truth = json.loads(config.GROUND_TRUTH_PATH.read_text())
+    return [f for f in truth if not (use_cache and load_cached((config.SAMPLES_DIR / f).read_bytes()))]
+
+
+def run_eval(use_cache: bool = True, allow_llm: bool = False, progress=None, log=print) -> dict:
+    """Score all samples; returns (and saves) the results dict. LLM is only used if allow_llm."""
+    truth = json.loads(config.GROUND_TRUTH_PATH.read_text())
+    todo = uncached_files(use_cache)
+    if todo and not allow_llm:
+        raise EvalNeedsLLM(todo)
+    per_file: dict[str, dict] = {}
+    for i, (fname, t) in enumerate(truth.items()):
+        pdf = (config.SAMPLES_DIR / fname).read_bytes()
+        contract = extract_contract(pdf, fname, use_cache=use_cache)
+        per_file[fname] = compare(contract, t, pdf)
+        ok = sum(r["correct"] for r in per_file[fname].values())
+        log(f"[{fname}] {ok}/{len(per_file[fname])} checks correct (model={contract.model})")
+        if progress:
+            progress(i + 1, len(truth))
+    agg = aggregate(per_file)
+    penalty = penalty_test_pass_rate()
+    out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "model": config.model_tag(),
+           "files": list(per_file), **agg, "penalty_tests": penalty,
+           "per_file": {f: {k: bool(v["correct"]) for k, v in c.items()} for f, c in per_file.items()}}
+    config.EVAL_RESULTS_PATH.write_text(json.dumps(out, indent=2))
+    return out
+
+
 def main(argv: list[str]) -> int:
     use_cache = "--no-cache" not in argv
-    truth = json.loads(config.GROUND_TRUTH_PATH.read_text())
-    todo = [f for f in truth if not (use_cache and load_cached((config.SAMPLES_DIR / f).read_bytes()))]
+    todo = uncached_files(use_cache)
     if todo:
         if not config.llm_configured():
             print(f"ERROR: {config.setup_hint()}", file=sys.stderr)
@@ -140,24 +176,12 @@ def main(argv: list[str]) -> int:
                   f"This will make {len(todo)} LLM call(s) (up to {2 * len(todo)} with retries) on "
                   f"{config.model_tag()}.\nRe-run with --yes to proceed.", file=sys.stderr)
             return 3
-    per_file: dict[str, dict] = {}
-    for fname, t in truth.items():
-        pdf = (config.SAMPLES_DIR / fname).read_bytes()
-        try:
-            contract = extract_contract(pdf, fname, use_cache=use_cache)
-        except LLMError as e:
-            print(f"[{fname}] extraction failed: {e}", file=sys.stderr)
-            return 1
-        per_file[fname] = compare(contract, t, pdf)
-        ok = sum(r["correct"] for r in per_file[fname].values())
-        print(f"[{fname}] {ok}/{len(per_file[fname])} checks correct (model={contract.model})")
-    agg = aggregate(per_file)
-    penalty = penalty_test_pass_rate()
-    print_table(agg, penalty)
-    out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "model": config.model_tag(),
-           "files": list(per_file), **agg, "penalty_tests": penalty,
-           "per_file": {f: {k: bool(v["correct"]) for k, v in c.items()} for f, c in per_file.items()}}
-    config.EVAL_RESULTS_PATH.write_text(json.dumps(out, indent=2))
+    try:
+        out = run_eval(use_cache=use_cache, allow_llm=True)
+    except LLMError as e:
+        print(f"extraction failed: {e}", file=sys.stderr)
+        return 1
+    print_table({"fields": out["fields"], "overall": out["overall"]}, out["penalty_tests"])
     print(f"\nSaved {config.EVAL_RESULTS_PATH.relative_to(ROOT)}")
     return 0
 

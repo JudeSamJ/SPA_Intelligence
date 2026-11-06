@@ -17,6 +17,11 @@ cashflow:
   # A milestone is construction/handover-linked when its name or trigger text contains
   # one of these keywords (case-insensitive). All other milestones are time-based.
   at_risk:
+    definition: >-
+      At risk = payments tied to construction or handover milestones (the milestone name or trigger
+      contains a construction/handover keyword below) plus the delay-compensation exposure computed
+      for the chosen delay scenario. Penalty exposure is compensation the buyer could be owed, so it
+      is always shown separately as well.
     handover_keywords: ["handover", "hand over", "notice of completion", "possession"]
     construction_keywords:
       - "construction"
