@@ -183,10 +183,10 @@ export default function Terms() {
         <table className="rtable" style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
           <thead>
             <tr>
-              <th scope="col" style={th}>
+              <th scope="col" style={{ ...th, minWidth: "8.5rem" }}>
                 {t("terms.field")}
               </th>
-              <th scope="col" style={th}>
+              <th scope="col" style={{ ...th, minWidth: "11rem" }}>
                 {t("terms.value")}
               </th>
               <th scope="col" style={th}>
@@ -195,7 +195,7 @@ export default function Terms() {
               <th scope="col" style={th}>
                 {t("terms.quote")}
               </th>
-              <th scope="col" style={th}>
+              <th scope="col" style={{ ...th, minWidth: "9.5rem" }}>
                 {t("evidence.trust")}
               </th>
             </tr>

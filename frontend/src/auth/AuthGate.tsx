@@ -40,7 +40,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           data-testid="signed-in"
           style={{
             position: "fixed",
-            top: "4.4rem",
+            bottom: "calc(var(--inset-bottom, 3rem) + 0.6rem)", // above the disclaimer banner, clear of the page content
             insetInlineEnd: "1rem",
             zIndex: 30,
             display: "flex",
