@@ -68,9 +68,11 @@ export function TopBar() {
         setOpen(false);
         go(to);
       }}
-      className={({ isActive }) =>
-        `rounded-full font-semibold ${big ? "px-4 py-3 text-base" : "px-3 py-1.5 text-sm"} ${isActive ? "bg-surface2 text-fg" : "text-muted hover:text-fg"}`
-      }
+      className={({ isActive }) => {
+        // "App" covers the contract views only, so it must not light up on the sibling sections that have their own link.
+        const on = isActive && !(to === "/app" && /^\/app\/(watch|crosscheck|review|buyers|accuracy)(\/|$)/.test(pathname));
+        return `rounded-full font-semibold ${big ? "px-4 py-3 text-base" : "px-3 py-1.5 text-sm"} ${on ? "bg-surface2 text-fg" : "text-muted hover:text-fg"}`;
+      }}
       style={big ? { minHeight: 48, display: "flex", alignItems: "center" } : undefined}
     >
       {label}

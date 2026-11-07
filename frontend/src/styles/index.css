@@ -321,6 +321,22 @@ select {
   font-size: 16px;
 } /* iOS Safari zooms the page on focus when a field is smaller than 16px */
 
+/* Text fields get a visible edge in both themes (they were borderless on the dark surface). */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+textarea,
+select {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.4rem 0.75rem;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
 /* Safe areas (notches / home indicator): needs viewport-fit=cover in index.html */
 body {
   padding-block-end: calc(2.6rem + env(safe-area-inset-bottom, 0px));

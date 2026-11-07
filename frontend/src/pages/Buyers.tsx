@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiX } from "../api/trust";
 import { useContracts } from "../api/hooks";
-import { Alert, EmptyState, ErrorState, Skeleton } from "../components/ui";
+import { Alert, EmptyState, Skeleton } from "../components/ui";
 
 const CHANNELS = ["any", "teams", "whatsapp", "web", "email", "api"] as const;
 
@@ -11,7 +11,7 @@ export default function Buyers() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const contracts = useContracts();
-  const list = useQuery({ queryKey: ["buyers"], queryFn: apiX.buyers });
+  const list = useQuery({ queryKey: ["buyers"], queryFn: apiX.buyers, retry: false });
   const [contractId, setContractId] = useState("");
   const [identity, setIdentity] = useState("");
   const [channel, setChannel] = useState<string>("any");
@@ -64,7 +64,7 @@ export default function Buyers() {
       </form>
 
       {list.isLoading && <Skeleton h={120} />}
-      {list.error && <ErrorState title={t("errors.generic")} message={(list.error as Error).message} onRetry={() => void list.refetch()} />}
+      {list.error && <Alert tone="warn">{(list.error as Error).message}</Alert>}
       {list.data && list.data.assignments.length === 0 && <EmptyState title={t("buyers.empty")} body="" />}
       <div style={{ display: "grid", gap: 8 }}>
         {list.data?.assignments.map((a) => (
