@@ -4,7 +4,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Flip } from "../motion/registry";
 import { usePrefs } from "../state/prefs";
 
-const TABS = ["terms", "penalty", "cashflow", "assistant"] as const;
+const TABS = ["terms", "gap", "penalty", "cashflow", "obligations", "playbook", "erp", "assistant"] as const;
 
 /** Tabs by URL. The highlight pill glides between tabs with Flip.fit. */
 export function Tabs({ base }: { base: string }) {

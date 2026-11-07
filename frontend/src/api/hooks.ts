@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type ChatTurn, type ContractSummary } from "./client";
+import { apiX } from "./trust";
 
 export const useHealth = () =>
   useQuery({ queryKey: ["health"], queryFn: api.health, refetchInterval: 15000 });
@@ -86,3 +87,5 @@ export const useEvalStatus = (enabled: boolean) =>
     enabled,
     refetchInterval: (q) => (q.state.data?.state === "running" ? 800 : false),
   });
+
+export const usePacks = () => useQuery({ queryKey: ["packs"], queryFn: apiX.packs, staleTime: 600_000 });

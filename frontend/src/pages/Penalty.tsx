@@ -6,6 +6,7 @@ import { PenaltyDial } from "../components/PenaltyDial";
 import { Alert, EmptyState, Skeleton } from "../components/ui";
 import { useFmt } from "../i18n/format";
 import { AnimatedNumber } from "../motion/AnimatedNumber";
+import { Probabilistic } from "../components/Probabilistic";
 import { useContractCtx } from "./ctx";
 
 function useDebounced<T>(v: T, ms: number): T {
@@ -20,7 +21,7 @@ function useDebounced<T>(v: T, ms: number): T {
 export default function Penalty() {
   const { t } = useTranslation();
   const fmt = useFmt();
-  const { id, openPdf } = useContractCtx();
+  const { id, openEvidence } = useContractCtx();
   const base = usePenalty(id); // default scenarios from rules/uae.yaml
   const [days, setDays] = useState<number | null>(null);
   const initial =
@@ -223,7 +224,7 @@ export default function Penalty() {
                   {page ? (
                     <button
                       className="chip num"
-                      onClick={() => openPdf(page)}
+                      onClick={() => openEvidence({ page, quote })}
                       aria-label={t("terms.openAtPage", { page })}
                     >
                       {fmt.num(page)}
@@ -235,6 +236,7 @@ export default function Penalty() {
           </tbody>
         </table>
       </section>
+      <Probabilistic />
     </div>
   );
 }

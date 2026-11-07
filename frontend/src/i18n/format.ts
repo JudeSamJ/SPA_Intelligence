@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { usePrefs } from "../state/prefs";
 
@@ -6,6 +6,9 @@ const AR_DIGITS = "٠١٢٣٤٥٦٧٨٩";
 const toArabicIndic = (s: string) => s.replace(/[0-9]/g, (d) => AR_DIGITS[Number(d)] ?? d);
 
 /** Locale-aware formatters. Western digits by default; Arabic-Indic digits only if the user opts in (AR mode). */
+/** Currency of the contract being shown (set by ContractLayout). null -> AED (the original default). */
+export const CurrencyContext = createContext<string | null>(null);
+
 export function makeFormatters(lang: "en" | "ar", arabicDigits: boolean, aedLabel: string) {
   const useArab = lang === "ar" && arabicDigits;
   const locale = lang === "ar" ? `ar-AE-u-nu-${useArab ? "arab" : "latn"}` : "en-GB";
@@ -41,7 +44,8 @@ export function makeFormatters(lang: "en" | "ar", arabicDigits: boolean, aedLabe
 export function useFmt() {
   const { lang, arabicDigits } = usePrefs();
   const { t } = useTranslation();
-  const aedLabel = t("common.aed");
+  const cur = useContext(CurrencyContext);
+  const aedLabel = cur && cur !== "AED" ? cur : t("common.aed");
   const f = useMemo(() => makeFormatters(lang, arabicDigits, aedLabel), [lang, arabicDigits, aedLabel]);
   const period = useCallback(
     (key: string) => {

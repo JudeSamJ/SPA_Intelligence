@@ -1,6 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ContractData } from "../api/client";
+import { Link } from "react-router-dom";
+import { apiX } from "../api/trust";
+import { usePacks } from "../api/hooks";
+import { GroundingChip } from "../components/GroundingChip";
 import { Alert, WarningCard } from "../components/ui";
 import { useFmt } from "../i18n/format";
 import { useMotion } from "../motion/mm";
@@ -37,7 +42,9 @@ export default function Terms() {
   const { t } = useTranslation();
   const fmt = useFmt();
   const { tier } = usePrefs();
-  const { detail, openPdf } = useContractCtx();
+  const { detail, openEvidence } = useContractCtx();
+  const qc = useQueryClient();
+  const packs = usePacks();
   const c = detail.contract;
   const warnings = c.warnings ?? [];
   const [sort, setSort] = useState<"field" | "page">("field");
@@ -136,6 +143,26 @@ export default function Terms() {
 
   return (
     <div ref={root} className="data-layer" style={{ display: "grid", gap: "1.2rem" }}>
+      <section className="card" style={{ padding: "0.8rem 1rem", display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+        <label htmlFor="jur" style={{ fontWeight: 700 }}>{t("terms.jurisdiction")}</label>
+        <select
+          id="jur"
+          value={c.jurisdiction ?? ""}
+          onChange={(e) => void apiX.setJurisdiction(detail.id, e.target.value || null).then(() => qc.invalidateQueries({ queryKey: ["contract", detail.id] }))}
+          style={{ minHeight: 44 }}
+        >
+          <option value="">{t("terms.jurisdictionAuto", { value: c.jurisdiction_detected?.value ?? "ae_dubai" })}</option>
+          {packs.data?.packs.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        {c.jurisdiction_detected?.value && (
+          <button className="chip" onClick={() => openEvidence({ field: "jurisdiction" })}>
+            {t("terms.detectedFrom", { text: c.jurisdiction_detected?.source_quote ?? "" })}
+          </button>
+        )}
+      </section>
+
       <section aria-label={t("terms.warnings")} style={{ display: "grid", gap: 8 }}>
         {warnings.length ? (
           warnings.map((w) => <WarningCard key={w}>{w}</WarningCard>)
@@ -168,6 +195,9 @@ export default function Terms() {
               <th scope="col" style={th}>
                 {t("terms.quote")}
               </th>
+              <th scope="col" style={th}>
+                {t("evidence.trust")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -190,7 +220,7 @@ export default function Terms() {
                     {item.source_page ? (
                       <button
                         className="chip"
-                        onClick={() => openPdf(item.source_page!)}
+                        onClick={() => openEvidence({ field: k, page: item.source_page! })}
                         aria-label={t("terms.openAtPage", { page: item.source_page })}
                       >
                         {fmt.num(item.source_page)}
@@ -210,6 +240,16 @@ export default function Terms() {
                       title={item.source_quote ?? ""}
                     >
                       {item.source_quote ?? "–"}
+                    </span>
+                  </td>
+                  <td style={td} data-label={t("evidence.trust")}>
+                    <span style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      <GroundingChip item={item} />
+                      {item.needs_review && !item.human_verified && (
+                        <Link className="chip" to="/app/review" style={{ color: "var(--warn)", borderColor: "var(--warn)" }}>
+                          {t("evidence.needsReview")}
+                        </Link>
+                      )}
                     </span>
                   </td>
                 </tr>
@@ -288,7 +328,7 @@ export default function Terms() {
                     className="chip num"
                     title={p.source_quote}
                     aria-label={t("terms.openAtPage", { page: p.source_page })}
-                    onClick={() => openPdf(p.source_page)}
+                    onClick={() => openEvidence({ field: `payment_plan.${i + 1}`, page: p.source_page })}
                   >
                     {fmt.num(p.source_page)}
                   </button>

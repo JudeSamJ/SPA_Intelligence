@@ -10,12 +10,17 @@ import { coinBurst } from "../motion/effects";
 import { gsap } from "../motion/registry";
 import { scrollToTarget } from "../motion/scroll";
 import { usePrefs } from "../state/prefs";
-import { ContractCtx } from "./ctx";
+import { CurrencyContext } from "../i18n/format";
+import { ContractCtx, type EvidenceTarget } from "./ctx";
 
 const Terms = lazy(() => import("./Terms"));
 const Penalty = lazy(() => import("./Penalty"));
 const Cashflow = lazy(() => import("./Cashflow"));
 const Assistant = lazy(() => import("./Assistant"));
+const Gap = lazy(() => import("./Gap"));
+const Obligations = lazy(() => import("./Obligations"));
+const Playbook = lazy(() => import("./Playbook"));
+const Erp = lazy(() => import("./Erp"));
 const PdfPanel = lazy(() => import("../components/PdfPanel"));
 
 function ExtractControls({ id, force }: { id: string; force: boolean }) {
@@ -85,7 +90,7 @@ export default function ContractLayout() {
   // Only request the detail when the list says it exists and is extracted: avoids a pointless (expected) 409.
   const q = useContract(id, known ? known.status === "extracted" : list.isFetched);
   const loc = useLocation();
-  const [pdfPage, setPdfPage] = useState<number | null>(null);
+  const [target, setTarget] = useState<EvidenceTarget | null>(null);
   const body = useRef<HTMLDivElement>(null);
   const { tier } = usePrefs();
   const seg = loc.pathname.split("/").pop();
@@ -101,11 +106,15 @@ export default function ContractLayout() {
     return () => void tw.kill();
   }, [seg, id, tier]);
 
-  const openPdf = useCallback((page: number) => {
-    setPdfPage(page);
+  const openEvidence = useCallback((tg: EvidenceTarget) => {
+    setTarget(tg);
     requestAnimationFrame(() => scrollToTarget("#pdf-panel", 90));
   }, []);
-  const ctx = useMemo(() => (q.data ? { id, detail: q.data, openPdf } : null), [id, q.data, openPdf]);
+  const openPdf = useCallback((page: number) => openEvidence({ page }), [openEvidence]);
+  const ctx = useMemo(
+    () => (q.data ? { id, detail: q.data, openPdf, openEvidence } : null),
+    [id, q.data, openPdf, openEvidence],
+  );
 
   if (list.isLoading || q.isLoading) return <Skeleton h={360} />;
   const summary = known;
@@ -135,6 +144,7 @@ export default function ContractLayout() {
   const base = `/app/contracts/${id}`;
   return (
     <ContractCtx.Provider value={ctx}>
+      <CurrencyContext.Provider value={c.currency ?? null}>
       <div style={{ display: "grid", gap: "1rem" }}>
         <header style={{ display: "grid", gap: 8 }}>
           <h1
@@ -160,7 +170,7 @@ export default function ContractLayout() {
           style={{
             display: "grid",
             gap: "1rem",
-            gridTemplateColumns: pdfPage ? "minmax(0,1fr) minmax(320px, 42%)" : "minmax(0,1fr)",
+            gridTemplateColumns: target ? "minmax(0,1fr) minmax(320px, 42%)" : "minmax(0,1fr)",
             alignItems: "start",
           }}
         >
@@ -170,19 +180,24 @@ export default function ContractLayout() {
               <Routes>
                 <Route index element={<Navigate to="terms" replace />} />
                 <Route path="terms" element={<Terms />} />
+                <Route path="gap" element={<Gap />} />
                 <Route path="penalty" element={<Penalty />} />
                 <Route path="cashflow" element={<Cashflow />} />
+                <Route path="obligations" element={<Obligations />} />
+                <Route path="playbook" element={<Playbook />} />
+                <Route path="erp" element={<Erp />} />
                 <Route path="assistant" element={<Assistant />} />
               </Routes>
             </Suspense>
           </div>
-          {pdfPage && (
+          {target && (
             <Suspense fallback={<Skeleton h={500} />}>
-              <PdfPanel id={id} page={pdfPage} onClose={() => setPdfPage(null)} />
+              <PdfPanel id={id} target={target} pages={known?.pages ?? 1} onClose={() => setTarget(null)} />
             </Suspense>
           )}
         </div>
       </div>
+      </CurrencyContext.Provider>
     </ContractCtx.Provider>
   );
 }

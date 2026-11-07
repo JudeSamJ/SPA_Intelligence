@@ -44,7 +44,7 @@ export function renderApp(ui: ReactElement, d: ContractDetail = detail()) {
     <QueryClientProvider client={qc}>
       <PrefsProvider>
         <MemoryRouter>
-          <ContractCtx.Provider value={{ id: d.id, detail: d, openPdf: () => {} }}>{ui}</ContractCtx.Provider>
+          <ContractCtx.Provider value={{ id: d.id, detail: d, openPdf: () => {}, openEvidence: () => {} }}>{ui}</ContractCtx.Provider>
         </MemoryRouter>
       </PrefsProvider>
     </QueryClientProvider>,

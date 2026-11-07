@@ -207,6 +207,9 @@ export function TopBar() {
               <nav aria-label={t("common.mainNav")} style={{ display: "grid", gap: 2 }}>
                 {navLink("/", t("nav.home"), true)}
                 {navLink("/app", t("nav.app"), true)}
+                {navLink("/app/watch", t("nav.watch"), true)}
+                {navLink("/app/crosscheck", t("nav.crosscheck"), true)}
+                {navLink("/app/review", t("nav.review"), true)}
                 {navLink("/app/accuracy", t("nav.accuracy"), true)}
               </nav>
               <div style={{ height: 1, background: "var(--line)", margin: "4px 0" }} />
@@ -223,6 +226,9 @@ export function TopBar() {
           <nav aria-label={t("common.mainNav")} style={{ display: "flex", gap: 2, marginInlineStart: 8 }}>
             {navLink("/", t("nav.home"))}
             {navLink("/app", t("nav.app"))}
+            {navLink("/app/watch", t("nav.watch"))}
+            {navLink("/app/crosscheck", t("nav.crosscheck"))}
+            {navLink("/app/review", t("nav.review"))}
             {navLink("/app/accuracy", t("nav.accuracy"))}
           </nav>
           <div style={{ flex: 1 }} />

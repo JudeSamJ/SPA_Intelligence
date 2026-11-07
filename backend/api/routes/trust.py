@@ -45,6 +45,13 @@ def evidence(contract_id: str, field: str):
                             confidence=item.confidence, human_verified=item.human_verified)
 
 
+@router.get("/contracts/{contract_id}/locate", response_model=Evidence)
+def locate_quote_endpoint(contract_id: str, page: int = Query(1, ge=1), quote: str = Query(..., max_length=1000)):
+    """Highlight rectangles for any quote (used for chat citations)."""
+    src = deps.get_source(contract_id)
+    return locate(src.path.read_bytes(), page, quote)
+
+
 @router.get("/contracts/{contract_id}/page/{page}.png")
 def page_image(contract_id: str, page: int, scale: float = Query(1.5, ge=0.5, le=3)):
     src = deps.get_source(contract_id)

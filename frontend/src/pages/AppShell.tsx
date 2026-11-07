@@ -7,11 +7,15 @@ import { useMotion } from "../motion/mm";
 import { gsap } from "../motion/registry";
 import { useContracts } from "../api/hooks";
 import { useMedia } from "../state/useMedia";
+import { usePrefs } from "../state/prefs";
 import { useLocation } from "react-router-dom";
 import { EmptyState } from "../components/ui";
 
 const ContractLayout = lazy(() => import("./ContractLayout"));
 const Accuracy = lazy(() => import("./Accuracy"));
+const Watch = lazy(() => import("./Watch"));
+const Crosscheck = lazy(() => import("./Crosscheck"));
+const ReviewQueue = lazy(() => import("./ReviewQueue"));
 
 function Pick() {
   const { t } = useTranslation();
@@ -24,6 +28,7 @@ export default function AppShell() {
   const root = useRef<HTMLDivElement>(null);
   const narrow = useMedia("(max-width: 900px)");
   const atHome = /^\/app\/?$/.test(useLocation().pathname);
+  const { lang } = usePrefs();
   useMotion(root, ({ tier, dirSign }) => {
     if (tier === "reduced") return;
     gsap.from("[data-shell-side]", { x: -40 * dirSign, opacity: 0, duration: 0.7, ease: "dune" });
@@ -64,11 +69,19 @@ export default function AppShell() {
         )}
       </aside>
       <section style={{ minWidth: 0 }}>
+        {lang === "ar" && (
+          <p role="note" data-testid="ar-review" style={{ margin: "0 0 0.6rem", fontSize: "0.85rem", color: "var(--muted)" }}>
+            {t("common.arReview")}
+          </p>
+        )}
         <Suspense fallback={<Skeleton h={320} />}>
           <Routes>
             <Route index element={<Pick />} />
             <Route path="contracts/:id/*" element={<ContractLayout />} />
             <Route path="accuracy" element={<Accuracy />} />
+            <Route path="watch" element={<Watch />} />
+            <Route path="crosscheck" element={<Crosscheck />} />
+            <Route path="review" element={<ReviewQueue />} />
             <Route
               path="*"
               element={<ErrorState title={t("errors.notFoundTitle")} message={t("errors.notFoundBody")} />}
