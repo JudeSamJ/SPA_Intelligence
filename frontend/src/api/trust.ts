@@ -286,7 +286,20 @@ const q = (o: Record<string, string | number | boolean | undefined | null>) => {
   return s ? `?${s}` : "";
 };
 
+export interface BuyerAssignment {
+  id: number;
+  contract_id: string;
+  identity: string;
+  channel: string;
+  active: boolean;
+  created_by: string;
+  created_at: string;
+}
+
 export const apiX = {
+  buyers: () => request<{ assignments: BuyerAssignment[] }>("/buyers"),
+  assignBuyer: (b: { contract_id: string; identity: string; channel: string }) => request<BuyerAssignment>("/buyers", json(b)),
+  removeBuyer: (id: number) => request<{ removed: number }>(`/buyers/${id}`, { method: "DELETE" }),
   evidence: (id: string, field: string) => request<EvidenceResponse>(`/contracts/${id}/evidence/${field}`),
   locate: (id: string, page: number, quote: string) => request<Evidence>(`/contracts/${id}/locate${q({ page, quote })}`),
   pageUrl: (id: string, page: number, scale = 1.5) => `${import.meta.env.VITE_API_BASE ?? "/api"}/contracts/${id}/page/${page}.png${q({ scale })}`,

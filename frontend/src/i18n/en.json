@@ -37,7 +37,8 @@
     "accuracy": "Accuracy",
     "watch": "Obligations",
     "crosscheck": "Cross-check",
-    "review": "Review queue"
+    "review": "Review queue",
+    "buyers": "Buyers"
   },
   "landing": {
     "eyebrow": "UAE off-plan property contracts",
@@ -593,6 +594,27 @@
       "failed": "GitHub did not complete the sign-in. Please try again.",
       "cancelled": "Sign-in was cancelled.",
       "not_allowed": "The GitHub account \"{{login}}\" is not allowed to use this app. Ask the owner to add it."
+    }
+  },
+  "buyers": {
+    "title": "Buyers",
+    "intro": "Link each buyer to their own contract. A buyer can then ask the assistant about that contract only, on any channel you connect. Add a buyer here; no key, setting or redeploy is needed.",
+    "contract": "Contract",
+    "identity": "Email or phone",
+    "identityHelp": "An email address, or a phone number with country code (for example +971 50 123 4567).",
+    "channel": "Channel",
+    "add": "Link buyer",
+    "remove": "Remove",
+    "empty": "No buyers are linked yet.",
+    "by": "Added by {{name}}",
+    "noContracts": "Upload a contract first.",
+    "channels": {
+      "any": "Any channel",
+      "teams": "Teams",
+      "whatsapp": "WhatsApp",
+      "web": "Web",
+      "email": "Email",
+      "api": "API"
     }
   }
 }

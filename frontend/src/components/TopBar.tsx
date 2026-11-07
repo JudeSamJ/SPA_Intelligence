@@ -212,6 +212,7 @@ export function TopBar() {
                 {navLink("/app/watch", t("nav.watch"), true)}
                 {navLink("/app/crosscheck", t("nav.crosscheck"), true)}
                 {navLink("/app/review", t("nav.review"), true)}
+                {navLink("/app/buyers", t("nav.buyers"), true)}
                 {navLink("/app/accuracy", t("nav.accuracy"), true)}
               </nav>
               <div style={{ height: 1, background: "var(--line)", margin: "4px 0" }} />
@@ -231,6 +232,7 @@ export function TopBar() {
             {navLink("/app/watch", t("nav.watch"))}
             {navLink("/app/crosscheck", t("nav.crosscheck"))}
             {navLink("/app/review", t("nav.review"))}
+            {navLink("/app/buyers", t("nav.buyers"))}
             {navLink("/app/accuracy", t("nav.accuracy"))}
           </nav>
           <div style={{ flex: 1 }} />

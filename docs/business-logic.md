@@ -129,7 +129,7 @@ A real database gives us:
 | Need | What we use |
 |---|---|
 | Data that survives restarts and redeploys | Supabase **Postgres** |
-| The original PDFs, kept safely | Supabase **Storage** (private bucket) |
+| The original PDFs and every saved result, kept safely | The same Postgres database (a durable copy of each file) |
 | Many contracts, each linked to its buyer, without editing server settings | A **buyer assignment** table |
 | Access that cannot leak between buyers | **Row Level Security** plus server-side checks |
 | A history of who reviewed what | Review and audit tables |
@@ -139,18 +139,15 @@ A real database gives us:
 
 | Table | Holds |
 |---|---|
-| `contracts` | One row per SPA: id (file hash), file name, status, jurisdiction, currency, extracted-at, model version, storage path |
-| `extractions` | The structured extraction as saved, with grounding results |
-| `review_decisions` | Accept, correct or reject, who, when, note |
-| `obligations` and `alerts` | Deadlines and which alerts were raised |
+| `app_files` | A durable copy of every file the app keeps: PDFs, extractions with grounding results, review decisions, alerts, document sets |
+| `contracts` | One readable row per SPA: file name, pages, status, model, open review items |
 | `buyer_assignments` | Which buyer identity (email or phone) may ask about which contract |
-| `crossdoc_sets` | Related documents grouped for comparison |
 | `audit_log` | Questions and tool calls, without contract text |
 
 ### Security model
 - The app server holds the Supabase **service key** as a secret environment variable. It never reaches the browser.
 - Buyers never get a database login. Our API checks the buyer assignment table before answering.
-- PDFs sit in a **private** bucket and are served only through short-lived links the API creates.
+- PDFs are served only through the authenticated API; the database tables are closed to Supabase's public REST API.
 
 ## 7. What is necessary, and what is optional
 

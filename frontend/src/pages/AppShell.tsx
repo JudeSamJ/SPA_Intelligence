@@ -16,6 +16,7 @@ const Accuracy = lazy(() => import("./Accuracy"));
 const Watch = lazy(() => import("./Watch"));
 const Crosscheck = lazy(() => import("./Crosscheck"));
 const ReviewQueue = lazy(() => import("./ReviewQueue"));
+const Buyers = lazy(() => import("./Buyers"));
 
 function Pick() {
   const { t } = useTranslation();
@@ -82,6 +83,7 @@ export default function AppShell() {
             <Route path="watch" element={<Watch />} />
             <Route path="crosscheck" element={<Crosscheck />} />
             <Route path="review" element={<ReviewQueue />} />
+            <Route path="buyers" element={<Buyers />} />
             <Route
               path="*"
               element={<ErrorState title={t("errors.notFoundTitle")} message={t("errors.notFoundBody")} />}

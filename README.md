@@ -428,3 +428,9 @@ endpoint serves a valid inline PDF).
 Document Intelligence / Docling swap behind `extract.py` (scans, complex layouts) · cross-document check · Arabic-English check
 (and Arabic contract parsing) · rulebook check against `rules/*.yaml` · WhatsApp assistant · authentication and persistence · a
 real, labelled evaluation set · mobile performance (prefetch the contract/cash-flow requests, preload route chunks).
+
+
+## Database (Supabase / PostgreSQL)
+
+Set `DATABASE_URL` and the app keeps its data in PostgreSQL, so nothing is lost when the host restarts. Leave it unset and the app runs on local files as before.
+Setup, the connection check, buyer linking and direct email are in [docs/supabase-setup.md](docs/supabase-setup.md). The business reasoning is in [docs/business-logic.md](docs/business-logic.md).
