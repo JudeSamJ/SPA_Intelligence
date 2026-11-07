@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const KEY = "spa.banner";
@@ -17,6 +17,7 @@ const read = () => {
 export function DisclaimerBar() {
   const { t } = useTranslation();
   const [hidden, setHidden] = useState(read);
+  const bar = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.dataset.banner = hidden ? "hidden" : "shown";
@@ -25,6 +26,29 @@ export function DisclaimerBar() {
     } catch {
       /* storage blocked: just not remembered */
     }
+  }, [hidden]);
+
+  // Publish the banner's real height as --inset-bottom (0 when dismissed) for scene framing.
+  useEffect(() => {
+    const root = document.documentElement.style;
+    const el = bar.current;
+    if (hidden || !el) {
+      root.setProperty("--inset-bottom", "0px");
+      return;
+    }
+    const publish = () =>
+      root.setProperty(
+        "--inset-bottom",
+        `${Math.round(window.innerHeight - el.getBoundingClientRect().top)}px`,
+      );
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    window.addEventListener("resize", publish);
+    publish();
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", publish);
+    };
   }, [hidden]);
 
   if (hidden) {
@@ -52,6 +76,7 @@ export function DisclaimerBar() {
   }
   return (
     <div
+      ref={bar}
       role="note"
       data-testid="disclaimer"
       style={{

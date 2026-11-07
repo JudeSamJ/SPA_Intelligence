@@ -111,8 +111,8 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 | Plugin / tool | Where it is used |
 |---|---|
 | ScrollTrigger | pinned and scrubbed skyline and roadmap scenes; for the Palm it only *starts* a time-based animation when the scene enters view (the island grows from the sea: ripples, trunk, fronds sprout, crescent sweeps, plane flies), so scroll speed and direction cannot affect it; the skyline lights the tower tier by tier with each step's card beside it; snap to step labels; batch reveals; progress bar |
-| ScrollSmoother | smooth scrolling and `data-speed` parallax on the **landing page only** (off on data pages, touch, lite and reduced) |
-| ScrollToPlugin | anchor navigation ("See how it works"), jump to the PDF panel from a citation |
+| ScrollSmoother | smooth scrolling and `data-speed` parallax on the **landing page only** (off on data pages, touch, lite, reduced, and on macOS/iOS where native momentum scrolling is already smooth) |
+| ScrollToPlugin | anchor navigation, jump to the PDF panel from a citation, and the frame-settling glide when there is no smoother |
 | SplitText | hero headline reveal (Arabic is split by words/lines only, never characters) |
 | ScrambleTextPlugin | hero tagline decode; decode on extracted field values (resolves to the exact text) |
 | TextPlugin | assistant reply typewriter (HTML-escaped twice, finalised with `textContent`; tested with real GSAP) |
@@ -121,7 +121,6 @@ All animation code is in `frontend/src/motion/` and `frontend/src/scenes/`; ever
 | MotionPathPlugin | dhow along the horizon wave, plane on the Palm crescent, payment dot on the milestone timeline (mirrored in RTL) |
 | Flip | sidebar card expansion, tab highlight pill, terms table re-sort |
 | Draggable + InertiaPlugin | rotary delay dial that snaps to presets (also keyboard accessible), draggable milestone timeline |
-| Observer | first wheel/swipe on the hero glides to the next scene |
 | Physics2DPlugin | gold-coin / sand burst when extraction completes |
 | PhysicsPropsPlugin | falling dust on error states |
 | CustomEase / CustomWiggle / CustomBounce | `dune` settle ease; warning-card wiggle; CTA bounce |
@@ -138,6 +137,22 @@ glass panels; hero **video** with a procedural fallback. Glitch is limited to th
 Safeguards: `prefers-reduced-motion` **and** a persisted "Reduce effects" toggle switch everything heavy to simple fades
 (no video, WebGL, smooth scroll, particles); mobile/low-power uses a "lite" tier; glitch bursts stay well under
 3 flashes per second; all ScrollTriggers/tweens are reverted on unmount.
+
+## Scene framing and scrolling (landing page)
+
+- **Framing:** every full-screen scene is centred in the area the user can actually see: the viewport minus the fixed header and the
+  disclaimer banner. Their real heights are measured at runtime (`--inset-top`, `--inset-bottom`), so it adapts to display scaling,
+  short laptop windows, the Windows taskbar (which already shrinks the browser viewport) and a dismissed banner. The Palm
+  illustration is capped to fit that area.
+- **Free scrolling, then settle:** scrolling is never hijacked. When it genuinely stops, the page glides to the nearest scene frame in
+  the direction of travel (hero, Palm, skyline, roadmap, CTA); a small nudge settles back, a larger one advances. Inside the pinned
+  skyline and roadmap scenes it does nothing (they have their own step snapping). Desktop with full effects only.
+- **The Palm starts only when framed** (its top within 14% of the viewport) and replays from the start if you scroll away before it
+  finishes.
+- **macOS:** ScrollSmoother is not used (trackpad and Magic Mouse momentum already scroll smoothly; stacking a smoother on top feels
+  floaty). The same framing and settling apply. Windows and Linux wheel mice keep ScrollSmoother.
+- **Scrollbar:** themed to the site (navy track with a gold-to-terracotta thumb; sand track with a terracotta thumb in the day theme;
+  always dark on the landing page). Chromium/Safari use `::-webkit-scrollbar`; Firefox gets `scrollbar-color`.
 
 ## Adding hero video
 

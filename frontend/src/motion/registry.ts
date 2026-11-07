@@ -14,7 +14,6 @@ import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { ExpoScaleEase, RoughEase, SlowMo } from "gsap/EasePack";
 import { Flip } from "gsap/Flip";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
-import { Observer } from "gsap/Observer";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -35,7 +34,6 @@ export function registerCore() {
     DrawSVGPlugin,
     MotionPathPlugin,
     Flip,
-    Observer,
     CustomEase,
     CustomWiggle,
     CustomBounce,
@@ -100,7 +98,6 @@ export {
   CustomEase,
   Flip,
   gsap,
-  Observer,
   ScrollToPlugin,
   ScrollTrigger,
   SplitText,

@@ -24,6 +24,25 @@ export function TopBar() {
   const { pathname } = useLocation();
 
   useEffect(() => setOpen(false), [pathname, narrow]);
+
+  // Publish the header's real bottom edge as --inset-top so full-screen scenes can centre in the visible area.
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        "--inset-top",
+        `${Math.round(el.getBoundingClientRect().bottom)}px`,
+      );
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    window.addEventListener("resize", publish);
+    publish();
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", publish);
+    };
+  }, [narrow]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);

@@ -11,6 +11,10 @@
   --gold: #d4a24c;
   --violet: #3b2250;
   --sunset: linear-gradient(180deg, #0b1b2b 0%, #3b2250 38%, #b5532e 72%, #d4a24c 100%);
+  /* Safe area for full-screen scenes = viewport minus the fixed header and banner. JS overwrites these with the
+     MEASURED sizes (TopBar / Disclaimer), so scenes are centred in what the user can actually see. */
+  --inset-top: 6rem;
+  --inset-bottom: 3rem;
   --font-display: "Fraunces Variable", "Noto Kufi Arabic", Georgia, serif;
   --font-body: "Inter Variable", "Tajawal", system-ui, sans-serif;
 }
@@ -38,6 +42,10 @@
   --ok: #1d6a39;
   --ok-bg: #d9ecd8;
   --info: #0b6b68;
+  --sb-track: #ead9b5;
+  --sb-thumb: linear-gradient(180deg, #c98a4b, #b5532e);
+  --sb-thumb-hover: linear-gradient(180deg, #d99a5a, #c4602f);
+  --sb-solid: #b5532e;
 }
 :root[data-theme="dusk"] {
   color-scheme: dark;
@@ -58,6 +66,10 @@
   --ok: #7fdca3;
   --ok-bg: #16372b;
   --info: #5fd4cf;
+  --sb-track: #0b1b2b;
+  --sb-thumb: linear-gradient(180deg, #e3ab55, #c98a4b 55%, #b5532e);
+  --sb-thumb-hover: linear-gradient(180deg, #f2bd6a, #dd9a52 55%, #c4602f);
+  --sb-solid: #d4a24c;
 }
 
 @theme inline {
@@ -480,4 +492,51 @@ body {
     font-size: clamp(1.8rem, 6vh, 3rem) !important;
     margin-block: 0.6rem !important;
   }
+}
+
+/* =====================================================================================================
+   Scrollbar: navy track, gold-to-terracotta thumb (dusk) / sand track, terracotta thumb (day)
+   ===================================================================================================== */
+::-webkit-scrollbar {
+  width: 13px;
+  height: 13px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--sb-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  background-clip: padding-box;
+  border: 3px solid var(--sb-track); /* insets the thumb so it floats in the track */
+  border-radius: 999px;
+  min-height: 56px;
+  min-width: 56px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+  background-clip: padding-box;
+}
+/* Firefox has no ::-webkit-scrollbar. Chrome 121+ would let scrollbar-color override the rules above, so only
+   apply the standard properties where the webkit pseudo-elements do not exist. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-solid) var(--sb-track);
+  }
+}
+
+/* Palm illustration: never taller than the visible frame (short laptop windows, large Windows display scaling) */
+.palm-svg {
+  width: min(100%, calc(100svh - var(--inset-top) - var(--inset-bottom) - 3rem));
+  height: auto;
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+}
+
+:root[data-scene="dark"] {
+  --sb-track: #0b1b2b;
+  --sb-thumb: linear-gradient(180deg, #e3ab55, #c98a4b 55%, #b5532e);
+  --sb-thumb-hover: linear-gradient(180deg, #f2bd6a, #dd9a52 55%, #c4602f);
+  --sb-solid: #d4a24c;
 }

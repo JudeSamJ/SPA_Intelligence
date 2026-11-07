@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Magnetic } from "../motion/Magnetic";
 import { EASE } from "../motion/ease";
 import { useMotion } from "../motion/mm";
-import { gsap, loadMorph, loadSmoother, Observer, ScrollTrigger } from "../motion/registry";
-import { getScrollY, scrollToTarget, setSmoother } from "../motion/scroll";
+import { gsap, loadMorph, loadSmoother, ScrollTrigger } from "../motion/registry";
+import { getSmoother, scrollToTarget, setSmoother } from "../motion/scroll";
 import { splitReveal } from "../motion/split";
 import { useGo } from "../motion/Transition";
 import { Dhow, Falcon } from "../scenes/Silhouettes";
@@ -44,9 +44,19 @@ export default function Landing() {
   const [introDone, setIntroDone] = useState(false);
   const firstTheme = useRef(true);
 
+  // The landing is always a dark cinematic page, so keep the scrollbar track dark here in the day theme too.
+  useEffect(() => {
+    document.documentElement.dataset.scene = "dark";
+    return () => void delete document.documentElement.dataset.scene;
+  }, []);
+
   // ScrollSmoother: landing only, full tier only (desktop, effects on). Must exist before ScrollTriggers are created.
   useEffect(() => {
-    if (tier !== "full") {
+    // macOS/iOS trackpads and Magic Mouse already scroll with native momentum; ScrollSmoother on top double-smooths
+    // (floaty, laggy). Wheel mice on Windows/Linux step in notches, which is what the smoother is for.
+    const apple =
+      /Mac|iPhone|iPad|iPod/i.test(navigator.platform || "") || /Mac OS X/.test(navigator.userAgent);
+    if (tier !== "full" || apple) {
       setReady(true);
       return;
     }
@@ -73,7 +83,7 @@ export default function Landing() {
     };
   }, [tier]);
 
-  // --- hero: split headline, scramble tagline, dhow on a motion path, Observer gate -------------------------
+  // --- hero: split headline, scramble tagline, dhow on a motion path -------------------------
   useMotion(
     root,
     ({ tier: tr, rtl, dirSign }) => {
@@ -126,21 +136,6 @@ export default function Landing() {
           ease: "sine.inOut",
         });
       }
-      // Observer: the first deliberate wheel/swipe down from the hero glides to the next scene
-      const gate = { busy: false };
-      const obs = Observer.create({
-        target: window,
-        type: "wheel,touch",
-        tolerance: 24,
-        preventDefault: false,
-        onDown: () => {
-          if (gate.busy || getScrollY() > 40) return;
-          gate.busy = true;
-          scrollToTarget("#palm", 0);
-          gsap.delayedCall(1.4, () => void (gate.busy = false));
-        },
-      });
-      cleanups.push(() => obs.kill());
       return () => cleanups.forEach((c) => c());
     },
     [ready],
@@ -220,17 +215,24 @@ export default function Landing() {
         0,
       );
 
+      // Start only once the scene is FRAMED: its top within 14% of the viewport (~86% visible, the frame-settling
+      // glide has all but landed). If the user scrolls on before it finishes, reset so it plays from the start next time.
+      const start = () => {
+        if (intro.progress() < 1) intro.play(0);
+        ambient.play();
+      };
+      const stop = () => {
+        if (intro.progress() < 1) intro.pause(0);
+        ambient.pause();
+      };
       const st = ScrollTrigger.create({
         trigger: "#palm",
-        start: "top 70%",
-        end: "bottom 10%",
-        onEnter: () => {
-          if (intro.progress() === 0) intro.play();
-          ambient.play();
-        },
-        onEnterBack: () => ambient.play(),
-        onLeave: () => ambient.pause(),
-        onLeaveBack: () => ambient.pause(),
+        start: "top 14%",
+        end: "bottom 14%",
+        onEnter: start,
+        onEnterBack: start,
+        onLeave: stop,
+        onLeaveBack: stop,
       });
       const stopWarm = prewarm(intro);
       return () => {
@@ -420,6 +422,95 @@ export default function Landing() {
     [ready],
   );
 
+  // --- frame settling ----------------------------------------------------------------------------------------
+  // Scrolling stays free and smooth. Once it has genuinely STOPPED, the page glides to the nearest scene frame in the
+  // direction of travel (hero, Palm, skyline, roadmap, CTA) so each scene lands exactly in view, centred below the
+  // header. Inside the pinned, scrubbed scenes it does nothing (they have their own step snapping). Desktop + full
+  // effects only. Implemented here (not with ScrollTrigger's `snap`) because that does not cooperate reliably with
+  // ScrollSmoother: after a snap, the smoother could stop following the native scroll position.
+  useMotion(
+    root,
+    ({ tier: tr, desktop }) => {
+      if (!ready || tr !== "full" || !desktop) return;
+      // Frame positions come from ScrollTrigger itself, so they are right with or without ScrollSmoother and pin spacers.
+      const frameSts = ["#palm", "#skyline", "#roadmap", "#cta"].map((sel) =>
+        ScrollTrigger.create({ trigger: sel, start: "top top", end: "+=1" }),
+      );
+      const pins = () => ScrollTrigger.getAll().filter((t) => t.pin);
+      const frames = (max: number) =>
+        [0, ...frameSts.map((t) => t.start)]
+          .map((y) => Math.min(Math.max(0, Math.round(y)), max))
+          .sort((a, b) => a - b);
+
+      let timer = 0;
+      let busy = false;
+      let lastY = window.scrollY;
+      let dir = 0;
+      const finish = () => void (busy = false);
+
+      const settle = () => {
+        if (busy) return;
+        const sm = getSmoother();
+        const y = window.scrollY;
+        if (sm && Math.abs(sm.scrollTop() - y) > 2) {
+          timer = window.setTimeout(settle, 80); // smoother still easing toward the native position
+          return;
+        }
+        const max = ScrollTrigger.maxScroll(window);
+        const vh = window.innerHeight;
+        if (!max) return;
+        for (const p of pins()) if (y > p.start + 6 && y < p.end - 6) return; // inside a pinned scene
+        const f = frames(max);
+        const prev = [...f].reverse().find((v) => v <= y) ?? f[0]!;
+        const next = f.find((v) => v > y) ?? f[f.length - 1]!;
+        const nudge = 0.1 * vh; // a small nudge settles back; moving further advances to the next frame
+        const target =
+          dir > 0
+            ? y - prev > nudge
+              ? next
+              : prev
+            : dir < 0
+              ? next - y > nudge
+                ? prev
+                : next
+              : y - prev < next - y
+                ? prev
+                : next;
+        const dist = Math.abs(target - y);
+        if (dist < 3 || dist > 1.4 * vh) return; // already framed, or never leap across a huge gap
+        busy = true;
+        const dur = Math.min(1.1, 0.5 + dist / (vh * 2));
+        if (sm) {
+          sm.scrollTo(target, true);
+          gsap.delayedCall(dur + 0.3, finish);
+        } else {
+          gsap.to(window, {
+            scrollTo: { y: target, autoKill: true },
+            duration: dur,
+            ease: "power2.inOut",
+            onComplete: finish,
+            onInterrupt: finish,
+          });
+        }
+      };
+      const onScroll = () => {
+        const y = window.scrollY;
+        if (y !== lastY) dir = y > lastY ? 1 : -1;
+        lastY = y;
+        if (busy) return;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(settle, 140);
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.clearTimeout(timer);
+        frameSts.forEach((t) => t.kill());
+      };
+    },
+    [ready],
+  );
+
   // --- batch reveals + CTA ---------------------------------------------------------------------------------
   useMotion(
     root,
@@ -530,7 +621,12 @@ export default function Landing() {
             <Falcon />
           </div>
           <div
-            style={{ position: "relative", textAlign: "center", padding: "7rem 1.25rem 5rem", maxWidth: 980 }}
+            style={{
+              position: "relative",
+              textAlign: "center",
+              padding: "calc(var(--inset-top) + 1.5rem) 1.25rem calc(var(--inset-bottom) + 2rem)",
+              maxWidth: 980,
+            }}
           >
             <p
               data-hero-eyebrow
@@ -639,7 +735,7 @@ export default function Landing() {
               alignItems: "center",
               maxWidth: 1200,
               margin: "0 auto",
-              padding: "6rem 1.5rem 4rem",
+              padding: "calc(var(--inset-top) + 1rem) 1.5rem calc(var(--inset-bottom) + 1rem)",
             }}
           >
             <div className="palm-copy">
@@ -661,7 +757,7 @@ export default function Landing() {
               </div>
             </div>
             <div style={{ position: "relative", color: "var(--gold)", direction: "ltr" }}>
-              <Palm />
+              <Palm className="palm-svg" />
               <svg
                 id="plane"
                 viewBox="0 0 24 24"
@@ -714,7 +810,7 @@ export default function Landing() {
             id="sky-content"
             style={{
               position: "relative",
-              padding: "6.5rem 2rem 3rem",
+              padding: "calc(var(--inset-top) + 0.75rem) 2rem calc(var(--inset-bottom) + 1rem)",
               display: "grid",
               gap: "1.2rem",
               alignContent: "start",
@@ -863,9 +959,13 @@ export default function Landing() {
 
         {/* ---------------- CTA ---------------- */}
         <section
+          id="cta"
           style={{
             position: "relative",
-            padding: "7rem 1.5rem 6rem",
+            minHeight: "100svh",
+            display: "grid",
+            alignContent: "center",
+            padding: "calc(var(--inset-top) + 2rem) 1.5rem calc(var(--inset-bottom) + 3rem)",
             textAlign: "center",
             background: "linear-gradient(180deg,#0b1b2b,#3b2250 70%,#b5532e)",
             overflow: "hidden",

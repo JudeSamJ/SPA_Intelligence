@@ -87,7 +87,6 @@ export default {
   ScrollToPlugin: {},
   SplitText: stub,
   Flip: stub,
-  Observer: stub,
   CustomEase: stub,
   CustomBounce: stub,
   CustomWiggle: stub,

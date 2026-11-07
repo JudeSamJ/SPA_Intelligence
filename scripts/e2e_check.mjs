@@ -271,9 +271,11 @@ console.log("C9. Palm animation is time-based (scroll speed cannot affect it); c
     const pinned = await page.evaluate(() => /pin-spacer/.test(document.getElementById("palm").parentElement.className));
     // progress proxy: mean frond scale (0..1) via the SVG transform API, sampled every animation frame
     await page.evaluate(() => { window.__s = []; const fr = [...document.querySelectorAll("#palm .frond")]; const t0 = performance.now(); const tick = () => { const now = performance.now(); let sc = 0; for (const e of fr) sc += e.transform.baseVal.numberOfItems ? e.transform.baseVal.consolidate().matrix.a : 1; window.__s.push([now - t0, sc / fr.length]); if (now - t0 < 12000) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
-    if (mode === "flick") for (let i = 0; i < 40; i++) { await page.mouse.wheel(0, 170); await sleep(22); }
-    else for (let i = 0; i < 70; i++) { await page.mouse.wheel(0, 60); await sleep(55); }
-    await sleep(9000);
+    // approach the Palm the way a user does (scroll toward it, then STOP); settling then frames it, which starts the animation
+    const frame = await page.evaluate(() => Math.round(document.getElementById("palm").getBoundingClientRect().top + window.scrollY));
+    if (mode === "flick") for (let i = 0; i < 60 && (await page.evaluate(() => window.scrollY)) < frame - 200; i++) { await page.mouse.wheel(0, 170); await sleep(22); }
+    else for (let i = 0; i < 120 && (await page.evaluate(() => window.scrollY)) < frame - 80; i++) { await page.mouse.wheel(0, 60); await sleep(55); }
+    await sleep(9500);
     const smp = await page.evaluate(() => window.__s); const v = smp.map((x) => x[1]);
     let maxStep = 0; for (let i = 1; i < v.length; i++) maxStep = Math.max(maxStep, Math.abs(v[i] - v[i - 1]));
     const first = smp.find((x) => x[1] > 0.02)?.[0], done = smp.find((x) => x[1] > 0.99)?.[0];
@@ -286,7 +288,7 @@ console.log("C9. Palm animation is time-based (scroll speed cannot affect it); c
   };
   const slow = await measure("slow"); const flick = await measure("flick");
   check("palm: section is not pinned (no pin-spacer)", !slow.pinned && !flick.pinned);
-  check("palm: growth takes about the same time for a slow scroll and a hard flick", Math.abs(slow.dur - flick.dur) < 400 && slow.dur > 1000 && slow.dur < 2600, `${Math.round(slow.dur)} ms vs ${Math.round(flick.dur)} ms`);
+  check("palm: growth takes about the same time whether you arrive by slow scrolling or a hard flick", Math.abs(slow.dur - flick.dur) < 400 && slow.dur > 1000 && slow.dur < 2600, `${Math.round(slow.dur)} ms vs ${Math.round(flick.dur)} ms`);
   check("palm: no frame advances the growth by more than 5%", slow.maxStep <= 0.05 && flick.maxStep <= 0.05, `${(slow.maxStep * 100).toFixed(1)}% / ${(flick.maxStep * 100).toFixed(1)}%`);
   check("palm: fully grown, and stays grown after scrolling away and back", slow.final > 0.98 && flick.final > 0.98 && slow.after > 0.98 && flick.after > 0.98, `${slow.after.toFixed(2)} / ${flick.after.toFixed(2)}`);
   const page = await ctx.newPage(); watch(page, "cursor");
@@ -343,6 +345,40 @@ console.log("C10. mobile responsiveness: 6 viewports x 7 routes (overflow, heade
   check("mobile: contracts list is collapsed once a contract is open; tabs form a 2x2 grid", (await page.locator("details.card").first().evaluate((d) => d.open)) === false && (await page.locator(".tabs").evaluate((t) => getComputedStyle(t).display)) === "grid");
   await shot(page, "mobile_ar_terms");
   await ctx.close();
+}
+
+console.log("C11. scene framing + frame settling on Windows-like and macOS-like windows; themed scrollbar");
+{
+  const CONFIGS = [["Windows 1536x730 (125% scaling)", 1536, 730, false], ["Windows 1920x945", 1920, 945, false], ["macOS 1440x780", 1440, 780, true]];
+  for (const [name, w, h, mac] of CONFIGS) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, userAgent: mac ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36" : undefined });
+    await ctx.addInitScript((isMac) => { localStorage.setItem("spa.reduce", "0"); if (isMac) Object.defineProperty(navigator, "platform", { get: () => "MacIntel" }); }, mac);
+    const page = await ctx.newPage(); watch(page, `frame ${name}`);
+    await page.goto(`${BASE}/`); await sleep(4500);
+    let startedAt = null, polling = true;
+    const poll = (async () => { while (polling) { try { const r = await page.evaluate(() => { const fr = [...document.querySelectorAll("#palm .frond")]; const sc = fr.reduce((a, e) => a + (e.transform.baseVal.numberOfItems ? e.transform.baseVal.consolidate().matrix.a : 1), 0) / fr.length; return { sc, top: document.getElementById("palm").getBoundingClientRect().top }; }); if (startedAt === null && r.sc > 0.02) startedAt = r.top; } catch { /* navigating */ } await sleep(30); } })();
+    await page.mouse.move(w / 2, h / 2); await page.mouse.wheel(0, 100); await sleep(90);
+    const early = await page.evaluate(() => Math.round(window.scrollY));
+    await sleep(6500);
+    const read = () => page.evaluate(() => { const r = (q) => { const e = document.querySelector(q); const b = e.getBoundingClientRect(); return { top: Math.round(b.top), bottom: Math.round(b.bottom) }; }; const cs = getComputedStyle(document.documentElement); return { palm: r("#palm"), copy: r(".palm-copy"), svg: r(".palm-svg"), sky: r("#skyline"), it: parseFloat(cs.getPropertyValue("--inset-top")), ib: parseFloat(cs.getPropertyValue("--inset-bottom")), vh: innerHeight }; });
+    const a = await read();
+    await page.mouse.wheel(0, 140); await sleep(3500);
+    const c = await read();
+    polling = false; await poll;
+    check(`${name}: scrolling is free (no teleport on the first wheel tick)`, early < 250, `scrollY ${early}`);
+    check(`${name}: scrolling settles with the Palm scene framed at the viewport top`, Math.abs(a.palm.top) <= 3, `top ${a.palm.top}`);
+    check(`${name}: Palm text and illustration sit inside the area between header and banner`, a.copy.top >= a.it - 1 && a.svg.top >= a.it - 1 && a.copy.bottom <= a.vh - a.ib + 1 && a.svg.bottom <= a.vh - a.ib + 1, `copy ${a.copy.top}-${a.copy.bottom} svg ${a.svg.top}-${a.svg.bottom} safe ${Math.round(a.it)}-${Math.round(a.vh - a.ib)}`);
+    check(`${name}: Palm animation starts only once framed`, startedAt !== null && startedAt <= 0.16 * a.vh, `palm top ${startedAt === null ? "n/a" : Math.round(startedAt)}px at start`);
+    check(`${name}: a small further scroll settles on the skyline frame`, Math.abs(c.sky.top) <= 3, `top ${c.sky.top}`);
+    await ctx.close();
+  }
+  for (const theme of ["dusk", "day"]) {
+    const ctx = await ctxFor({ theme }); const page = await ctx.newPage(); watch(page, `scrollbar ${theme}`);
+    await page.goto(`${BASE}/app/accuracy`); await sleep(2200);
+    const sb = await page.evaluate(() => ({ w: getComputedStyle(document.documentElement, "::-webkit-scrollbar").width, r: getComputedStyle(document.documentElement, "::-webkit-scrollbar-thumb").borderRadius, g: getComputedStyle(document.documentElement, "::-webkit-scrollbar-thumb").backgroundImage.startsWith("linear-gradient") }));
+    check(`scrollbar (${theme}): themed gradient thumb, rounded, 13px`, sb.w === "13px" && sb.r === "999px" && sb.g, JSON.stringify(sb));
+    await ctx.close();
+  }
 }
 
 // ------------------------------------------------------------------ D. FPS (software-rendered headless: indicative only)

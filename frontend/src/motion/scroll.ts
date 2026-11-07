@@ -6,6 +6,8 @@ let smoother: any = null;
 /** The landing page registers its ScrollSmoother here so anchor navigation works with and without it. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setSmoother = (s: any) => void (smoother = s);
+/** The landing page's ScrollSmoother, or null (macOS, touch, reduced effects). */
+export const getSmoother = () => smoother;
 export const getScrollY = () => (smoother ? (smoother.scrollTop() as number) : window.scrollY);
 
 /** ScrollToPlugin (or the smoother) anchor navigation. */
