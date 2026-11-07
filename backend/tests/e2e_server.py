@@ -117,7 +117,31 @@ def seed_penalty_fixture():
                      handover_date=S(_d(2027, 1, 1)), grace_period_days=S(30), delay_rate=S(6.0),
                      delay_basis=S("percent_per_annum"), delay_cap=Sourced(), payment_plan=plan,
                      cancellation_clause=Sourced(), model=config.model_tag(), file_hash=h, source_file="fixture_penalty_case.pdf",
-                     payment_plan_percent_sum=100.0, extracted_at="fixture")
+                     payment_plan_percent_sum=100.0, extracted_at="fixture", grounded_version=1)
+    config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    (config.CACHE_DIR / f"{h}.json").write_text(c.model_dump_json())
+
+
+def seed_review_fixture():
+    """A contract whose price quote has a typo ('Prize'), so grounding marks it PARTIAL and it lands in the review queue."""
+    import pymupdf
+    from datetime import date as _d
+    from app.schema import ContractData, Sourced
+    doc = pymupdf.open()
+    doc.new_page().insert_text((72, 72), "The Purchase Price is AED 1,250,000 payable in instalments. Handover on 1 January 2029.")
+    data = doc.tobytes()
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    h = file_hash(data)
+    (config.UPLOAD_DIR / f"{h}.pdf").write_bytes(data)
+    (config.UPLOAD_DIR / f"{h}.meta.json").write_text(json.dumps({"name": "fixture_review_case.pdf"}))
+    quote_ok = "The Purchase Price is AED 1,250,000"
+    c = ContractData(buyer=Sourced(), unit_id=Sourced(),
+                     price=Sourced(value=1250000.0, source_page=1, source_quote="The Purchase Prize is AED 1,250,000"),
+                     area_sqft=Sourced(), handover_date=Sourced(value=_d(2029, 1, 1), source_page=1, source_quote="Handover on 1 January 2029"),
+                     grace_period_days=Sourced(), delay_rate=Sourced(), delay_basis=Sourced(), delay_cap=Sourced(),
+                     payment_plan=[], cancellation_clause=Sourced(), model=config.model_tag(), file_hash=h,
+                     source_file="fixture_review_case.pdf", extracted_at="fixture")
+    del quote_ok
     config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
     (config.CACHE_DIR / f"{h}.json").write_text(c.model_dump_json())
 
@@ -145,6 +169,7 @@ if __name__ == "__main__":
     seed()
     if os.environ.get("E2E_FIXTURE_CASE") == "1":
         seed_penalty_fixture()
+        seed_review_fixture()
     llm._calls = 0   # fixture seeding is not a "call" for the demo counter
     print(f"E2E stub server: cache={config.CACHE_DIR} model={config.model_tag()}", file=sys.stderr)
     uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("E2E_PORT", "8000")), log_level="warning")

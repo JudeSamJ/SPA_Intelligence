@@ -20,7 +20,7 @@ const SUGGESTIONS = ["s1", "s2", "s3", "s4", "s5"] as const;
 export default function Assistant() {
   const { t } = useTranslation();
   const fmt = useFmt();
-  const { id, openPdf } = useContractCtx();
+  const { id, openEvidence } = useContractCtx();
   const chat = useChat(id);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -134,7 +134,7 @@ export default function Assistant() {
                     key={i}
                     className="chip"
                     data-testid="citation"
-                    onClick={() => openPdf(c.page)}
+                    onClick={() => openEvidence({ page: c.page, quote: c.quote })}
                     aria-label={t("chat.openCitation", { page: fmt.num(c.page) })}
                     title={c.quote}
                     style={{ maxWidth: "100%" }}

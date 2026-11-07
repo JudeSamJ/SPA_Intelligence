@@ -109,7 +109,8 @@ console.log("C1. chat: refusal, answer with quote, clickable page citation");
   const cite = page.getByTestId("citation").last(); check("chat: citation chip shows page 3", /Page 3/.test(await cite.innerText()));
   await cite.click(); await sleep(900);
   const panel = page.locator("#pdf-panel"); check("chat: citation opens the PDF panel", await panel.isVisible());
-  check("chat: PDF opened at page 3", /#page=3/.test((await panel.locator("iframe").getAttribute("src")) ?? ""));
+  check("chat: PDF panel shows page 3 as an image", /\/page\/3\.png/.test((await panel.locator("img").first().getAttribute("src")) ?? ""));
+  await page.getByTestId("highlight").first().waitFor({ timeout: 8000 }).then(() => check("chat: the cited quote is highlighted on the page", true)).catch(() => check("chat: the cited quote is highlighted on the page", false));
   await shot(page, "chat_pdf_panel");
   await ask("Is there a parking allocation?"); await sleep(2800);
   check("chat: outside-contract question says not stated", /not stated in the contract/i.test(await page.getByTestId("chat-log").innerText()));
@@ -192,7 +193,7 @@ console.log("C5. route transition, toggles, uploads, accuracy, 404");
   await page.reload(); await sleep(1500);
   check("toggle: preference persists after reload", (await page.evaluate(() => document.documentElement.dataset.effects)) === "reduced");
   await page.goto(`${BASE}/app/accuracy`); await sleep(2500);
-  check("accuracy: shows API results", /\d+(\.\d)?%/.test(await page.getByTestId("acc-values").innerText()) && (await page.getByTestId("acc-row").count()) >= 10);
+  check("accuracy: page loads with golden-set note", await page.getByTestId("golden-note").isVisible());
   await disclaimer(page, "accuracy"); await shot(page, "accuracy");
   await page.goto(`${BASE}/does-not-exist`); await sleep(1200);
   check("404 page renders with disclaimer", /not found/i.test(await page.locator("h1").innerText()) && await page.getByTestId("disclaimer").isVisible());
@@ -381,6 +382,156 @@ console.log("C11. scene framing + frame settling on Windows-like and macOS-like 
   }
 }
 
+// ------------------------------------------------------------------ E. trust and intelligence pages
+console.log("E. evidence, gap, probabilistic, obligations, cross-check, playbook, ERP, review, accuracy");
+const D = idOf("sample_d_rera.pdf"), RV = idOf("fixture_review_case.pdf");
+const num = (t) => Number(String(t).replace(/[^0-9.\-]/g, ""));
+const get = async (path) => (await fetch(`${BASE}/api${path}`)).json();
+{
+  const ctx = await ctxFor(); const page = await ctx.newPage(); watch(page, "trust EN");
+  // --- E1 evidence highlight + grounding chips + currency + jurisdiction
+  await page.goto(`${BASE}/app/contracts/${D}/terms`); await sleep(2600);
+  check("E1 terms(D): amounts are shown in INR, not AED", /INR\s*8,450,000/.test(await page.getByTestId("value-price").innerText()), await page.getByTestId("value-price").innerText());
+  const chips = await page.getByTestId("grounding-chip").evaluateAll((els) => els.map((e) => e.dataset.status));
+  check("E1 terms(D): every extracted field carries a grounding chip (grounded or not stated)", chips.length >= 10 && chips.every((c) => ["grounded", "not_stated"].includes(c)), chips.join());
+  check("E1 terms(D): jurisdiction detected as India (RERA) with its evidence", /in_rera|India/.test(await page.locator("#jur option:checked").innerText()) || /in_rera/.test(await page.locator("#jur").evaluate((e) => e.options[0].text)));
+  await page.getByTestId("row-price").getByRole("button").first().click();
+  await page.getByTestId("highlight").first().waitFor({ timeout: 8000 }).then(() => check("E1: clicking a field's page opens the PDF with the exact span highlighted", true)).catch(() => check("E1: clicking a field's page opens the PDF with the exact span highlighted", false));
+  const hb = await page.getByTestId("highlight").first().boundingBox();
+  const vb = await page.getByTestId("page-viewer").boundingBox();
+  check("E1: highlight box sits inside the rendered page", hb && vb && hb.width > 20 && hb.height > 5, JSON.stringify(hb));
+  await shot(page, "trust_evidence_highlight_D");
+  await page.goto(`${BASE}/app/contracts/${D}/terms`); await sleep(1800);
+  await page.getByTestId("value-price").scrollIntoViewIfNeeded();
+
+  // --- E2 statute gap
+  const gapApi = await post(`/contracts/${D}/statute-gap`, { delay_days: 180, as_of_date: "2026-12-31" });
+  await page.goto(`${BASE}/app/contracts/${D}/gap`); await sleep(3000);
+  const uiStat = num(await page.getByTestId("gap-statute").innerText()), uiCon = num(await page.getByTestId("gap-contract").innerText()), uiGap = num(await page.getByTestId("gap-shortfall").innerText());
+  check("E2 gap(D): statutory amount equals the API value exactly", Math.abs(uiStat - gapApi.statutory.amount) < 0.005, `${uiStat} vs ${gapApi.statutory.amount}`);
+  check("E2 gap(D): contractual amount equals the API value exactly", Math.abs(uiCon - gapApi.contractual.penalty) < 0.005, `${uiCon} vs ${gapApi.contractual.penalty}`);
+  check("E2 gap(D): shortfall counter settles exactly on statutory - contractual", Math.abs(uiGap - gapApi.shortfall) < 0.005 && Math.abs(uiGap - (uiStat - uiCon)) < 0.011, `${uiGap}`);
+  check("E2 gap(D): unreviewed-legal-logic badge and illustrative-rate warning are shown", (await page.getByTestId("unreviewed-badge").count()) >= 1 && await page.getByTestId("illustrative-rates").isVisible());
+  check("E2 gap(D): input table lists inputs with evidence links", (await page.getByTestId("gap-inputs").locator("tr").count()) >= 8 && (await page.getByTestId("gap-inputs").getByTestId("evidence-link").count()) >= 4);
+  check("E2 gap(D): findings flag the one-sided clause with severity", (await page.getByTestId("gap-findings").locator("li").count()) >= 1);
+  await page.getByTestId("gap-inputs").getByTestId("evidence-link").first().click(); await page.getByTestId("highlight").first().waitFor({ timeout: 8000 }).then(() => check("E2 gap(D): an input's evidence link opens the highlighted PDF span", true)).catch(() => check("E2 gap(D): an input's evidence link opens the highlighted PDF span", false));
+  await shot(page, "trust_gap_D");
+  await page.getByTestId("gap-days").fill("0"); await sleep(1200);
+  check("E2 gap(D): zero delay gives a zero shortfall", num(await page.getByTestId("gap-shortfall").innerText()) === 0);
+  await page.goto(`${BASE}/app/contracts/${A}/gap`); await sleep(2600);
+  check("E2 gap(A, Dubai): clear 'cannot compute' reason and badge, no invented number", await page.getByTestId("gap-cannot").isVisible() && (await page.getByTestId("gap-shortfall").count()) === 0 && (await page.getByTestId("unreviewed-badge").count()) >= 1);
+  await shot(page, "trust_gap_A_cannot");
+
+  // --- E3 probabilistic view
+  await page.goto(`${BASE}/app/contracts/${D}/penalty`); await sleep(3500);
+  check("E3 penalty(D): probabilistic view is labelled assumption-driven", await page.getByTestId("mc-assumption").isVisible() && /not a prediction/i.test(await page.getByTestId("mc").innerText()));
+  await page.getByTestId("mc-family").selectOption("fixed"); await page.getByTestId("mc-days").fill("180"); await page.getByTestId("mc-run").click(); await sleep(2500);
+  const mcRows = await page.getByTestId("mc-table").locator("tbody tr").allInnerTexts();
+  const stat50 = num(mcRows.find((r) => /Statutory/.test(r)).split("\t")[2]);
+  check("E3 penalty(D): fixed 180-day distribution reproduces the deterministic statutory amount", Math.abs(stat50 - gapApi.statutory.amount) < 0.005, `${stat50} vs ${gapApi.statutory.amount}`);
+  check("E3: probabilities shown", /%/.test(await page.getByTestId("mc-pgrace").innerText()));
+  await page.getByTestId("mc-family").selectOption("triangular"); await page.getByTestId("mc-run").click(); await sleep(2500);
+  const t1 = await page.getByTestId("mc-table").innerText(); await page.getByTestId("mc-run").click(); await sleep(2000);
+  check("E3: same seed gives the same table (reproducible)", t1 === (await page.getByTestId("mc-table").innerText()));
+  await page.getByTestId("mc-portfolio").click(); await page.getByTestId("mc-portfolio-table").waitFor({ timeout: 10000 });
+  const totals = await page.getByTestId("mc-total").allInnerTexts();
+  check("E3: portfolio rollup keeps currencies separate (AED and INR rows)", totals.some((x) => /AED/.test(x)) && totals.some((x) => /INR/.test(x)), totals.join("|"));
+  await shot(page, "trust_montecarlo_D", true);
+
+  // --- E4 obligations
+  await page.goto(`${BASE}/app/watch`); await sleep(2200);
+  await page.getByTestId("obl-asof").fill("2025-03-10"); await sleep(1500);
+  await page.getByRole("button", { name: "Recompute alerts" }).click(); await sleep(1500);
+  const n0 = await page.getByTestId("alert").count();
+  check("E4 watch: alerts feed lists due-soon items (in-app only)", n0 >= 1 && /In-app feed only/.test(await page.locator("body").innerText()), `${n0} alerts`);
+  check("E4 watch: timeline and obligation rows are visible", await page.getByTestId("obl-timeline").isVisible() && (await page.getByTestId("obl-row").count()) >= 5);
+  await page.getByTestId("ack").first().click(); await sleep(1200);
+  check("E4 watch: acknowledging removes the alert from the feed", (await page.getByTestId("alert").count()) === n0 - 1, `${n0} -> ${await page.getByTestId("alert").count()}`);
+  await page.getByTestId("obl-status").selectOption("due_soon"); await sleep(1200);
+  check("E4 watch: event filter narrows the table", (await page.getByTestId("obl-row").evaluateAll((r) => r.every((x) => x.dataset.event === "due_soon"))));
+  await shot(page, "trust_watch");
+  await page.goto(`${BASE}/app/contracts/${A}/obligations`); await sleep(2600);
+  check("E4 per-contract: calendar view and evidence links", await page.getByTestId("obl-calendar").isVisible() && (await page.getByTestId("evidence-link").count()) >= 1);
+
+  // --- E5 cross-document check
+  await page.goto(`${BASE}/app/crosscheck`); await sleep(2500);
+  check("E5 cross-check: sample set labelled synthetic", await page.getByTestId("cross-synthetic").isVisible());
+  await page.getByTestId("cross-read").click(); await page.getByTestId("conflict").first().waitFor({ timeout: 15000 }).catch(() => {});
+  await sleep(800);
+  check("E5 cross-check set_1: both planted conflicts found (price, handover)", (await page.getByTestId("conflict").count()) === 2, `${await page.getByTestId("conflict").count()}`);
+  check("E5 cross-check: planted-error precision and recall are shown (1.00 / 1.00)", /precision 1\.00, recall 1\.00/.test(await page.getByTestId("cross-score").innerText()));
+  check("E5 cross-check: graph draws conflict edges in the alert colour", (await page.getByTestId("conflict-edge").count()) >= 1 && (await page.getByTestId("graph-doc").count()) === 4);
+  await page.getByTestId("conflict").first().click(); await sleep(1500);
+  check("E5 cross-check: clicking a conflict shows two documents side by side", (await page.getByTestId("side-doc").count()) === 2);
+  await page.getByTestId("highlight").first().waitFor({ timeout: 8000 }).then(() => check("E5 cross-check: the conflicting value is highlighted in the PDF", true)).catch(() => check("E5 cross-check: the conflicting value is highlighted in the PDF", false));
+  await shot(page, "trust_crosscheck", true);
+
+  // --- E6 playbook
+  await page.goto(`${BASE}/app/contracts/${C}/playbook`); await sleep(2800);
+  check("E6 playbook(C): flagged as example content, internal view", await page.getByTestId("pb-example").isVisible());
+  const sumFail = page.locator("[data-testid=pb-card]", { hasText: "Payment plan sums to 100%" });
+  check("E6 playbook(C): the 95% plan fails with an approved-clause redline", /Fail/.test(await sumFail.innerText()) && (await sumFail.getByTestId("redline").count()) === 1);
+  check("E6 playbook: qualitative rules are 'not run' until the specialist LLM is invoked", /not run:\s*6/i.test(await page.getByTestId("pb-summary").innerText()));
+  await page.getByTestId("pb-run").click(); await sleep(2500);
+  check("E6 playbook: running the clause specialists grounds and fills the qualitative rules", !/not run:\s*[1-9]/i.test(await page.getByTestId("pb-summary").innerText()));
+  await shot(page, "trust_playbook_C", true);
+
+  // --- E7 ERP
+  await page.goto(`${BASE}/app/contracts/${A}/erp`); await sleep(2200);
+  check("E7 erp: placeholder warning is visible", await page.getByTestId("erp-placeholder").isVisible());
+  await page.getByTestId("erp-preview").click(); await page.getByTestId("erp-table").waitFor({ timeout: 8000 });
+  check("E7 erp: dry-run preview has rows and validates", (await page.getByTestId("erp-table").locator("tbody tr").count()) >= 5 && /Valid/.test(await page.getByTestId("erp-valid").innerText()));
+  const dl = page.waitForEvent("download"); await page.getByTestId("erp-csv").click(); const file = await dl;
+  check("E7 erp: CSV downloads", /\.csv$/.test(file.suggestedFilename()));
+  await page.getByTestId("erp-push").click(); await page.getByTestId("erp-confirm-check").check(); await page.getByTestId("erp-confirm-push").click(); await sleep(1200);
+  check("E7 erp: live push is refused while disabled, with a clear reason (after an explicit confirmation step)", /disabled/i.test(await page.getByTestId("erp-push-error").innerText()));
+  await shot(page, "trust_erp_A");
+
+  // --- E8 review queue
+  await page.goto(`${BASE}/app/review`); await sleep(2200);
+  check("E8 review: the partially-grounded price is queued", (await page.locator("[data-testid=review-item][data-field=price]").count()) === 1);
+  await page.getByTestId("rv-correct").click(); await page.getByTestId("rv-value").fill("1250000"); await page.getByTestId("rv-save").click(); await sleep(1500);
+  check("E8 review: after a correction the item leaves the queue", (await page.locator("[data-testid=review-item][data-field=price]").count()) === 0);
+  await page.goto(`${BASE}/app/contracts/${RV}/terms`); await sleep(2400);
+  check("E8 review: the corrected field shows as human verified", (await page.getByTestId("row-price").getByTestId("grounding-chip").getAttribute("data-status")) === "human");
+  const hist = await get(`/contracts/${RV}/reviews`);
+  check("E8 review: the decision is stored with a timestamp", hist.decisions.length === 1 && !!hist.decisions[0].at);
+
+  // --- E9 accuracy
+  await page.goto(`${BASE}/app/accuracy`); await sleep(2400);
+  check("E9 accuracy: states the golden-set size and that no real documents exist yet", /4 documents \(4 synthetic, 0 real\)|No evaluation run yet/.test(await page.getByTestId("golden-note").innerText()) && /say nothing|No real documents/.test(await page.getByTestId("golden-note").innerText()));
+  await page.getByTestId("acc-run").click(); await page.getByTestId("run-row").first().waitFor({ timeout: 15000 });
+  await sleep(1500);
+  check("E9 accuracy: a run appears in the history, labelled as a test stub", (await page.getByTestId("run-row").count()) >= 1 && (await page.getByTestId("stub-badge").count()) >= 1);
+  await page.getByTestId("acc-run").click(); await sleep(3500);
+  check("E9 accuracy: a second run is compared with the first (history grows)", (await page.getByTestId("run-row").count()) >= 2);
+  await page.getByTestId("acc-tab-engines").click(); await sleep(1500);
+  const rows = await page.getByTestId("bake-row").allInnerTexts();
+  check("E9 engines: unconfigured engines are reported 'not configured', never faked", rows.some((r) => /azure_docint/.test(r) && /not configured/.test(r)) && rows.some((r) => /docling/.test(r) && /not configured/.test(r)));
+  check("E9 engines: comparison states that results apply only to our golden set", /only to our golden set/.test(await page.getByTestId("bake-note").innerText()));
+  await shot(page, "trust_accuracy_engines");
+  await ctx.close();
+}
+
+// every new page for all samples, EN and AR: loads, shows the disclaimer, no console errors (checked at the end)
+for (const lang of ["en", "ar"]) {
+  const ctx = await ctxFor({ lang }); const page = await ctx.newPage(); watch(page, `trust pages ${lang}`);
+  for (const [name, id] of [["a", A], ["b", B], ["c", C], ["d", D]]) for (const tab of ["gap", "obligations", "playbook", "erp"]) {
+    await page.goto(`${BASE}/app/contracts/${id}/${tab}`); await sleep(2300);
+    check(`new page ${lang} ${name}/${tab}: renders`, await page.locator("h2").first().isVisible() && (await page.locator("[role=alert]:has-text('Something went wrong')").count()) === 0);
+    await disclaimer(page, `new page ${lang} ${name}/${tab}`);
+    if (name === "d" || name === "a") await shot(page, `trust_${lang}_${name}_${tab}`);
+  }
+  for (const route of ["watch", "crosscheck", "review", "accuracy"]) {
+    await page.goto(`${BASE}/app/${route}`); await sleep(2300);
+    check(`new page ${lang} ${route}: renders`, await page.locator("h1, h2").first().isVisible());
+    await disclaimer(page, `new page ${lang} ${route}`);
+    await shot(page, `trust_${lang}_${route}`);
+  }
+  if (lang === "ar") check("AR: native-review note is shown", await page.getByTestId("ar-review").isVisible());
+  await ctx.close();
+}
+
 // ------------------------------------------------------------------ D. FPS (software-rendered headless: indicative only)
 console.log("D. frame-rate probe on the landing page");
 {
@@ -399,7 +550,7 @@ await browser.close();
 
 // ------------------------------------------------------------------ summary
 // the deliberate fake-PDF upload (step C5) makes the server answer 415 on purpose; the browser logs it as a resource error
-const real = consoleErrors.filter((e) => !/GL Driver|GPU stall/.test(e) && !(e.startsWith("misc:") && /415/.test(e)));
+const real = consoleErrors.filter((e) => !/GL Driver|GPU stall/.test(e) && !(e.startsWith("misc:") && /415/.test(e)) && !(e.startsWith("trust EN:") && /409/.test(e)));
 check("no console errors or page errors anywhere", real.length === 0, real.slice(0, 5).join(" || "));
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);

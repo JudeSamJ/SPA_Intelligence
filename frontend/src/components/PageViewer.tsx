@@ -24,12 +24,11 @@ export function PageViewer({
   const { t } = useTranslation();
   const { tier } = usePrefs();
   const box = useRef<HTMLDivElement>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState("");
+  const loaded = loadedSrc === src;
   const rects = useMemo(() => (evidence && evidence.page === page ? evidence.rects : []), [evidence, page]);
   const W = evidence?.page_width ?? 0;
   const H = evidence?.page_height ?? 0;
-
-  useEffect(() => setLoaded(false), [src]);
 
   // scroll the first highlight into view and let it pulse once (entrance only, never on the text itself)
   useEffect(() => {
@@ -50,9 +49,13 @@ export function PageViewer({
     <div ref={box} data-testid="page-viewer" style={{ overflow: "auto", height, background: "#fff", borderRadius: 8 }}>
       <div style={{ position: "relative", width: "100%" }}>
         <img
+          key={src}
           src={src}
           alt={label}
-          onLoad={() => setLoaded(true)}
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth > 0) setLoadedSrc(src); // cached image: load may fire before React attaches
+          }}
+          onLoad={() => setLoadedSrc(src)}
           style={{ display: "block", width: "100%", height: "auto" }}
         />
         {loaded &&

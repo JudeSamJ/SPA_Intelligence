@@ -12,3 +12,8 @@ docs/screenshots/*.tmp
 docs/.video/
 .env.local
 *.tsbuildinfo
+data/reviews/
+data/alerts.json
+data/audit/
+data/docsets/
+eval/results.json.tmp

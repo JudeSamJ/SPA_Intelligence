@@ -43,6 +43,7 @@ export default function Accuracy() {
     setStartErr(null);
     try {
       await apiX.evalRunEngine(runEngine, allow);
+      qc.removeQueries({ queryKey: ["evalStatus"] }); // do not mistake the previous run's "done" for this one
       setWatch(true);
     } catch (e) {
       if (e instanceof ApiError && e.code === "llm_confirmation_required") setNeedConfirm(e.message);

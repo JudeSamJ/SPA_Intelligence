@@ -13,7 +13,7 @@ export function ObligationTimeline({ rows, asOf }: { rows: Obligation[]; asOf: s
   const { t } = useTranslation();
   const fmt = useFmt();
   const ref = useRef<HTMLDivElement>(null);
-  const pathId = useId().replace(/:/g, "");
+  const pathId = "tl" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const days = rows.map((r) => day(r.due_date));
   const a = day(asOf);
   const lo = Math.min(a, ...days), hi = Math.max(a, ...days, lo + 1);
@@ -30,7 +30,7 @@ export function ObligationTimeline({ rows, asOf }: { rows: Obligation[]; asOf: s
   if (!rows.length) return null;
   return (
     <div ref={ref}><svg viewBox={`0 0 ${W} 190`} role="img" aria-label={t("obl.timeline")} style={{ width: "100%", height: "auto" }} data-testid="obl-timeline">
-      <path id={pathId} d={`M${pad} 60 L${W - pad} 60`} stroke="var(--line)" strokeWidth={3} fill="none" />
+      <path id={pathId} d={`M${pad} 60 C${pad + 300} 60 ${W - pad - 300} 60 ${W - pad} 60`} stroke="var(--line)" strokeWidth={3} fill="none" />
       {rows.map((r, i) => {
         const cx = x(day(r.due_date));
         const ly = 90 + (i % 3) * 34;

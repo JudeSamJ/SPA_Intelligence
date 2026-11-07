@@ -252,6 +252,9 @@ class BuyerAgent:
     @staticmethod
     def _finalize(reply: AgentReply, tool_texts: list[str], question: str) -> AgentReply:
         """No source, no answer: an answer with no tool call, or with figures no tool returned, is replaced."""
+        if not reply.tool_calls and "not stated in the contract" in reply.answer.lower() and len(reply.answer) < 160 \
+                and not unverified_figures(reply.answer, [], question):
+            return reply     # a plain "not stated" needs no source: it asserts nothing
         if not reply.tool_calls:
             reply.answer = ("I can only answer from your contract's extracted terms. Ask about your payments, "
                             "handover date, late-fee rule or upcoming obligations.")

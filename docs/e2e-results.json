@@ -1,6 +1,6 @@
 {
-  "passed": 183,
-  "total": 183,
+  "passed": 311,
+  "total": 311,
   "failed": [],
   "results": [
     {
@@ -554,7 +554,12 @@
       "detail": ""
     },
     {
-      "name": "chat: PDF opened at page 3",
+      "name": "chat: PDF panel shows page 3 as an image",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chat: the cited quote is highlighted on the page",
       "ok": true,
       "detail": ""
     },
@@ -644,11 +649,6 @@
       "detail": ""
     },
     {
-      "name": "upload: extraction failure is shown (no silent hang)",
-      "ok": true,
-      "detail": ""
-    },
-    {
       "name": "toggle: Reduce effects switches the mode",
       "ok": true,
       "detail": ""
@@ -659,7 +659,7 @@
       "detail": ""
     },
     {
-      "name": "accuracy: shows API results",
+      "name": "accuracy: page loads with golden-set note",
       "ok": true,
       "detail": ""
     },
@@ -766,7 +766,7 @@
     {
       "name": "palm: growth takes about the same time whether you arrive by slow scrolling or a hard flick",
       "ok": true,
-      "detail": "1616 ms vs 1600 ms"
+      "detail": "1600 ms vs 1599 ms"
     },
     {
       "name": "palm: no frame advances the growth by more than 5%",
@@ -909,9 +909,649 @@
       "detail": "{\"w\":\"13px\",\"r\":\"999px\",\"g\":true}"
     },
     {
+      "name": "E1 terms(D): amounts are shown in INR, not AED",
+      "ok": true,
+      "detail": "INR 8,450,000"
+    },
+    {
+      "name": "E1 terms(D): every extracted field carries a grounding chip (grounded or not stated)",
+      "ok": true,
+      "detail": "grounded,grounded,grounded,grounded,grounded,grounded,grounded,grounded,grounded,grounded"
+    },
+    {
+      "name": "E1 terms(D): jurisdiction detected as India (RERA) with its evidence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E1: clicking a field's page opens the PDF with the exact span highlighted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E1: highlight box sits inside the rendered page",
+      "ok": true,
+      "detail": "{\"x\":1233.578125,\"y\":816.921875,\"width\":48.25,\"height\":10.796875}"
+    },
+    {
+      "name": "E2 gap(D): statutory amount equals the API value exactly",
+      "ok": true,
+      "detail": "458383.56 vs 458383.56"
+    },
+    {
+      "name": "E2 gap(D): contractual amount equals the API value exactly",
+      "ok": true,
+      "detail": "12797.26 vs 12797.26"
+    },
+    {
+      "name": "E2 gap(D): shortfall counter settles exactly on statutory - contractual",
+      "ok": true,
+      "detail": "445586.3"
+    },
+    {
+      "name": "E2 gap(D): unreviewed-legal-logic badge and illustrative-rate warning are shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E2 gap(D): input table lists inputs with evidence links",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E2 gap(D): findings flag the one-sided clause with severity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E2 gap(D): an input's evidence link opens the highlighted PDF span",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E2 gap(D): zero delay gives a zero shortfall",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E2 gap(A, Dubai): clear 'cannot compute' reason and badge, no invented number",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E3 penalty(D): probabilistic view is labelled assumption-driven",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E3 penalty(D): fixed 180-day distribution reproduces the deterministic statutory amount",
+      "ok": true,
+      "detail": "458383.56 vs 458383.56"
+    },
+    {
+      "name": "E3: probabilities shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E3: same seed gives the same table (reproducible)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E3: portfolio rollup keeps currencies separate (AED and INR rows)",
+      "ok": true,
+      "detail": "Total (4)\tAED\t93,407.84\t232,402.16\t–|Total (1)\tINR\t5,545.48\t23,888.22\t657,016.44"
+    },
+    {
+      "name": "E4 watch: alerts feed lists due-soon items (in-app only)",
+      "ok": true,
+      "detail": "4 alerts"
+    },
+    {
+      "name": "E4 watch: timeline and obligation rows are visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E4 watch: acknowledging removes the alert from the feed",
+      "ok": true,
+      "detail": "4 -> 3"
+    },
+    {
+      "name": "E4 watch: event filter narrows the table",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E4 per-contract: calendar view and evidence links",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E5 cross-check: sample set labelled synthetic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E5 cross-check set_1: both planted conflicts found (price, handover)",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "E5 cross-check: planted-error precision and recall are shown (1.00 / 1.00)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E5 cross-check: graph draws conflict edges in the alert colour",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E5 cross-check: clicking a conflict shows two documents side by side",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E5 cross-check: the conflicting value is highlighted in the PDF",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E6 playbook(C): flagged as example content, internal view",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E6 playbook(C): the 95% plan fails with an approved-clause redline",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E6 playbook: qualitative rules are 'not run' until the specialist LLM is invoked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E6 playbook: running the clause specialists grounds and fills the qualitative rules",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E7 erp: placeholder warning is visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E7 erp: dry-run preview has rows and validates",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E7 erp: CSV downloads",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E7 erp: live push is refused while disabled, with a clear reason (after an explicit confirmation step)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E8 review: the partially-grounded price is queued",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E8 review: after a correction the item leaves the queue",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E8 review: the corrected field shows as human verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E8 review: the decision is stored with a timestamp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E9 accuracy: states the golden-set size and that no real documents exist yet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E9 accuracy: a run appears in the history, labelled as a test stub",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E9 accuracy: a second run is compared with the first (history grows)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E9 engines: unconfigured engines are reported 'not configured', never faked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E9 engines: comparison states that results apply only to our golden set",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en a/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en a/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en a/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en a/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en a/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en a/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en a/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en a/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en b/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en b/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en b/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en b/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en b/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en b/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en b/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en b/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en c/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en c/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en c/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en c/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en c/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en c/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en c/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en c/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en d/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en d/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en d/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en d/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en d/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en d/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en d/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en d/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en watch: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en watch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en crosscheck: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en crosscheck",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en review: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page en accuracy: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page en accuracy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar a/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar a/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar a/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar a/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar a/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar a/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar a/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar a/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar b/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar b/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar b/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar b/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar b/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar b/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar b/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar b/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar c/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar c/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar c/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar c/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar c/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar c/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar c/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar c/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar d/gap: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar d/gap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar d/obligations: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar d/obligations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar d/playbook: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar d/playbook",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar d/erp: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar d/erp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar watch: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar watch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar crosscheck: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar crosscheck",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar review: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "new page ar accuracy: renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "disclaimer visible: new page ar accuracy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "AR: native-review note is shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "fps probe (informational)",
       "ok": true,
-      "detail": "54.1 fps"
+      "detail": "54.2 fps"
     },
     {
       "name": "no console errors or page errors anywhere",

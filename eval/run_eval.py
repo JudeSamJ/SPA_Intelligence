@@ -320,7 +320,7 @@ def run_eval(use_cache: bool = True, allow_llm: bool = False, progress=None, log
             progress(i + 1, len(golden))
     agg = aggregate_prf(per_doc)
     now = datetime.now(timezone.utc)
-    run = {"run_id": now.strftime("%Y%m%dT%H%M%S"), "timestamp": now.isoformat(timespec="seconds"),
+    run = {"run_id": now.strftime("%Y%m%dT%H%M%S") + f"{now.microsecond // 1000:03d}", "timestamp": now.isoformat(timespec="seconds"),
            "engine": engine, "model": config.model_tag(), "git_commit": git_commit(),
            "stub": os.environ.get("SPA_STUB_MODEL") == "1",
            "golden": {"size": len(golden), "synthetic": sum(g["synthetic"] for g in golden),

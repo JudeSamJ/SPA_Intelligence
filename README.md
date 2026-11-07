@@ -13,9 +13,9 @@ entrance animations: no continuous distortion, and every number settles on the e
 ## Hard rules (enforced in code and tests)
 
 1. The LLM only extracts and phrases. All arithmetic (penalties, cash-flow, percentage sums) is plain, unit-tested Python.
-2. Every extracted value carries `source_page` and `source_quote`; `null` if the document does not state it. Quotes are verified against the PDF text after extraction.
+2. Every extracted value carries `source_page` and `source_quote`; `null` if the document does not state it. Each value is grounded against the PDF (quote, numbers/dates, names); a value that fails grounding is returned as `null` with status `ungrounded`.
 3. No fake or hardcoded numbers in the UI: everything rendered comes from API responses. Skyline, dunes, particles are decorative only.
-4. Jurisdiction rules live in `rules/uae.yaml` (day-count, scenarios, the "at risk" definition, legal-advice patterns).
+4. Jurisdiction rules live in versioned packs: `rules/packs/*.yaml` (statute entries, all `reviewed_by_lawyer: false`) and `rules/common.yaml` (day-count, scenarios, the "at risk" definition, legal-advice patterns). Changing rates are dated tables in `rules/rates/`, never in code.
 5. The buyer agent answers only from the selected contract's JSON, cites the quote, refuses legal-advice questions ("please contact the legal team"), and treats contract text as data, not instructions.
 6. The disclaimer is shown on every screen by default. It can be dismissed (the choice is remembered), and a small scales tab stays in the corner so it is always one click away.
 7. API keys stay on the server. The browser bundle contains no key names (checked on every build).
@@ -38,10 +38,14 @@ entrance animations: no continuous distortion, and every number settles on the e
 spa-intel/
 ├── backend/api/        main.py, routes/{contracts,penalty,cashflow,chat,eval}.py, schemas.py, deps.py
 ├── backend/tests/      test_api.py (LLM mocked), e2e_server.py (test-only stub server)
-├── app/                core logic: schema, extract, penalty, cashflow, agent, llm, config
+├── app/                core logic: schema, extract, grounding, evidence, packs, statute_gap, montecarlo, obligations,
+│                       crossdoc, playbook, buyer, review, penalty, cashflow, agent, llm, engines/, erp/
 ├── frontend/           Vite + React + TS (src/api, i18n, motion, scenes, components, pages, styles, state)
 ├── samples/            three synthetic Dubai SPAs (generated)        ground_truth.json
-├── rules/uae.yaml      eval/run_eval.py        scripts/        docs/ (screenshots, video, reports)
+├── rules/              common.yaml, packs/{ae_dubai,in_rera}.yaml, rates/, grounding/simulation/obligations/crossdoc/playbook .yaml
+├── eval/               run_eval.py, bakeoff.py, golden/ (documents + labels), runs/ (saved runs)
+├── clauses/approved/   example clause library      erp/d365_mapping.yaml (placeholders)
+├── scripts/            docs/ (screenshots, video, reports)
 ```
 
 ## Setup
@@ -67,13 +71,17 @@ cd frontend && npm install && cd ..
 | `CORS_ORIGINS` | comma-separated explicit origins (default `http://localhost:5173`); a wildcard is ignored |
 | `SERVE_FRONTEND` | `1` to serve `frontend/dist` from the API |
 | `RATE_UPLOADS`, `RATE_CHAT` | requests per minute per IP (defaults 10, 30) |
+| `AZURE_DOCINT_ENDPOINT`, `AZURE_DOCINT_KEY` | enable the `azure_docint` engine (otherwise "not configured") |
+| `BUYER_TOKENS` | `token=contract_id,...` or JSON: buyer token auth **stub** for `/buyer/chat` |
+| `ERP_PUSH_ENABLED`, `D365_TENANT_ID`, `D365_CLIENT_ID`, `D365_CLIENT_SECRET`, `D365_RESOURCE` | live D365 push (off by default; mapping names are placeholders) |
+| `SPA_RATES_DIR`, `SPA_DISABLE_SCHEDULER` | rate-table folder override; turn off the daily obligation recompute |
 
 ## Run
 
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (94) + vitest (75)
+npm test             # pytest (209) + vitest (81)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -97,7 +105,17 @@ model on page load: extraction runs only when you click **Extract** (or upload),
 | `POST /contracts/{id}/penalty` | `{scenarios}`: deterministic penalty table (default scenarios from `rules/uae.yaml`) |
 | `POST /contracts/{id}/cashflow` | `{granularity, delay_days}`: schedule, at-risk summary and the definition text |
 | `POST /contracts/{id}/chat` | `{message, history}`: answer, citations, `refused` |
-| `GET /eval/results`, `POST /eval/run`, `GET /eval/run/status` | accuracy results; running asks for explicit confirmation before spending LLM calls |
+| `GET /eval/results`, `POST /eval/run`, `GET /eval/run/status` | legacy results; running asks for explicit confirmation before spending LLM calls |
+| `GET /contracts/{id}/evidence/{field}`, `/locate`, `/page/{n}.png` | exact highlight rectangles and rendered pages |
+| `GET /review-queue`, `POST /contracts/{id}/fields/{field}/review`, `GET .../reviews`, `POST .../golden-export` | human review (accept / correct / reject) and golden-set export |
+| `PUT /contracts/{id}/jurisdiction`, `GET /packs` | choose / inspect jurisdiction packs |
+| `POST /contracts/{id}/statute-gap` | contractual vs statutory delay compensation with every input |
+| `POST /contracts/{id}/montecarlo`, `POST /portfolio/montecarlo`, `GET /simulation/defaults` | assumption-driven simulation |
+| `GET /obligations`, `GET /alerts`, `POST /alerts/{id}/ack`, `POST /alerts/recompute` | obligation watcher (in-app feed only) |
+| `GET /crossdoc/sets[/{id}]`, `POST /crossdoc/sets`, `POST .../documents` | cross-document check |
+| `GET /contracts/{id}/playbook`, `POST /contracts/{id}/erp/export`, `POST /contracts/{id}/erp/push` | internal playbook and ERP (dry run by default) |
+| `GET /eval/runs[/{id}]`, `GET /eval/engines`, `GET /eval/bakeoff` | run history, engines, engine comparison |
+| `POST /buyer/chat` | token-authenticated, contract-scoped buyer chat (`Authorization: Bearer`) |
 
 Contract ids are SHA-256 file hashes (validated); contract text and keys are never logged; uploads are stored as `<hash>.pdf`
 with a sanitised display name.
@@ -191,14 +209,135 @@ mirrored animations. Contract text and quotes stay in their source language (`di
 default; an Arabic-Indic digits toggle appears in AR mode. **The Arabic translations were written without a native review and
 need one before release.** A test keeps the EN/AR key sets identical (allowing Arabic's extra plural forms).
 
+## Trust and intelligence layer (Phase 1-3)
+
+Everything below follows the same split: the LLM extracts, classifies and phrases; **every amount, date, interest figure and
+simulation is plain, unit-tested Python**. Contract text is data, never instructions.
+
+### Evidence, grounding and review
+
+- **Evidence boxes.** Every sourced field carries `evidence {page, quote, bbox, rects}`, computed server-side with PyMuPDF
+  (`app/evidence.py`): words of the page are normalised (case, punctuation, line breaks, hyphenation), the quote is located
+  exactly, then fuzzily (rapidfuzz, threshold in `rules/grounding.yaml`); `bbox` is `null` if it cannot be found.
+  `GET /contracts/{id}/evidence/{field}` returns the rectangles; the PDF panel renders the page and draws them. Clicking a term, a
+  payment-plan row, a gap input, a flag or a chat citation opens the exact span.
+- **Grounding with abstention** (`app/grounding.py`). Per field: (a) the quote exists on the stated page (exact, other page, or
+  fuzzy above the threshold); (b) amounts, percentages and dates in `value` appear in the quote, compared **numerically / as
+  ISO dates** ("2.45 million", "sixty (60)", "30th June 2027" all parse); (c) names and unit ids appear in the document.
+  Status `grounded | partial | ungrounded | not_stated`. **Ungrounded -> value `null`**, the model's claim is kept only in
+  `grounding.claimed_value`, and a warning is added. **Confidence** = weighted mean of the applicable checks
+  (quote 0.5, value 0.35, entity 0.15; weights and the review threshold are in `rules/grounding.yaml`). Partial or
+  low-confidence fields get `needs_review`. Ungrounded payment rows and dated clauses are removed from the plan instead of being
+  shown as facts.
+- **Review queue.** `GET /review-queue`; `POST /contracts/{id}/fields/{field}/review` records accept / correct / reject with
+  reviewer, note and timestamp (`data/reviews/`). Human decisions override extraction and show as "human verified".
+  `POST /contracts/{id}/golden-export` writes the reviewed contract into `eval/golden/` format.
+
+### Jurisdiction packs and the statute gap
+
+`rules/packs/*.yaml` (schema-validated by `app/packs.py`, shared settings in `rules/common.yaml`). Each legal entry has
+`statute, section, description, formula, effective_from, source_url, reviewed_by_lawyer` and `needs_legal_review`. **Every entry is
+`reviewed_by_lawyer: false`**, and any result that depends on one carries the **"Unreviewed legal logic" badge** (one shared
+component). `in_rera.yaml` models promoter delay interest (`interest_on_amounts_paid`: dated SBI MCLR table + 2.0 spread, on amounts
+paid, from the agreed possession date), the 5-year defect liability (s.14(3)) and the 10% advance cap (s.13(1)).
+`ae_dubai.yaml` records Oqood registration and escrow as non-computing entries and leaves **delay compensation as a TODO with
+`needs_legal_review: true` and no percentage**. Rates that change over time live in `rules/rates/sbi_mclr.yaml`, which **ships empty**:
+with no row the calculator returns `{"can_compute": false, "reason": ...}` instead of guessing. The tests and the browser demo use
+`tests/fixtures/rates/` whose values are **illustrative and labelled so on screen**.
+
+`POST /contracts/{id}/statute-gap {delay_days, as_of_date, amounts_paid?}` (`app/statute_gap.py`): contractual penalty (existing
+simulator) vs statutory entitlement, shortfall, every input with its source, one-sided findings with severity and evidence.
+Amounts paid come from the user or from the payment plan up to the as-of date, and the response says which. Hand-calculated tests
+(arithmetic in the comments) cover zero delay, delay within grace, rate change mid-period, cap, payment after possession,
+missing rate row and a pack without a formula.
+
+### Predictive and proactive
+
+- **Probabilistic penalty** (`app/montecarlo.py`, `rules/simulation.yaml`): seeded NumPy draws of delay days; money is looked up
+  from the same deterministic functions per delay-day, so a fixed distribution equals the deterministic result exactly. Outputs
+  P10/P50/P90 for delay, contractual, statutory and shortfall, P(delay > grace) and P(cap binds), a histogram and a percentile
+  curve, plus a per-currency portfolio rollup (currencies are never converted or mixed). **Labelled "assumption-driven"**: the
+  distribution is yours, there is no ML forecast. An optional progress CSV shifts the distribution by a documented rule
+  (`shift = clamp(latest planned - actual gap x days_per_gap_point)`).
+- **Obligation watcher** (`app/obligations.py`): payments, handover, grace-period end and extracted dated clauses (inspection
+  and defect-liability periods, buyer rights after prolonged delay) with `as_of` injected. Events: `due_soon`, `overdue`,
+  `grace_expiring`, `handover_approaching`, `notice_deadline`. APScheduler recomputes daily and on every contract change;
+  alerts are an **in-app feed only** (`Notifier` has a logging implementation; nothing is emailed or messaged). The tool cannot
+  know whether a payment was made, so "overdue" means the due date passed.
+- **Engines** (`app/engines/`): `claude_pdf` (existing path, whichever provider is configured), `azure_docint` (needs
+  `AZURE_DOCINT_ENDPOINT/KEY`), `docling` (optional `pip install docling`). An engine that is not configured is reported
+  "not configured". `python eval/bakeoff.py` runs the golden set through each configured engine; latency is measured, tokens and
+  pages are real usage, and cost = usage x the constants **you** set in `rules/pricing.yaml` (n/a until set).
+
+### Cross-document, playbook, ERP, buyer agent
+
+- **Cross-document graph** (`app/crossdoc.py`, networkx): SPA, brochure, regulator filing and a CRM export (CSV/XLSX through
+  the column mapping in `rules/crm_mapping.yaml`) per unit. Facts are normalised (currency formatting, sq m to sq ft, dates, payment
+  plans, registration numbers), matched to the unit by a configurable normalised key (near-misses are shown as **uncertain**), and
+  differing values become conflicts with severity from `rules/crossdoc.yaml` and evidence from both documents. Three synthetic sets
+  with planted mismatches are in `samples/crossdoc/`; the test measures planted-error precision and recall.
+- **Playbook** (`rules/playbook.yaml`, `app/playbook.py`): deterministic rules in code, plus one clause-specialist LLM call per
+  contract for qualitative rules, every judgement checked by the grounding step. Suggested wording comes **only** from
+  `clauses/approved/*.md` (metadata: clause type, jurisdiction, version, approved_by); if none exists the result says so and flags
+  legal. A word-level redline (difflib) shows the contract clause against the approved one. **The seeded playbook and library are
+  fictional examples ("example, replace with company-approved text").** Internal only: not exposed to buyers.
+- **ERP (D365 F&O)** (`app/erp/d365.py`, `erp/d365_mapping.yaml`): payment schedule and exposure rows validated against the mapping,
+  downloadable CSV/JSON. **Entity and field names in the mapping are placeholders you must confirm.** Live OData push needs
+  `ERP_PUSH_ENABLED=1` plus tenant/app credentials, an explicit confirmation, refuses placeholder names, and writes an audit-log
+  line per push; tests use a mock transport.
+- **Buyer agent**: tools `statute_gap_for_my_unit` and `upcoming_obligations` added to the original four (`playbook_status` is
+  deliberately not a buyer tool). `POST /buyer/chat` is channel-agnostic and authenticated by `Authorization: Bearer <token>` where
+  `BUYER_TOKENS` maps token -> contract id (**a stub: no login, rotation or user store**). The contract comes from the token, never
+  from the request; tools take no contract id; cross-contract questions are refused before any model call; an answer with no tool
+  result behind it, or with a figure no tool returned, is replaced; every question, tool call and answer is audit-logged without
+  contract text or the token. `scripts/live_buyer_check.py --yes` runs the same 12 kinds of question against the real model.
+
+### Evaluation
+
+`eval/golden/<doc_id>/{doc.pdf,labels.json}` (see `eval/golden/README.md` for labelling real documents and adding public
+documents **manually**; there is no scraper). The four `synthetic_*` documents are a **smoke set** and say nothing about accuracy on
+real contracts. `python eval/run_eval.py [--yes] [--model NAME] [--engine NAME]` reports per-field precision/recall/F1,
+grounding pass rate, abstention rate and a hallucination count (values that failed grounding), saves `eval/runs/<timestamp>.json`
+with the model and git commit, and compares with the previous run of the same engine (regressions are listed and shown in red in
+the Accuracy page). `--model` swaps the model in one command (and invalidates the cache, so it asks for `--yes`).
+
+### Jurisdiction-pack format
+
+```yaml
+id: in_rera                 # file name = id
+currency: INR
+detect_keywords: ["\\bRERA\\b"]        # regexes used to detect the pack from contract text
+penalty: {day_count_basis: 365, scenarios_days: [30, 90, 180, 365]}
+entries:
+  - id: in_rera_delay_interest
+    statute: "Real Estate (Regulation and Development) Act, 2016"
+    section: "Section 18(1)"
+    description: "..."
+    formula:                # null => the entry must set needs_legal_review: true (a TODO)
+      type: interest_on_amounts_paid       # known types: interest_on_amounts_paid | defect_liability_years | advance_cap_pct
+      rate: {kind: base_plus_spread, base_table: sbi_mclr, spread_pct: 2.0}
+    effective_from: "2017-05-01"
+    source_url: "TODO: official URL"
+    reviewed_by_lawyer: false
+    needs_legal_review: false
+```
+
+### Items that need a lawyer
+
+All pack entries are unreviewed. Specifically: `in_rera_delay_interest` (whether a contractual grace period shifts the accrual
+start is a TODO: the formula currently ignores the grace period); `in_rera_rate_rule` (the prescribed rate and which MCLR tenor
+vary by state; the spread of 2.0 is a state-rule matter); `in_rera_defect_liability` and `in_rera_advance_cap` (section numbers
+believed correct, still unreviewed); `ae_oqood_registration`, `ae_escrow` (article numbers are TODO); `ae_delay_compensation`
+(not modelled at all). The SBI MCLR table is empty until you add dated rows from a source you have checked.
+
 ## Verification (what was actually run)
 
 | Check | Result |
 |---|---|
-| `pytest` | 94 passed (API tests mock the LLM; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01) |
-| `vitest` | 75 passed (API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
+| `pytest` | 209 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
+| `vitest` | 81 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
-| Playwright e2e (`scripts/e2e_check.mjs`, 183 checks) | 183/183: landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; scenes settle into a centred frame at Windows- and macOS-like window sizes; themed scrollbar; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
+| Playwright e2e (`scripts/e2e_check.mjs`, 311 checks) | 311/311: every new page (Gap, Obligations, Playbook, ERP, Watch, Cross-check, Review queue, Accuracy) for all samples in EN and AR; highlighted evidence in the PDF panel; UI amounts equal API amounts; same-seed simulation reproducible; ack removes an alert; both planted cross-document conflicts found; ERP push refused while disabled; review correction shown as human verified; landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; scenes settle into a centred frame at Windows- and macOS-like window sizes; themed scrollbar; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
 
 **Lighthouse 12** (headless Chromium, production build with gzip; single runs; `docs/lighthouse.json`):
@@ -225,6 +364,20 @@ built-in PDF viewer, so the PDF side panel shows blank in screenshots (the e2e a
 endpoint serves a valid inline PDF).
 
 ## Assumptions and limitations
+
+- **No model key exists in the build environment, so nothing here was measured against a real model.** The eval and the browser tests
+  run the real pipeline on a deterministic stub (`backend/tests/e2e_server.py`, `SPA_STUB_MODEL=1`); runs made that way are labelled
+  "test stub" in the Accuracy page. The stub's 1.00 scores prove the scoring, grounding and history code work; they say nothing about
+  model accuracy. Run `python eval/run_eval.py --yes` (and `eval/bakeoff.py --yes`) with your key to get real numbers. The golden
+  set has 4 synthetic documents and **0 real ones**.
+- `azure_docint` and `docling` engines were **not configured** here and were not run; the Document Intelligence call is tested only
+  against a mock transport.
+- The SBI MCLR table ships **empty** (so the India statute gap says "cannot compute" until you add dated rows). The browser demo and tests
+  use illustrative values, labelled on screen.
+- The seeded playbook and approved-clause library are fictional examples. The D365 mapping uses placeholder names. Buyer auth is a
+  token stub. Alerts are an in-app feed; the `Notifier` only logs.
+- Arabic strings added in this release are marked "needs native review".
+- Cross-document facts for brochures and filings need one LLM call per PDF; the tests use an oracle in place of the model.
 
 - Extraction and the eval were last run against the real model **before** the samples were moved to Dubai districts. The sample PDFs
   changed (project names/locations; sample C is now a Downtown unit `OTC-2106`), so cached extractions no longer match and
