@@ -31,7 +31,10 @@ def q(name, typ="string", desc="", required=False):
 
 
 def B(props, required=()):
-    return {"type": "object", "properties": props, "required": list(required)}
+    d = {"type": "object", "properties": props}
+    if required:                       # Power Platform rejects an empty "required" array
+        d["required"] = list(required)
+    return d
 
 
 STAFF_OPS = [

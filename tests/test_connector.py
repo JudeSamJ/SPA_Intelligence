@@ -47,3 +47,21 @@ def test_apikey_variants_use_a_header_key_not_oauth(f):
     assert spec["security"] == [{"api_key": []}] and "oauth2" not in json.dumps(spec)
     entra = json.loads((ROOT / f.replace(".apikey", "")).read_text())
     assert spec["paths"] == entra["paths"]                      # identical operations, only the security differs
+
+
+def _walk(node, path=""):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk(v, f"{path}/{k}")
+            if k == "required" and isinstance(v, list):
+                yield path, v
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            yield from _walk(v, f"{path}/{i}")
+
+
+@pytest.mark.parametrize("f", FILES + APIKEY)
+def test_no_empty_required_arrays(f):
+    """Power Platform refuses `required: []` ("requires at least one value")."""
+    spec = json.loads((ROOT / f).read_text())
+    assert [p for p, v in _walk(spec) if v == []] == []

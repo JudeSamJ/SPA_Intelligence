@@ -45,8 +45,7 @@
                       "content": {
                         "type": "string"
                       }
-                    },
-                    "required": []
+                    }
                   }
                 },
                 "channel": {
@@ -94,15 +93,13 @@
                       "quote": {
                         "type": "string"
                       }
-                    },
-                    "required": []
+                    }
                   }
                 },
                 "disclaimer": {
                   "type": "string"
                 }
-              },
-              "required": []
+              }
             }
           },
           "default": {

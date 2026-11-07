@@ -425,8 +425,7 @@
                   "type": "string",
                   "format": "date"
                 }
-              },
-              "required": []
+              }
             }
           }
         ],
