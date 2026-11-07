@@ -161,12 +161,12 @@ def _tool_schema() -> dict:
     }
 
 
-def extract_from_llm(pdf_bytes: bytes, client=None) -> ExtractionOutput:
+def extract_from_llm(pdf_bytes: bytes, client=None, pages: list[str] | None = None) -> ExtractionOutput:
     """One call normally; a second only if the first output fails validation (retry once)."""
     llm = get_llm(client)
     tool = _tool_schema()
     messages: list[dict] = [{
-        "role": "user", "pdf": pdf_bytes, "pages": pdf_pages(pdf_bytes),
+        "role": "user", "pdf": pdf_bytes, "pages": pages or pdf_pages(pdf_bytes),
         "content": "Extract the key terms from this SPA using the tool. Page numbers are the 1-based PDF pages. "
                    "Copy quotes verbatim; for a table row, join the cell texts with single spaces."}]
 

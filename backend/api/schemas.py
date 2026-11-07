@@ -198,6 +198,7 @@ class EvalResults(BaseModel):
 class EvalRunRequest(BaseModel):
     allow_llm: bool = False
     use_cache: bool = True
+    engine: Literal["claude_pdf", "azure_docint", "docling"] = "claude_pdf"
 
 
 class EvalRunStatus(BaseModel):

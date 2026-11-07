@@ -107,3 +107,21 @@ def test_packs_endpoint_marks_unreviewed(client):
     ids = {p["id"] for p in j["packs"]}
     assert ids == {"ae_dubai", "in_rera"}
     assert all(e["unreviewed"] and e["reviewed_by_lawyer"] is False for p in j["packs"] for e in p["entries"])
+
+
+def test_eval_runs_engines_bakeoff_endpoints(client, seeded, monkeypatch, tmp_path):
+    import eval.run_eval as ev
+    monkeypatch.setattr(ev, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(ev, "penalty_test_pass_rate", lambda: {"passed": 1, "failed": 0, "total": 1, "pass_rate": 1.0})
+    assert client.get("/api/eval/runs").json()["runs"] == []
+    run = ev.run_eval(use_cache=True, log=lambda *_: None)
+    rs = client.get("/api/eval/runs").json()["runs"]
+    assert rs[0]["run_id"] == run["run_id"] and rs[0]["overall"]["f1"] == 1.0
+    assert client.get(f"/api/eval/runs/{run['run_id']}").json()["fields"]["price"]["f1"] == 1.0
+    assert client.get("/api/eval/runs/nope").status_code == 404
+    es = {e["name"]: e for e in client.get("/api/eval/engines").json()["engines"]}
+    assert es["claude_pdf"]["configured"] and not es["docling"]["configured"]
+    b = client.get("/api/eval/bakeoff").json()
+    assert b["golden_size"] == 4 and b["golden_real"] == 0 and "only to our golden set" in b["note"]
+    row = {e["name"]: e for e in b["engines"]}
+    assert row["claude_pdf"]["run"]["fields"]["price"] == 1.0 and row["docling"]["run"] is None

@@ -1,0 +1,115 @@
+{
+  "doc_id": "synthetic_b",
+  "kind": "synthetic",
+  "synthetic": true,
+  "currency": "AED",
+  "note": "Synthetic smoke-set document. Labels are known by construction.",
+  "buyer": {
+    "value": "Rajesh Kumar Menon",
+    "page": 1,
+    "quote": "Rajesh Kumar Menon"
+  },
+  "unit_id": {
+    "value": "PHT-B-0807",
+    "page": 1,
+    "quote": "PHT-B-0807"
+  },
+  "price": {
+    "value": 1875000,
+    "page": 1,
+    "quote": "AED 1,875,000"
+  },
+  "area_sqft": {
+    "value": 1025.5,
+    "page": 1,
+    "quote": "1,025.50 square feet"
+  },
+  "handover_date": {
+    "value": "2028-03-31",
+    "page": 3,
+    "quote": "31 March 2028"
+  },
+  "grace_period_days": {
+    "value": 90,
+    "page": 3,
+    "quote": "90 days"
+  },
+  "delay_rate": {
+    "value": 7.0,
+    "page": 3,
+    "quote": "AED 7.00 per square foot"
+  },
+  "delay_basis": {
+    "value": "fixed_per_sqft_per_year",
+    "page": 3,
+    "quote": "AED 7.00 per square foot"
+  },
+  "delay_cap": {
+    "value": null,
+    "page": 3,
+    "quote": "is not subject to any cap or maximum limit"
+  },
+  "cancellation_clause": {
+    "value": "present",
+    "page": 4,
+    "quote": "Buyer's right to cancel for delay"
+  },
+  "payment_plan": [
+    {
+      "name": "Booking Deposit",
+      "percent": 10.0,
+      "due_date": "2025-08-01",
+      "trigger": "On signing of this Agreement",
+      "page": 6,
+      "quote": "Booking Deposit 10% 1 August 2025 On signing of this Agreement"
+    },
+    {
+      "name": "Second Payment",
+      "percent": 10.0,
+      "due_date": "2025-11-01",
+      "trigger": "Within 90 days of signing",
+      "page": 6,
+      "quote": "Second Payment 10% 1 November 2025 Within 90 days of signing"
+    },
+    {
+      "name": "Excavation Milestone",
+      "percent": 10.0,
+      "due_date": "2026-02-01",
+      "trigger": "On commencement of excavation works",
+      "page": 6,
+      "quote": "Excavation Milestone 10% 1 February 2026 On commencement of excavation works"
+    },
+    {
+      "name": "Foundation Milestone",
+      "percent": 15.0,
+      "due_date": "2026-06-01",
+      "trigger": "On completion of foundation and basement slab",
+      "page": 6,
+      "quote": "Foundation Milestone 15% 1 June 2026 On completion of foundation and basement slab"
+    },
+    {
+      "name": "Podium Milestone",
+      "percent": 15.0,
+      "due_date": "2026-12-01",
+      "trigger": "On completion of podium slab",
+      "page": 6,
+      "quote": "Podium Milestone 15% 1 December 2026 On completion of podium slab"
+    },
+    {
+      "name": "Structure Milestone",
+      "percent": 10.0,
+      "due_date": "2027-08-01",
+      "trigger": "On completion of structural frame to roof level",
+      "page": 6,
+      "quote": "Structure Milestone 10% 1 August 2027 On completion of structural frame to roof level"
+    },
+    {
+      "name": "Handover Payment",
+      "percent": 30.0,
+      "due_date": "2028-03-31",
+      "trigger": "On notice of completion and handover of the Unit",
+      "page": 6,
+      "quote": "Handover Payment 30% 31 March 2028 On notice of completion and handover of the Unit"
+    }
+  ]
+}

@@ -1,0 +1,529 @@
+{
+  "run_id": "20261107T032051",
+  "timestamp": "2026-11-07T03:20:51+00:00",
+  "engine": "claude_pdf",
+  "model": "azure_openai/gpt-5.4-mini",
+  "git_commit": "ec6a128",
+  "stub": false,
+  "golden": {
+    "size": 4,
+    "synthetic": 4,
+    "real": 0,
+    "docs": [
+      "synthetic_a",
+      "synthetic_b",
+      "synthetic_c",
+      "synthetic_d_rera"
+    ]
+  },
+  "fields": {
+    "buyer": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "unit_id": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "price": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "area_sqft": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "handover_date": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "grace_period_days": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "delay_rate": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "delay_basis": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "delay_cap": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "cancellation_clause": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "payment_plan_rows": {
+      "tp": 24,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "overall": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tp": 62,
+    "fp": 0,
+    "fn": 0,
+    "grounding_pass_rate": 1.0,
+    "claims": 63,
+    "hallucinations": 0,
+    "abstention_rate": 0.05,
+    "plan_sum_correct": 4,
+    "docs": 4
+  },
+  "per_doc": {
+    "synthetic_a": {
+      "fields": {
+        "buyer": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "unit_id": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "price": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "area_sqft": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "handover_date": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "grace_period_days": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_rate": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_basis": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_cap": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "cancellation_clause": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "payment_plan_rows": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        }
+      },
+      "claims": 15,
+      "grounded": 15,
+      "hallucinations": 0,
+      "abstained": 0,
+      "scalar_fields": 10,
+      "plan_sum_ok": true
+    },
+    "synthetic_b": {
+      "fields": {
+        "buyer": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "unit_id": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "price": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "area_sqft": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "handover_date": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "grace_period_days": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_rate": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_basis": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_cap": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 1,
+          "correct": true
+        },
+        "cancellation_clause": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "payment_plan_rows": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        }
+      },
+      "claims": 17,
+      "grounded": 17,
+      "hallucinations": 0,
+      "abstained": 1,
+      "scalar_fields": 10,
+      "plan_sum_ok": true
+    },
+    "synthetic_c": {
+      "fields": {
+        "buyer": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "unit_id": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "price": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "area_sqft": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "handover_date": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "grace_period_days": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_rate": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_basis": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_cap": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "cancellation_clause": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 1,
+          "correct": true
+        },
+        "payment_plan_rows": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        }
+      },
+      "claims": 15,
+      "grounded": 15,
+      "hallucinations": 0,
+      "abstained": 1,
+      "scalar_fields": 10,
+      "plan_sum_ok": true
+    },
+    "synthetic_d_rera": {
+      "fields": {
+        "buyer": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "unit_id": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "price": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "area_sqft": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "handover_date": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "grace_period_days": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_rate": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_basis": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "delay_cap": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "cancellation_clause": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        },
+        "payment_plan_rows": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "correct": true
+        }
+      },
+      "claims": 16,
+      "grounded": 16,
+      "hallucinations": 0,
+      "abstained": 0,
+      "scalar_fields": 10,
+      "plan_sum_ok": true
+    }
+  },
+  "metrics": {
+    "synthetic_a": {
+      "engine": "claude_pdf",
+      "latency_s": 0.0,
+      "pages": 6,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 0,
+      "cached": true,
+      "cost_usd": null
+    },
+    "synthetic_b": {
+      "engine": "claude_pdf",
+      "latency_s": 0.0,
+      "pages": 6,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 0,
+      "cached": true,
+      "cost_usd": null
+    },
+    "synthetic_c": {
+      "engine": "claude_pdf",
+      "latency_s": 0.0,
+      "pages": 6,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 0,
+      "cached": true,
+      "cost_usd": null
+    },
+    "synthetic_d_rera": {
+      "engine": "claude_pdf",
+      "latency_s": 0.0,
+      "pages": 6,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 0,
+      "cached": true,
+      "cost_usd": null
+    }
+  },
+  "compared_to": null,
+  "regressions": [],
+  "improvements": []
+}

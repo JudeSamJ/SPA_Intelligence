@@ -1,0 +1,107 @@
+{
+  "doc_id": "synthetic_c",
+  "kind": "synthetic",
+  "synthetic": true,
+  "currency": "AED",
+  "note": "Synthetic smoke-set document. Labels are known by construction.",
+  "buyer": {
+    "value": "Fatima Zahra Bin Rashid",
+    "page": 1,
+    "quote": "Fatima Zahra Bin Rashid"
+  },
+  "unit_id": {
+    "value": "OTC-2106",
+    "page": 1,
+    "quote": "OTC-2106"
+  },
+  "price": {
+    "value": 3980000,
+    "page": 1,
+    "quote": "AED 3,980,000"
+  },
+  "area_sqft": {
+    "value": 3120.0,
+    "page": 1,
+    "quote": "3,120.00 square feet"
+  },
+  "handover_date": {
+    "value": "2027-12-31",
+    "page": 3,
+    "quote": "31 December 2027"
+  },
+  "grace_period_days": {
+    "value": 30,
+    "page": 3,
+    "quote": "30 days"
+  },
+  "delay_rate": {
+    "value": 4.5,
+    "page": 3,
+    "quote": "4.5% per annum"
+  },
+  "delay_basis": {
+    "value": "percent_per_annum",
+    "page": 3,
+    "quote": "4.5% per annum"
+  },
+  "delay_cap": {
+    "value": 5.0,
+    "page": 3,
+    "quote": "shall not exceed 5% of the Purchase Price"
+  },
+  "cancellation_clause": {
+    "value": null,
+    "page": null,
+    "quote": null
+  },
+  "payment_plan": [
+    {
+      "name": "Booking Deposit",
+      "percent": 20.0,
+      "due_date": "2025-11-10",
+      "trigger": "On signing of this Agreement",
+      "page": 6,
+      "quote": "Booking Deposit 20% 10 November 2025 On signing of this Agreement"
+    },
+    {
+      "name": "First Instalment",
+      "percent": 15.0,
+      "due_date": "2026-03-10",
+      "trigger": "On completion of site clearance and piling",
+      "page": 6,
+      "quote": "First Instalment 15% 10 March 2026 On completion of site clearance and piling"
+    },
+    {
+      "name": "Second Instalment",
+      "percent": 15.0,
+      "due_date": "2026-08-10",
+      "trigger": "On completion of podium slab",
+      "page": 6,
+      "quote": "Second Instalment 15% 10 August 2026 On completion of podium slab"
+    },
+    {
+      "name": "Third Instalment",
+      "percent": 15.0,
+      "due_date": "2027-01-10",
+      "trigger": "On completion of structural frame to level 21",
+      "page": 6,
+      "quote": "Third Instalment 15% 10 January 2027 On completion of structural frame to level 21"
+    },
+    {
+      "name": "Fourth Instalment",
+      "percent": 15.0,
+      "due_date": "2027-07-10",
+      "trigger": "On completion of external walls and roofing",
+      "page": 6,
+      "quote": "Fourth Instalment 15% 10 July 2027 On completion of external walls and roofing"
+    },
+    {
+      "name": "Handover Payment",
+      "percent": 15.0,
+      "due_date": "2027-12-31",
+      "trigger": "On notice of completion and handover of the Unit",
+      "page": 6,
+      "quote": "Handover Payment 15% 31 December 2027 On notice of completion and handover of the Unit"
+    }
+  ]
+}

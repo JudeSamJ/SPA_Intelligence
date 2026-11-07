@@ -1,0 +1,99 @@
+{
+  "doc_id": "synthetic_a",
+  "kind": "synthetic",
+  "synthetic": true,
+  "currency": "AED",
+  "note": "Synthetic smoke-set document. Labels are known by construction.",
+  "buyer": {
+    "value": "Layla Hassan Al Mansoori",
+    "page": 1,
+    "quote": "Layla Hassan Al Mansoori"
+  },
+  "unit_id": {
+    "value": "MCR-1204",
+    "page": 1,
+    "quote": "MCR-1204"
+  },
+  "price": {
+    "value": 2450000,
+    "page": 1,
+    "quote": "AED 2,450,000"
+  },
+  "area_sqft": {
+    "value": 1180.0,
+    "page": 1,
+    "quote": "1,180.00 square feet"
+  },
+  "handover_date": {
+    "value": "2027-06-30",
+    "page": 3,
+    "quote": "30 June 2027"
+  },
+  "grace_period_days": {
+    "value": 60,
+    "page": 3,
+    "quote": "60 days"
+  },
+  "delay_rate": {
+    "value": 6.0,
+    "page": 3,
+    "quote": "6% per annum"
+  },
+  "delay_basis": {
+    "value": "percent_per_annum",
+    "page": 3,
+    "quote": "6% per annum"
+  },
+  "delay_cap": {
+    "value": 10.0,
+    "page": 3,
+    "quote": "shall not exceed 10% of the Purchase Price"
+  },
+  "cancellation_clause": {
+    "value": "present",
+    "page": 4,
+    "quote": "Buyer's right to cancel for delay"
+  },
+  "payment_plan": [
+    {
+      "name": "Booking / Signing",
+      "percent": 20.0,
+      "due_date": "2025-03-15",
+      "trigger": "On signing of this Agreement",
+      "page": 6,
+      "quote": "Booking / Signing 20% 15 March 2025 On signing of this Agreement"
+    },
+    {
+      "name": "First Instalment",
+      "percent": 20.0,
+      "due_date": "2025-09-15",
+      "trigger": "Six months after signing",
+      "page": 6,
+      "quote": "First Instalment 20% 15 September 2025 Six months after signing"
+    },
+    {
+      "name": "Second Instalment",
+      "percent": 20.0,
+      "due_date": "2026-03-15",
+      "trigger": "Twelve months after signing",
+      "page": 6,
+      "quote": "Second Instalment 20% 15 March 2026 Twelve months after signing"
+    },
+    {
+      "name": "Third Instalment",
+      "percent": 20.0,
+      "due_date": "2026-12-15",
+      "trigger": "Upon completion of the structural works",
+      "page": 6,
+      "quote": "Third Instalment 20% 15 December 2026 Upon completion of the structural works"
+    },
+    {
+      "name": "Final Instalment",
+      "percent": 20.0,
+      "due_date": "2027-06-30",
+      "trigger": "Upon notice of completion and handover",
+      "page": 6,
+      "quote": "Final Instalment 20% 30 June 2027 Upon notice of completion and handover"
+    }
+  ]
+}

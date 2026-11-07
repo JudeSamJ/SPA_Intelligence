@@ -38,6 +38,18 @@ class LLMReply:
 
 
 _calls = 0
+_usage = {"input_tokens": 0, "output_tokens": 0, "calls": 0}
+
+
+def usage_totals() -> dict:
+    """Real token usage reported by the provider since process start (used for per-document cost)."""
+    return dict(_usage)
+
+
+def _add_usage(inp, out) -> None:
+    _usage["calls"] += 1
+    _usage["input_tokens"] += int(inp or 0)
+    _usage["output_tokens"] += int(out or 0)
 
 
 def calls_made() -> int:
@@ -130,6 +142,8 @@ class AnthropicAdapter:
         resp = client.messages.create(model=config.MODEL, max_tokens=max_tokens, system=system,
                                          tools=tools, messages=self._convert(messages), **kw)
         reply = LLMReply()
+        u = getattr(resp, "usage", None)
+        _add_usage(getattr(u, "input_tokens", 0), getattr(u, "output_tokens", 0))
         for b in resp.content:
             t = getattr(b, "type", None)
             if t == "text":
@@ -198,6 +212,8 @@ class AzureOpenAIAdapter:
                 raise
             raise LLMError(azure_error_hint(status, str(getattr(e, "message", e))[:300])) from e
         msg = resp.choices[0].message
+        u = getattr(resp, "usage", None)
+        _add_usage(getattr(u, "prompt_tokens", 0), getattr(u, "completion_tokens", 0))
         reply = LLMReply(text=msg.content or "")
         for tc in (getattr(msg, "tool_calls", None) or []):
             try:

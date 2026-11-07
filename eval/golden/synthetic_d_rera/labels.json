@@ -1,0 +1,107 @@
+{
+  "doc_id": "synthetic_d_rera",
+  "kind": "synthetic",
+  "synthetic": true,
+  "currency": "INR",
+  "note": "Synthetic smoke-set document. Labels are known by construction.",
+  "buyer": {
+    "value": "Anita Suresh Deshpande",
+    "page": 1,
+    "quote": "Anita Suresh Deshpande"
+  },
+  "unit_id": {
+    "value": "KH-T2-1503",
+    "page": 1,
+    "quote": "KH-T2-1503"
+  },
+  "price": {
+    "value": 8450000,
+    "page": 1,
+    "quote": "INR 8,450,000"
+  },
+  "area_sqft": {
+    "value": 865.0,
+    "page": 1,
+    "quote": "865.00 square feet"
+  },
+  "handover_date": {
+    "value": "2026-12-31",
+    "page": 3,
+    "quote": "31 December 2026"
+  },
+  "grace_period_days": {
+    "value": 90,
+    "page": 3,
+    "quote": "90 days"
+  },
+  "delay_rate": {
+    "value": 60.0,
+    "page": 3,
+    "quote": "INR 60.00 per square foot"
+  },
+  "delay_basis": {
+    "value": "fixed_per_sqft_per_year",
+    "page": 3,
+    "quote": "INR 60.00 per square foot"
+  },
+  "delay_cap": {
+    "value": 3.0,
+    "page": 3,
+    "quote": "shall not exceed 3% of the Purchase Price"
+  },
+  "cancellation_clause": {
+    "value": "present",
+    "page": 4,
+    "quote": "Buyer's right to cancel for delay"
+  },
+  "payment_plan": [
+    {
+      "name": "Agreement Payment",
+      "percent": 10.0,
+      "due_date": "2024-03-01",
+      "trigger": "On signing of this Agreement",
+      "page": 6,
+      "quote": "Agreement Payment 10% 1 March 2024 On signing of this Agreement"
+    },
+    {
+      "name": "Plinth Milestone",
+      "percent": 20.0,
+      "due_date": "2024-09-01",
+      "trigger": "On completion of plinth",
+      "page": 6,
+      "quote": "Plinth Milestone 20% 1 September 2024 On completion of plinth"
+    },
+    {
+      "name": "Slab Milestone",
+      "percent": 20.0,
+      "due_date": "2025-03-01",
+      "trigger": "On completion of the 8th floor slab",
+      "page": 6,
+      "quote": "Slab Milestone 20% 1 March 2025 On completion of the 8th floor slab"
+    },
+    {
+      "name": "Walls Milestone",
+      "percent": 20.0,
+      "due_date": "2025-10-01",
+      "trigger": "On completion of internal walls and external plaster",
+      "page": 6,
+      "quote": "Walls Milestone 20% 1 October 2025 On completion of internal walls and external plaster"
+    },
+    {
+      "name": "Finishing Milestone",
+      "percent": 20.0,
+      "due_date": "2026-06-01",
+      "trigger": "On completion of flooring and doors",
+      "page": 6,
+      "quote": "Finishing Milestone 20% 1 June 2026 On completion of flooring and doors"
+    },
+    {
+      "name": "Possession Payment",
+      "percent": 10.0,
+      "due_date": "2026-12-31",
+      "trigger": "On offer of possession with occupancy certificate",
+      "page": 6,
+      "quote": "Possession Payment 10% 31 December 2026 On offer of possession with occupancy certificate"
+    }
+  ]
+}
