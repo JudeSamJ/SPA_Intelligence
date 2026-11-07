@@ -45,6 +45,19 @@ agent:
     - "\\bshould i (sign|walk away|pursue|take legal)"
     - "\\bwithhold payment"
     - "\\bstop paying"
+    - "\\bmy rights\\b"
+    - "\\bam i entitled"
+    - "\\bbreach"
+    - "\\bcan i claim"
+    - "\\bdamages\\b"
+    - "\\bforfeit"
+  # Questions that reach for another buyer's contract/data are refused before any LLM call.
+  cross_contract_patterns:
+    - "\\b(another|other|different|someone else'?s?|somebody else'?s?)\\s+(buyer|customer|client|contract|unit|owner|spa|agreement)s?"
+    - "\\b(all|every|each)\\s+(the\\s+)?(buyers|customers|clients|contracts|units|owners)\\b"
+    - "\\b[0-9a-f]{64}\\b"
+    - "\\bcontract[_ ]?id\\b"
+  cross_contract_message: "I can only discuss your own contract."
   refusal_message: "I can't advise on that; please contact the legal team."
 
 disclaimer: "Decision support, not legal advice."

@@ -17,7 +17,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import config
 from app.llm import LLMCapError, LLMError, calls_made
 from backend.api.deps import ApiError
-from backend.api.routes import cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
+from backend.api.routes import buyer, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
 from backend.api.schemas import Health
 
@@ -50,7 +50,7 @@ def create_app() -> FastAPI:
                   description="Decision support, not legal advice.")
     app.add_middleware(GZipMiddleware, minimum_size=1024)   # text assets + JSON; ~70% smaller transfer
     app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_credentials=False,
-                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type"])
+                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
     @app.middleware("http")
     async def access_log(request: Request, call_next):
@@ -91,7 +91,7 @@ def create_app() -> FastAPI:
         log.error("unhandled %s", type(e).__name__)          # type only, no message (could hold contract text)
         return _err(500, "internal_error", "Something went wrong on the server.")
 
-    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router, crossdoc.router, internal.router):
+    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router, crossdoc.router, internal.router, buyer.router):
         app.include_router(r, prefix="/api")
 
     @app.get("/api/health", response_model=Health, tags=["meta"])
