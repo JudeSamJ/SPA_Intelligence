@@ -941,7 +941,12 @@ export default function Landing() {
               >
                 <span
                   className="chip"
-                  style={{ cursor: "default", color: "#f1cf8a", borderColor: "rgba(241,207,138,.5)" }}
+                  style={{
+                    cursor: "default",
+                    color: "#f1cf8a",
+                    background: "rgba(241,207,138,.14)", // own background: the theme's chip surface is light in day mode
+                    borderColor: "rgba(241,207,138,.55)",
+                  }}
                 >
                   {t("common.comingNext")}
                 </span>
