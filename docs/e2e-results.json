@@ -1,23 +1,7 @@
 {
-  "passed": 180,
+  "passed": 183,
   "total": 183,
-  "failed": [
-    {
-      "name": "palm: growth takes about the same time for a slow scroll and a hard flick",
-      "ok": false,
-      "detail": "NaN ms vs NaN ms"
-    },
-    {
-      "name": "palm: no frame advances the growth by more than 5%",
-      "ok": false,
-      "detail": "13.8% / 0.0%"
-    },
-    {
-      "name": "palm: fully grown, and stays grown after scrolling away and back",
-      "ok": false,
-      "detail": "0.08 / 0.07"
-    }
-  ],
+  "failed": [],
   "results": [
     {
       "name": "landing dusk_en_full: dir/lang",
@@ -780,19 +764,19 @@
       "detail": ""
     },
     {
-      "name": "palm: growth takes about the same time for a slow scroll and a hard flick",
-      "ok": false,
-      "detail": "NaN ms vs NaN ms"
+      "name": "palm: growth takes about the same time whether you arrive by slow scrolling or a hard flick",
+      "ok": true,
+      "detail": "1616 ms vs 1600 ms"
     },
     {
       "name": "palm: no frame advances the growth by more than 5%",
-      "ok": false,
-      "detail": "13.8% / 0.0%"
+      "ok": true,
+      "detail": "1.3% / 1.4%"
     },
     {
       "name": "palm: fully grown, and stays grown after scrolling away and back",
-      "ok": false,
-      "detail": "0.08 / 0.07"
+      "ok": true,
+      "detail": "1.00 / 1.00"
     },
     {
       "name": "cursor: body and buttons use the orange arrow image, no custom ring/dot",
