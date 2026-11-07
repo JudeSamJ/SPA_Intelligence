@@ -1,0 +1,24 @@
+# Monte Carlo defaults. THESE ARE USER ASSUMPTIONS, NOT PREDICTIONS: nothing here was learned from data.
+# Edit them (or override per request in the UI). The API and UI label every result "assumption-driven".
+trials: 10000
+seed: 42
+max_trials: 50000
+delay_distribution:
+  family: triangular            # triangular | lognormal | fixed
+  triangular:                   # days of delay past the contractual handover date
+    min_days: 0
+    mode_days: 60
+    max_days: 365
+  lognormal:
+    median_days: 90
+    sigma: 0.6
+  fixed:
+    days: 90
+# Optional progress signal (CSV: date, planned_progress_pct, actual_progress_pct). Documented, deliberately simple rule:
+#   gap = planned_progress_pct - actual_progress_pct   (percentage points, from the LATEST row; positive = behind)
+#   shift_days = clamp(gap * days_per_gap_point, -max_shift_days, +max_shift_days)
+#   every simulated delay is then shifted by shift_days (floored at 0).
+# days_per_gap_point is an assumption you choose; this is NOT a machine-learning forecast.
+signal:
+  days_per_gap_point: 4.0
+  max_shift_days: 180

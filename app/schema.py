@@ -81,6 +81,18 @@ class Milestone(TrustMixin):
     source_quote: str = Field(..., min_length=1, description="Verbatim text of the payment-plan row.")
 
 
+class DatedClause(TrustMixin):
+    """A clause that sets a deadline relative to an anchor event (e.g. 'within 14 days after the Notice of Completion')."""
+    kind: Literal["notice_deadline", "cancellation_right", "defect_liability", "other"]
+    description: str = Field(..., description="Short neutral label of what must happen or what right arises.")
+    amount: int = Field(..., ge=0, description="The number as stated (days or months).")
+    unit: Literal["days", "months"]
+    anchor: Literal["handover_date", "grace_expiry", "notice_of_completion", "signing_date", "other"] = Field(
+        ..., description="The event the period runs from.")
+    source_page: int = Field(..., ge=1)
+    source_quote: str = Field(..., min_length=1, description="Verbatim sentence stating the period.")
+
+
 class ExtractionOutput(BaseModel):
     """What the LLM returns (and nothing computed)."""
     buyer: Sourced[str]
@@ -98,6 +110,10 @@ class ExtractionOutput(BaseModel):
     payment_plan: list[Milestone]
     cancellation_clause: Sourced[str] = Field(
         ..., description="Short summary of the buyer cancellation/termination clause; null if absent.")
+    dated_clauses: list[DatedClause] = Field(
+        default_factory=list,
+        description="Clauses that set a deadline as a number of days/months from an event (notice, inspection, "
+                    "defect-liability period, buyer cancellation right after prolonged delay). Empty if none.")
 
 
 class ContractData(ExtractionOutput):

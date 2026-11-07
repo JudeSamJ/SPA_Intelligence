@@ -1,4 +1,8 @@
+import os
+
 import pytest
+
+os.environ.setdefault("SPA_DISABLE_SCHEDULER", "1")
 
 from app import llm
 

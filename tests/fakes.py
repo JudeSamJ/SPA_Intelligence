@@ -39,7 +39,18 @@ def oracle_input(pdf_path: Path) -> dict:
         q = f"{m['name']} {m['percent']:g}% {_long(m['due_date'])} {m['trigger']}"   # whole table row, as printed
         plan.append({"name": m["name"], "percent": m["percent"], "due_date": m["due_date"],
                      "trigger": m["trigger"], "source_page": locate_quote(pages, q), "source_quote": q})
+    dated = []
+    for kind, desc, amount, unit, anchor, q in [
+            ("notice_deadline", "Buyer inspection and snagging list", 14, "days", "notice_of_completion",
+             "Within fourteen (14) days after the Notice of Completion the Buyer shall inspect the"),
+            ("defect_liability", "Defects liability period", 12, "months", "notice_of_completion",
+             "within twelve (12) months after the date of the Notice of Completion")]:
+        pg = locate_quote(pages, q)
+        if pg:
+            dated.append({"kind": kind, "description": desc, "amount": amount, "unit": unit, "anchor": anchor,
+                          "source_page": pg, "source_quote": q})
     return {
+        "dated_clauses": dated,
         "buyer": S(t["buyer"], t["buyer"]),
         "unit_id": S(t["unit_id"], t["unit_id"]),
         "price": S(float(t["price"]), f"{cur} {t['price']:,}"),

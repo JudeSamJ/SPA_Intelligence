@@ -157,7 +157,7 @@ def ground_item(item, name: str, pdf_bytes: bytes, pages: list[str], doc_key: st
                 percent: float | None = None, due_date=None, basis: str | None = None) -> Grounding:
     """Mutates `item` (evidence, grounding, confidence, needs_review, value) and returns its Grounding."""
     quote = item.source_quote
-    value = None if percent is not None or hasattr(item, "percent") else getattr(item, "value", None)
+    value = None if percent is not None or hasattr(item, "percent") or hasattr(item, "amount") else getattr(item, "value", None)
     if not quote or not quote.strip():
         g = Grounding(status="not_stated" if value is None else "ungrounded")
         item.grounding, item.confidence, item.needs_review = g, (1.0 if value is None else 0.0), value is not None
@@ -165,7 +165,12 @@ def ground_item(item, name: str, pdf_bytes: bytes, pages: list[str], doc_key: st
         return g
     qchk, ev, qscore = _quote_check(pdf_bytes, pages, item.source_page, quote)
     checks, scores = [qchk], [("quote", qscore)]
-    if hasattr(item, "percent"):                       # payment-plan row
+    if hasattr(item, "amount"):                        # dated clause: the stated number must be in the quote
+        ac = GroundingCheck(name="value_in_quote",
+                            passed=any(_close(n, float(item.amount)) for n in parse_numbers(quote)),
+                            detail=f"{item.amount} {item.unit} in clause quote")
+        checks.append(ac); scores.append(("value", 1.0 if ac.passed else 0.0))
+    elif hasattr(item, "percent"):                     # payment-plan row
         pc = GroundingCheck(name="value_in_quote",
                             passed=any(_close(n, float(item.percent)) for n in parse_numbers(quote)),
                             detail=f"percent {item.percent:g} in row quote")
@@ -228,6 +233,18 @@ def ground_contract(data: ContractData, pdf_bytes: bytes, pages: list[str]) -> C
             if m.needs_review:
                 notes.append(f"Grounding: payment-plan row '{m.name}' needs review.")
     data.payment_plan, data.ungrounded_rows = kept_rows, bad_rows
+    keep_cl = []
+    for i, cl in enumerate(data.dated_clauses, 1):
+        if cl.human_verified:
+            keep_cl.append(cl); continue
+        g = ground_item(cl, f"dated_clauses[{i}]", pdf_bytes, pages, doc_key)
+        if g.status == "ungrounded":
+            notes.append(f"Grounding: dated clause '{cl.description}' is ungrounded and was dropped.")
+        else:
+            keep_cl.append(cl)
+            if cl.needs_review:
+                notes.append(f"Grounding: dated clause '{cl.description}' needs review.")
+    data.dated_clauses = keep_cl
     detect_jurisdiction(data, pdf_bytes, pages, doc_key)
     data.grounded_version = 1
     data.warnings = keep + notes

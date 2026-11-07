@@ -1,7 +1,9 @@
 """FastAPI app. Run: uvicorn backend.api.main:app --reload   (from the project root)"""
 from __future__ import annotations
 
+import contextlib
 import logging
+import os
 import time
 
 from fastapi import FastAPI, Request
@@ -15,7 +17,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import config
 from app.llm import LLMCapError, LLMError, calls_made
 from backend.api.deps import ApiError
-from backend.api.routes import cashflow, chat, contracts, penalty, trust
+from backend.api.routes import cashflow, chat, contracts, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
 from backend.api.schemas import Health
 
@@ -26,8 +28,25 @@ def _err(status: int, code: str, message: str) -> JSONResponse:
     return JSONResponse(status_code=status, content={"error": {"code": code, "message": message}})
 
 
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Daily obligation recompute (APScheduler). Off when SPA_DISABLE_SCHEDULER=1."""
+    sched = None
+    if os.environ.get("SPA_DISABLE_SCHEDULER") != "1":
+        from apscheduler.schedulers.background import BackgroundScheduler
+        sched = BackgroundScheduler(daemon=True)
+        sched.add_job(obligations.recompute_now, "cron", hour=6, minute=5, id="daily_obligations", replace_existing=True)
+        sched.add_job(obligations.recompute_now, id="startup_obligations")      # once at startup
+        sched.start()
+    try:
+        yield
+    finally:
+        if sched:
+            sched.shutdown(wait=False)
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="SPA Intelligence API", version="1.0.0",
+    app = FastAPI(title="SPA Intelligence API", version="1.1.0", lifespan=lifespan,
                   description="Decision support, not legal advice.")
     app.add_middleware(GZipMiddleware, minimum_size=1024)   # text assets + JSON; ~70% smaller transfer
     app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_credentials=False,
@@ -72,7 +91,7 @@ def create_app() -> FastAPI:
         log.error("unhandled %s", type(e).__name__)          # type only, no message (could hold contract text)
         return _err(500, "internal_error", "Something went wrong on the server.")
 
-    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router):
+    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router):
         app.include_router(r, prefix="/api")
 
     @app.get("/api/health", response_model=Health, tags=["meta"])

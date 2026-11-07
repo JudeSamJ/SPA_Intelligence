@@ -125,3 +125,37 @@ def test_eval_runs_engines_bakeoff_endpoints(client, seeded, monkeypatch, tmp_pa
     assert b["golden_size"] == 4 and b["golden_real"] == 0 and "only to our golden set" in b["note"]
     row = {e["name"]: e for e in b["engines"]}
     assert row["claude_pdf"]["run"]["fields"]["price"] == 1.0 and row["docling"]["run"] is None
+
+
+def test_montecarlo_endpoints(client, seeded):
+    d = sid("sample_d_rera.pdf")
+    body = {"as_of_date": "2027-01-01", "trials": 1000, "seed": 3}
+    a = client.post(f"/api/contracts/{d}/montecarlo", json=body).json()
+    b = client.post(f"/api/contracts/{d}/montecarlo", json=body).json()
+    assert a == b and a["assumption_driven"] is True and a["statutory"]["p90"] >= a["statutory"]["p50"]
+    fixed = client.post(f"/api/contracts/{d}/montecarlo", json={**body, "family": "fixed", "params": {"days": 180}}).json()
+    det = client.post(f"/api/contracts/{d}/statute-gap", json={"delay_days": 180, "as_of_date": "2027-01-01"}).json()
+    assert fixed["statutory"]["p50"] == det["statutory"]["amount"]
+    assert client.post(f"/api/contracts/{d}/montecarlo", json={**body, "params": {"zzz": 1}, "family": "fixed"}).status_code == 422
+    assert client.post(f"/api/contracts/{d}/montecarlo", json={**body, "signal_csv": "bad"}).status_code == 422
+    sig = client.post(f"/api/contracts/{d}/montecarlo", json={**body, "signal_csv": "date,planned_progress_pct,actual_progress_pct\n2026-06-01,60,50"}).json()
+    assert sig["assumptions"]["signal"]["shift_days"] == 40 and sig["delay_days"]["p50"] > a["delay_days"]["p50"]
+    p = client.post("/api/portfolio/montecarlo", json=body).json()
+    assert set(p["totals_by_currency"]) == {"AED", "INR"} and len(p["rows"]) == 4
+
+
+def test_obligations_and_alerts_api(client, seeded):
+    r = client.get("/api/obligations", params={"as_of": "2025-03-10", "within_days": 30}).json()
+    assert r["as_of"] == "2025-03-10" and r["obligations"]
+    assert all(o["evidence"]["quote"] and o["days_until"] <= 30 for o in r["obligations"])
+    assert {o["status"] for o in r["obligations"]} <= {"due_soon", "overdue", "upcoming", "past"} | set(r["event_types"])
+    rc = client.post("/api/alerts/recompute", params={"as_of": "2025-03-16"}).json()
+    assert rc["alerts"] > 0
+    al = client.get("/api/alerts").json()
+    assert al["delivery"] == "in-app feed only" and al["unacked"] == len(al["alerts"]) > 0
+    first = al["alerts"][0]
+    assert client.post(f"/api/alerts/{first['id']}/ack").json()["acked"] is True
+    assert client.get("/api/alerts").json()["unacked"] == al["unacked"] - 1
+    assert client.post("/api/alerts/zzz/ack").status_code == 404
+    one = client.get("/api/obligations", params={"as_of": "2025-03-10", "contract_id": sid("sample_a.pdf")}).json()
+    assert {o["contract_id"] for o in one["obligations"]} == {sid("sample_a.pdf")}

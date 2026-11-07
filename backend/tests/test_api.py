@@ -32,6 +32,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "UPLOAD_DIR", tmp_path / "uploads")
     monkeypatch.setattr(config, "EVAL_RESULTS_PATH", tmp_path / "results.json")
     monkeypatch.setattr(config, "REVIEW_DIR", tmp_path / "reviews")
+    monkeypatch.setattr(config, "ALERTS_PATH", tmp_path / "alerts.json")
     monkeypatch.setenv("SPA_RATES_DIR", str(ROOT / "tests" / "fixtures" / "rates"))
     monkeypatch.setattr(config, "PROVIDER", "azure_openai")
     for k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT"):

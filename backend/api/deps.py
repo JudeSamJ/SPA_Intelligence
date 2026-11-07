@@ -144,6 +144,8 @@ def start_extraction(src: Source, force: bool) -> Job:
         try:
             extract_contract(src.path.read_bytes(), source_name=src.name, use_cache=not force)
             job.state = "done"
+            from backend.api.routes.obligations import recompute_now
+            recompute_now()                       # contract changed -> refresh the alert feed
         except Exception as e:  # noqa: BLE001  (surface a safe message; never contract text)
             job.state, job.error = "error", f"{type(e).__name__}: {str(e)[:300]}"
         job.updated = time.time()

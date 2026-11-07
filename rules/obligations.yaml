@@ -1,0 +1,11 @@
+# Obligation watcher settings (days). Product heuristics, not legal deadlines.
+due_soon_days: 14            # payment due within this many days -> due_soon
+handover_approaching_days: 90
+grace_expiring_days: 30
+notice_deadline_days: 14
+severity:
+  overdue: high
+  due_soon: medium
+  grace_expiring: high
+  handover_approaching: medium
+  notice_deadline: medium

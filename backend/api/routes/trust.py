@@ -72,6 +72,8 @@ def review_field(contract_id: str, field: str, body: ReviewRequest):
                          body.source_page, body.source_quote)
     except (ReviewError, ValueError) as e:
         raise ApiError(422, "validation_error", str(e)) from None
+    from backend.api.routes.obligations import recompute_now
+    recompute_now()
     return {"saved": d, "disclaimer": config.DISCLAIMER}
 
 

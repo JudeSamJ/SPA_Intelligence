@@ -15,7 +15,7 @@ from .schema import ContractData, Grounding, Milestone, ReviewMark, Sourced
 
 SCALARS = ["buyer", "unit_id", "price", "area_sqft", "handover_date", "grace_period_days", "delay_rate",
            "delay_basis", "delay_cap", "cancellation_clause"]
-FIELD_RE = re.compile(r"^(payment_plan|ungrounded_rows)\.(\d{1,3})$")
+FIELD_RE = re.compile(r"^(payment_plan|ungrounded_rows|dated_clauses)\.(\d{1,3})$")
 
 
 class ReviewError(ValueError):
@@ -58,7 +58,7 @@ def get_item(c: ContractData, field: str):
     m = FIELD_RE.match(field)
     if not m:
         raise ReviewError(f"unknown field '{field}'")
-    rows = c.payment_plan if m[1] == "payment_plan" else c.ungrounded_rows
+    rows = {"payment_plan": c.payment_plan, "ungrounded_rows": c.ungrounded_rows, "dated_clauses": c.dated_clauses}[m[1]]
     i = int(m[2]) - 1
     if not 0 <= i < len(rows):
         raise ReviewError(f"no such row '{field}'")
@@ -110,6 +110,12 @@ def add_decision(c: ContractData, cid: str, field: str, action: str, value: Any 
                 if not 0 <= pc <= 100:
                     raise ReviewError("percent must be between 0 and 100")
                 row["percent"] = pc
+            if m_clause := FIELD_RE.match(field):
+                if m_clause[1] == "dated_clauses":
+                    if "amount" in value:
+                        row["amount"] = int(value["amount"])
+                    if "unit" in value and value["unit"] in ("days", "months"):
+                        row["unit"] = value["unit"]
             if "due_date" in value:
                 row["due_date"] = None if value["due_date"] in (None, "") else date.fromisoformat(str(value["due_date"])).isoformat()
             for k in ("name", "trigger"):
@@ -178,11 +184,16 @@ def review_items(c: ContractData) -> list[dict]:
     names = [(n, getattr(c, n)) for n in SCALARS]
     names += [(f"payment_plan.{i}", m) for i, m in enumerate(c.payment_plan, 1)]
     names += [(f"ungrounded_rows.{i}", m) for i, m in enumerate(c.ungrounded_rows, 1)]
+    names += [(f"dated_clauses.{i}", m) for i, m in enumerate(c.dated_clauses, 1)]
     for name, it in names:
         if it.needs_review and not it.human_verified:
             g = it.grounding
-            val = it.value if isinstance(it, Sourced) else {"name": it.name, "percent": it.percent,
-                                                              "due_date": it.due_date, "trigger": it.trigger}
+            if isinstance(it, Sourced):
+                val = it.value
+            elif hasattr(it, "amount"):
+                val = {"description": it.description, "amount": it.amount, "unit": it.unit, "anchor": it.anchor}
+            else:
+                val = {"name": it.name, "percent": it.percent, "due_date": it.due_date, "trigger": it.trigger}
             out.append({"field": name, "value": val, "claimed_value": g.claimed_value if g else None,
                         "status": g.status if g else "ungrounded", "confidence": it.confidence,
                         "source_page": it.source_page, "source_quote": it.source_quote,
