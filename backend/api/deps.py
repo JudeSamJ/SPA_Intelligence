@@ -83,9 +83,39 @@ def get_source(contract_id: str) -> Source:
     raise ApiError(404, "not_found", "Contract not found.")
 
 
+_eff_cache: dict[tuple[str, float, float, str], ContractData] = {}
+
+
+def effective_contract(src: Source) -> ContractData | None:
+    """Cached extraction + grounding (re-run for old cache files, no LLM) + human review overlay."""
+    from app.extract import pdf_pages
+    from app.grounding import ground_contract
+    from app.review import apply_reviews, load_store, store_mtime
+    data = src.path.read_bytes()
+    c = load_cached(data)
+    if c is None:
+        return None
+    cp = extract_cache_path(src)
+    key = (src.id, store_mtime(src.id), cp.stat().st_mtime if cp.exists() else 0.0, config.model_tag())
+    hit = _eff_cache.get(key)
+    if hit is None:
+        if c.grounded_version is None:                      # extraction predates grounding
+            ground_contract(c, data, pdf_pages(data))
+        hit = apply_reviews(c, load_store(src.id), data)
+        if len(_eff_cache) > 64:
+            _eff_cache.clear()
+        _eff_cache[key] = hit
+    return hit.model_copy(deep=True)
+
+
+def extract_cache_path(src: Source) -> Path:
+    from app.extract import cache_path
+    return cache_path(src.id)
+
+
 def get_contract(contract_id: str) -> tuple[Source, ContractData]:
     src = get_source(contract_id)
-    c = load_cached(src.path.read_bytes())
+    c = effective_contract(src)
     if c is None:
         raise ApiError(409, "not_extracted", "This contract has not been extracted yet.")
     return src, c

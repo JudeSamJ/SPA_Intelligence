@@ -31,6 +31,8 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "CACHE_DIR", tmp_path / "cache")
     monkeypatch.setattr(config, "UPLOAD_DIR", tmp_path / "uploads")
     monkeypatch.setattr(config, "EVAL_RESULTS_PATH", tmp_path / "results.json")
+    monkeypatch.setattr(config, "REVIEW_DIR", tmp_path / "reviews")
+    monkeypatch.setenv("SPA_RATES_DIR", str(ROOT / "tests" / "fixtures" / "rates"))
     monkeypatch.setattr(config, "PROVIDER", "azure_openai")
     for k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT"):
         monkeypatch.setenv(k, "x")
@@ -209,7 +211,8 @@ def synthetic_contract(env, **over):
         delay_rate=Sourced[float](value=6.0, source_page=1, source_quote="Synthetic"),
         delay_basis=Sourced[str](value="percent_per_annum", source_page=1, source_quote="Synthetic"),
         delay_cap=Sourced[float](), payment_plan=[], cancellation_clause=Sourced[str](),
-        model=config.model_tag(), file_hash=file_hash(data))
+        model=config.model_tag(), file_hash=file_hash(data),
+        grounded_version=1)   # test fixture bypasses extraction on a blank PDF: skip re-grounding
     base.update(over)
     c = ContractData(**base)
     config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

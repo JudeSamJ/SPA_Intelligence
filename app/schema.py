@@ -107,6 +107,7 @@ class ContractData(ExtractionOutput):
     jurisdiction_detected: Sourced[str] = Field(default_factory=Sourced, description="Pack id found by keyword scan.")
     jurisdiction: Optional[str] = Field(None, description="Pack id chosen by the user (overrides detection).")
     currency: Optional[str] = None
+    grounded_version: Optional[int] = Field(None, description="Set by app.grounding; None = never grounded.")
     payment_plan_percent_sum: Optional[float] = None
     source_file: Optional[str] = None
     file_hash: Optional[str] = None

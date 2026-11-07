@@ -228,5 +228,22 @@ def ground_contract(data: ContractData, pdf_bytes: bytes, pages: list[str]) -> C
             if m.needs_review:
                 notes.append(f"Grounding: payment-plan row '{m.name}' needs review.")
     data.payment_plan, data.ungrounded_rows = kept_rows, bad_rows
+    detect_jurisdiction(data, pdf_bytes, pages, doc_key)
+    data.grounded_version = 1
     data.warnings = keep + notes
     return data
+
+
+def detect_jurisdiction(data: ContractData, pdf_bytes: bytes, pages: list[str], doc_key: str) -> None:
+    """Keyword scan using each pack's detect_keywords. Sets jurisdiction_detected (with a quote) and currency."""
+    from .packs import detect_pack, list_packs
+    hit = detect_pack(pages)
+    if not hit:
+        data.jurisdiction_detected = Sourced()
+        return
+    pack_id, text = hit
+    page = next((i for i, p in enumerate(pages, 1) if text.lower() in p.lower()), None)
+    s = Sourced(value=pack_id, source_page=page, source_quote=text)
+    ground_item(s, "jurisdiction", pdf_bytes, pages, doc_key)
+    data.jurisdiction_detected = s
+    data.currency = next((p.currency for p in list_packs() if p.id == pack_id), data.currency)
