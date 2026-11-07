@@ -1,5 +1,6 @@
 {
   "sample_a.pdf": {
+    "currency": "AED",
     "buyer": "Layla Hassan Al Mansoori",
     "unit_id": "MCR-1204",
     "price": 2450000,
@@ -44,6 +45,7 @@
     ]
   },
   "sample_b.pdf": {
+    "currency": "AED",
     "buyer": "Rajesh Kumar Menon",
     "unit_id": "PHT-B-0807",
     "price": 1875000,
@@ -100,6 +102,7 @@
     ]
   },
   "sample_c.pdf": {
+    "currency": "AED",
     "buyer": "Fatima Zahra Bin Rashid",
     "unit_id": "OTC-2106",
     "price": 3980000,
@@ -146,6 +149,57 @@
         "percent": 15.0,
         "due_date": "2027-12-31",
         "trigger": "On notice of completion and handover of the Unit"
+      }
+    ]
+  },
+  "sample_d_rera.pdf": {
+    "currency": "INR",
+    "buyer": "Anita Suresh Deshpande",
+    "unit_id": "KH-T2-1503",
+    "price": 8450000,
+    "area_sqft": 865.0,
+    "handover_date": "2026-12-31",
+    "grace_period_days": 90,
+    "delay_rate": 60.0,
+    "delay_basis": "fixed_per_sqft_per_year",
+    "delay_cap": 3.0,
+    "has_cancellation_clause": true,
+    "payment_plan": [
+      {
+        "name": "Agreement Payment",
+        "percent": 10.0,
+        "due_date": "2024-03-01",
+        "trigger": "On signing of this Agreement"
+      },
+      {
+        "name": "Plinth Milestone",
+        "percent": 20.0,
+        "due_date": "2024-09-01",
+        "trigger": "On completion of plinth"
+      },
+      {
+        "name": "Slab Milestone",
+        "percent": 20.0,
+        "due_date": "2025-03-01",
+        "trigger": "On completion of the 8th floor slab"
+      },
+      {
+        "name": "Walls Milestone",
+        "percent": 20.0,
+        "due_date": "2025-10-01",
+        "trigger": "On completion of internal walls and external plaster"
+      },
+      {
+        "name": "Finishing Milestone",
+        "percent": 20.0,
+        "due_date": "2026-06-01",
+        "trigger": "On completion of flooring and doors"
+      },
+      {
+        "name": "Possession Payment",
+        "percent": 10.0,
+        "due_date": "2026-12-31",
+        "trigger": "On offer of possession with occupancy certificate"
       }
     ]
   }

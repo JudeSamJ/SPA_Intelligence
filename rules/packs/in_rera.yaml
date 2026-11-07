@@ -1,0 +1,71 @@
+# Jurisdiction pack: India, RERA (Real Estate (Regulation and Development) Act, 2016).
+# All entries are UNREVIEWED (reviewed_by_lawyer: false). The Act is a central law, but the prescribed INTEREST RATE
+# is set by each STATE's rules, so confirm the state before relying on the spread below.
+id: in_rera
+name: "India (RERA)"
+country: IN
+jurisdiction: "India (RERA)"
+currency: "INR"
+version: "1.0"
+detect_keywords:
+  - "Real Estate \\(Regulation and Development\\) Act"
+  - "\\bRERA\\b"
+  - "\\bRERA\\s+registration\\b"
+
+penalty:
+  day_count_basis: 365
+  scenarios_days: [30, 90, 180, 365]
+
+entries:
+  - id: in_rera_delay_interest
+    statute: "Real Estate (Regulation and Development) Act, 2016"
+    section: "Section 18(1)"
+    description: >-
+      If the promoter fails to give possession by the agreed date and the allottee does not withdraw, the promoter
+      pays interest for every month of delay until possession, at the prescribed rate, on the amount paid.
+    formula:
+      type: interest_on_amounts_paid
+      rate:
+        kind: base_plus_spread
+        base_table: sbi_mclr          # dated table in rules/rates/sbi_mclr.yaml (you edit it)
+        spread_pct: 2.0               # see in_rera_rate_rule: set by state rules, confirm for your state
+      accrual_start: agreed_possession_date
+      day_count: 365
+      respects_contract_grace: false  # TODO lawyer: confirm whether a contractual grace period shifts the start
+    effective_from: "2017-05-01"
+    source_url: "TODO: official India Code URL for the Act (add after checking terms of use)"
+    reviewed_by_lawyer: false
+    needs_legal_review: false
+  - id: in_rera_rate_rule
+    statute: "State RERA Rules made under Section 84 of the Act (e.g. the Maharashtra rules)"
+    section: "TODO: the rule number differs by state (commonly 'SBI highest MCLR + 2%')"
+    description: >-
+      The prescribed rate of interest is the State Bank of India's highest marginal cost of lending rate (MCLR) plus
+      2 percentage points in many states. Confirm the rule for the state your project is in.
+    formula: null
+    effective_from: null
+    source_url: "TODO: state RERA rules URL"
+    reviewed_by_lawyer: false
+    needs_legal_review: true
+  - id: in_rera_defect_liability
+    statute: "Real Estate (Regulation and Development) Act, 2016"
+    section: "Section 14(3)"
+    description: >-
+      Structural or workmanship defects brought to the promoter's notice within five years of handing over possession
+      must be rectified by the promoter without further charge.
+    formula: {type: defect_liability_years, years: 5}
+    effective_from: "2017-05-01"
+    source_url: "TODO: official India Code URL"
+    reviewed_by_lawyer: false
+    needs_legal_review: false
+  - id: in_rera_advance_cap
+    statute: "Real Estate (Regulation and Development) Act, 2016"
+    section: "Section 13(1)"
+    description: >-
+      A promoter may not accept more than 10% of the cost of the apartment as an advance payment or application fee
+      before entering into a written, registered agreement for sale.
+    formula: {type: advance_cap_pct, pct: 10.0}
+    effective_from: "2017-05-01"
+    source_url: "TODO: official India Code URL"
+    reviewed_by_lawyer: false
+    needs_legal_review: false

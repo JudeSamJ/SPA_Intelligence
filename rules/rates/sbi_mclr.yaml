@@ -1,0 +1,10 @@
+# Dated rate table. YOU maintain this file; the code never hardcodes a rate.
+# Add one row per change: the rate applies from `effective_from` until the next row.
+# Which MCLR to use ("highest MCLR" in many state rules) is a legal question: confirm it, then enter the figures.
+# Left empty on purpose: until rows exist, the statutory-gap calculator reports "cannot compute" (it never guesses).
+id: sbi_mclr
+name: "SBI MCLR (percent per annum)"
+source: "TODO: add the SBI source and retrieval date for each row"
+illustrative: false
+rows: []
+#  - {effective_from: "2024-04-15", rate_pct: 0.00}

@@ -1,6 +1,6 @@
 """Deterministic cash-flow schedule and "at risk" exposure. Pure Python, no LLM.
 
-DEFINITION OF "AT RISK" (configurable in rules/uae.yaml -> cashflow.at_risk):
+DEFINITION OF "AT RISK" (configurable in rules/common.yaml and the jurisdiction pack -> cashflow.at_risk):
 
     at_risk_total = linked_amount + penalty_exposure
 

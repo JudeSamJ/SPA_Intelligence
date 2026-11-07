@@ -1,0 +1,8 @@
+# ILLUSTRATIVE TEST DATA, NOT REAL SBI MCLR VALUES. Used only by tests and the e2e demo server.
+id: sbi_mclr
+name: "SBI MCLR (ILLUSTRATIVE - not real)"
+source: "illustrative placeholder values for tests/demo"
+illustrative: true
+rows:
+  - {effective_from: "2020-01-01", rate_pct: 8.50}
+  - {effective_from: "2025-02-01", rate_pct: 9.00}

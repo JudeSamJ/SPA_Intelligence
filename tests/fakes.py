@@ -29,19 +29,20 @@ def oracle_input(pdf_path: Path) -> dict:
         assert pg, f"test quote not in PDF: {quote}"
         return {"value": value, "source_page": pg, "source_quote": quote}
 
+    cur = t.get("currency", "AED")
     basis_q = (f"{t['delay_rate']:g}% per annum" if t["delay_basis"] == "percent_per_annum"
-               else f"AED {t['delay_rate']:.2f} per square foot")
+               else f"{cur} {t['delay_rate']:.2f} per square foot")
     cap_q = (f"shall not exceed {t['delay_cap']:g}% of the Purchase Price" if t["delay_cap"] is not None
              else "is not subject to any cap or maximum limit")
     plan = []
     for m in t["payment_plan"]:
-        q = m["name"]
+        q = f"{m['name']} {m['percent']:g}% {_long(m['due_date'])} {m['trigger']}"   # whole table row, as printed
         plan.append({"name": m["name"], "percent": m["percent"], "due_date": m["due_date"],
                      "trigger": m["trigger"], "source_page": locate_quote(pages, q), "source_quote": q})
     return {
         "buyer": S(t["buyer"], t["buyer"]),
         "unit_id": S(t["unit_id"], t["unit_id"]),
-        "price": S(float(t["price"]), f"AED {t['price']:,}"),
+        "price": S(float(t["price"]), f"{cur} {t['price']:,}"),
         "area_sqft": S(t["area_sqft"], f"{t['area_sqft']:,.2f} square feet"),
         "handover_date": S(t["handover_date"], _long(t["handover_date"])),
         "grace_period_days": S(t["grace_period_days"], f"{t['grace_period_days']} days"),

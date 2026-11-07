@@ -38,7 +38,8 @@ CACHE_DIR = Path(os.environ.get("SPA_CACHE_DIR") or ROOT / "data" / "cache")
 RULES_DIR = ROOT / "rules"
 GROUND_TRUTH_PATH = ROOT / "ground_truth.json"
 EVAL_RESULTS_PATH = ROOT / "eval" / "results.json"
-DEFAULT_RULES = "uae"
+DEFAULT_RULES = "ae_dubai"
+REVIEW_DIR = Path(os.environ.get("SPA_REVIEW_DIR") or ROOT / "data" / "reviews")
 
 DISCLAIMER = "Decision support, not legal advice."
 
@@ -70,6 +71,9 @@ def setup_hint() -> str:
 
 @lru_cache(maxsize=None)
 def load_rules(name: str = DEFAULT_RULES) -> dict:
-    """Load jurisdiction rules from rules/<name>.yaml (nothing jurisdictional is hardcoded in code)."""
-    with open(RULES_DIR / f"{name}.yaml", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+    """Merged rules: rules/common.yaml + rules/packs/<name>.yaml (the pack wins). Nothing jurisdictional is in code."""
+    with open(RULES_DIR / "common.yaml", encoding="utf-8") as fh:
+        merged = yaml.safe_load(fh) or {}
+    with open(RULES_DIR / "packs" / f"{name}.yaml", encoding="utf-8") as fh:
+        merged.update(yaml.safe_load(fh) or {})
+    return merged

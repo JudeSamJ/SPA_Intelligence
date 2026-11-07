@@ -1,0 +1,51 @@
+# Jurisdiction pack: UAE (Dubai off-plan sales).
+# EVERY legal entry below is UNREVIEWED (reviewed_by_lawyer: false). Entries marked needs_legal_review: true are
+# TODO placeholders: the rule is NOT modelled because we are not certain of it. Do not invent percentages here.
+id: ae_dubai
+name: "UAE (Dubai)"
+country: AE
+jurisdiction: "UAE (Dubai)"
+currency: "AED"
+version: "2.0"
+detect_keywords:            # regexes (case-insensitive) used to detect this pack from contract text
+  - "Dubai Land Department"
+  - "\\bOqood\\b"
+  - "\\bDubai\\b"
+
+penalty:
+  day_count_basis: 365            # days per year for pro-rata accrual of the CONTRACTUAL penalty
+  # Compensation accrues only on days of delay AFTER the grace period has expired.
+  scenarios_days: [30, 90, 180, 365]
+
+entries:
+  - id: ae_oqood_registration
+    statute: "Dubai Law No. 13 of 2008 (Interim Real Estate Register)"
+    section: "TODO: confirm article numbers"
+    description: >-
+      Off-plan sales in Dubai are expected to be registered in the Dubai Land Department's interim real estate
+      register (Oqood). The playbook checks that the contract mentions registration; it does not compute anything.
+    formula: null
+    effective_from: "2008-01-01"
+    source_url: "TODO: add the official DLD / Dubai legislation URL after checking terms of use"
+    reviewed_by_lawyer: false
+    needs_legal_review: true
+  - id: ae_escrow
+    statute: "Dubai Law No. 8 of 2007 (Escrow Accounts for Real Estate Development)"
+    section: "TODO: confirm article numbers"
+    description: "Buyer payments for off-plan units are expected to be held in a project escrow account."
+    formula: null
+    effective_from: "2007-01-01"
+    source_url: "TODO: add the official URL"
+    reviewed_by_lawyer: false
+    needs_legal_review: true
+  - id: ae_delay_compensation
+    statute: "TODO: identify the applicable Dubai off-plan delay-compensation rule"
+    section: "TODO"
+    description: >-
+      Statutory compensation for late handover is NOT modelled. A lawyer must supply the rule, rate and any cap
+      before this entry is given a formula. No percentage is assumed.
+    formula: null
+    effective_from: null
+    source_url: "TODO"
+    reviewed_by_lawyer: false
+    needs_legal_review: true

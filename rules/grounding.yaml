@@ -1,0 +1,13 @@
+# Grounding configuration (edit freely; nothing here is legal content).
+fuzzy_threshold: 88          # 0-100. Quote/box fuzzy matching must score at least this to count as "partial".
+min_confidence: 0.85         # below this a field is flagged needs_review even if grounded
+# Confidence = weighted mean of the checks that APPLY to the field, weights renormalised.
+#   quote check : exact on stated page = 1.0, exact on another page (page corrected) = 0.9,
+#                 fuzzy match = (score/100) capped at 0.8, not found = 0.0
+#   value check : 1.0 if every amount/percentage/date in `value` appears in the quote (parsed and compared
+#                 numerically / as ISO dates, not as strings), else 0.0
+#   entity check: 1.0 if the entity value (name, unit id) appears in the document text, else 0.0
+weights:
+  quote: 0.5
+  value: 0.35
+  entity: 0.15

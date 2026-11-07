@@ -1,4 +1,4 @@
-"""Generate 3 synthetic English SPA PDFs plus ground_truth.json from one dict of truth values.
+"""Generate 4 synthetic English SPA PDFs plus ground_truth.json from one dict of truth values.
 
 Run:  python scripts/generate_samples.py
 """
@@ -106,14 +106,74 @@ TRUTH = {
             {"name": "Handover Payment", "percent": 15.0, "due_date": "2027-12-31", "trigger": "On notice of completion and handover of the Unit"},
         ],
     },
+    # India / RERA-flavoured sample (INR). Fictional parties and a fictional registration number.
+    "sample_d": {
+        "file": "sample_d_rera.pdf",
+        "country": "IN",
+        "project": "Kalyani Heights",
+        "district": "Kharadi",
+        "city": "Pune",
+        "unit_type": "Apartment",
+        "developer": "Sahyadri Realty Private Limited",
+        "buyer": "Anita Suresh Deshpande",
+        "unit_id": "KH-T2-1503",
+        "floor": "15th",
+        "rera_no": "P99999000001",
+        "price": 8450000,
+        "area_sqft": 865.0,
+        "spa_date": "2024-03-01",
+        "handover_date": "2026-12-31",
+        "grace_period_days": 90,
+        "delay_rate": 60.0,  # INR per sq ft per year (= INR 5 per sq ft per month)
+        "delay_basis": "fixed_per_sqft_per_year",
+        "delay_cap": 3.0,
+        "has_cancellation_clause": True,
+        "payment_plan": [
+            {"name": "Agreement Payment", "percent": 10.0, "due_date": "2024-03-01", "trigger": "On signing of this Agreement"},
+            {"name": "Plinth Milestone", "percent": 20.0, "due_date": "2024-09-01", "trigger": "On completion of plinth"},
+            {"name": "Slab Milestone", "percent": 20.0, "due_date": "2025-03-01", "trigger": "On completion of the 8th floor slab"},
+            {"name": "Walls Milestone", "percent": 20.0, "due_date": "2025-10-01", "trigger": "On completion of internal walls and external plaster"},
+            {"name": "Finishing Milestone", "percent": 20.0, "due_date": "2026-06-01", "trigger": "On completion of flooring and doors"},
+            {"name": "Possession Payment", "percent": 10.0, "due_date": "2026-12-31", "trigger": "On offer of possession with occupancy certificate"},
+        ],
+    },
 }
+
+CURRENT: dict = {}   # the sample being built (used by localize)
+
+# India wording applied to the shared Dubai template text, so one template yields both jurisdictions.
+IN_REPLACEMENTS = [
+    ("AED ", "INR "),
+    (", Dubai, United Arab Emirates", ", {city}, Maharashtra, India"),
+    ("the laws of the Emirate of Dubai and the federal laws of the United Arab Emirates applicable therein, including the "
+     "laws regulating the registration of off-plan sales and the operation of escrow accounts for real estate developments",
+     "the laws of India, including the Real Estate (Regulation and Development) Act, 2016 (RERA) and the rules made under it"),
+    ("the laws of the Emirate of Dubai and the federal laws of the United Arab Emirates. The courts of Dubai shall have",
+     "the laws of India including RERA. The courts at {city} shall have"),
+    ("United Arab Emirates Dirhams", "Indian Rupees"),
+    ("the Land Department", "the Sub-Registrar of Assurances"),
+    ("the escrow account designated for the Project", "the RERA designated bank account of the Project"),
+    ("the escrow account", "the RERA designated bank account"),
+    ("escrow monies", "monies in the RERA designated account"),
+    ("Dubai, UAE", "{city}, India"),
+    ("under the laws of the United Arab Emirates", "under the laws of India"),
+    ("under the laws of the United Arab Emirates (the", "under the laws of India (the"),
+]
+
+
+def localize(text: str) -> str:
+    if CURRENT.get("country") != "IN":
+        return text
+    for a, b in IN_REPLACEMENTS:
+        text = text.replace(a, b.replace("{city}", CURRENT["city"]))
+    return text
 
 
 # ---------------------------------------------------------------------------
 # Formatting helpers
 # ---------------------------------------------------------------------------
 def aed(n: float) -> str:
-    return f"AED {n:,.0f}" if float(n).is_integer() else f"AED {n:,.2f}"
+    return f"AED {n:,.0f}" if float(n).is_integer() else f"AED {n:,.2f}"   # localize() turns AED into INR for India
 
 
 def long_date(iso: str) -> str:
@@ -323,21 +383,28 @@ def clauses(t: dict) -> list[tuple[str, list[str]]]:
     return out
 
 
+def P(text, style):
+    return Paragraph(localize(text), style)
+
+
 def story_for(t: dict, st: dict) -> list:
     unit = t["unit_type"]
     s: list = []
-    s.append(Paragraph("SALE AND PURCHASE AGREEMENT", st["title"]))
-    s.append(Paragraph(f"{t['project']}, {t['district']}, Dubai, United Arab Emirates", st["sub"]))
-    s.append(Paragraph(f"Dated {long_date(t['spa_date'])}", st["sub"]))
+    s.append(P("SALE AND PURCHASE AGREEMENT", st["title"]))
+    s.append(P(f"{t['project']}, {t['district']}, Dubai, United Arab Emirates", st["sub"]))
+    s.append(P(f"Dated {long_date(t['spa_date'])}", st["sub"]))
     s.append(Spacer(1, 8))
-    s.append(Paragraph("PARTIES", st["h"]))
-    s.append(Paragraph(
+    if t.get("rera_no"):
+        s.append(P(f"The Project is registered under the Real Estate (Regulation and Development) Act, 2016 with "
+                   f"RERA registration number <b>{t['rera_no']}</b>.", st["p"]))
+    s.append(P("PARTIES", st["h"]))
+    s.append(P(
         f"(1) <b>{t['developer']}</b>, a company duly incorporated and existing under the laws of the United Arab "
         f"Emirates (the \"Seller\"); and", st["p"]))
-    s.append(Paragraph(
+    s.append(P(
         f"(2) <b>{t['buyer']}</b>, the individual identified in Schedule 1 (the \"Buyer\").", st["p"]))
-    s.append(Paragraph("BACKGROUND", st["h"]))
-    s.append(Paragraph(
+    s.append(P("BACKGROUND", st["h"]))
+    s.append(P(
         f"(A) The Seller is developing the Project known as {t['project']}. (B) The Seller has agreed to sell and the "
         f"Buyer has agreed to buy the {unit} described below on the terms and conditions of this Agreement.", st["p"]))
 
@@ -345,13 +412,13 @@ def story_for(t: dict, st: dict) -> list:
         if heading == "PAGEBREAK":
             s.append(PageBreak())
             continue
-        s.append(Paragraph(heading, st["h"]))
+        s.append(P(heading, st["h"]))
         for p in paras:
-            s.append(Paragraph(p, st["p"]))
+            s.append(P(p, st["p"]))
 
     # Schedule 1 on its own page
     s.append(PageBreak())
-    s.append(Paragraph("SCHEDULE 1: UNIT DETAILS", st["h"]))
+    s.append(P("SCHEDULE 1: UNIT DETAILS", st["h"]))
     rows = [
         ["Item", "Details"],
         ["Project", t["project"]],
@@ -367,8 +434,8 @@ def story_for(t: dict, st: dict) -> list:
     s.append(table(rows, [55 * mm, 100 * mm]))
     s.append(Spacer(1, 12))
 
-    s.append(Paragraph("SCHEDULE 2: PAYMENT PLAN", st["h"]))
-    s.append(Paragraph(
+    s.append(P("SCHEDULE 2: PAYMENT PLAN", st["h"]))
+    s.append(P(
         "The Buyer shall pay the Purchase Price in accordance with the following Payment Plan. Percentages are of the "
         "Purchase Price. Amounts are due on the Due Date stated, subject to Clause 3.4.", st["p"]))
     prow = [["No.", "Milestone", "% of Price", "Due Date", "Payment Trigger"]]
@@ -376,8 +443,8 @@ def story_for(t: dict, st: dict) -> list:
         prow.append([str(i), m["name"], pct(m["percent"]), long_date(m["due_date"]), m["trigger"]])
     s.append(table(prow, [10 * mm, 38 * mm, 20 * mm, 30 * mm, 62 * mm], repeat=1))
     s.append(Spacer(1, 14))
-    s.append(Paragraph("EXECUTION", st["h"]))
-    s.append(Paragraph(
+    s.append(P("EXECUTION", st["h"]))
+    s.append(P(
         f"Signed by the parties on {long_date(t['spa_date'])}.", st["p"]))
     sig = [[f"For and on behalf of the Seller\n{t['developer']}\n\n______________________",
             f"The Buyer\n{t['buyer']}\n\n______________________"]]
@@ -386,6 +453,7 @@ def story_for(t: dict, st: dict) -> list:
 
 
 def table(rows, widths, repeat=1):
+    rows = [[localize(str(c)) for c in r] for r in rows]
     tb = Table(rows, colWidths=widths, repeatRows=repeat)
     tb.setStyle(TableStyle([
         ("FONTNAME", (0, 0), (-1, 0), "Times-Bold"),
@@ -400,7 +468,7 @@ def table(rows, widths, repeat=1):
     wrapb = ParagraphStyle("cb", fontName="Times-Bold", fontSize=9.5, leading=11.5)
     for r, row in enumerate(rows):
         for c, cell in enumerate(row):
-            row[c] = Paragraph(str(cell), wrapb if r == 0 else wrap)
+            row[c] = Paragraph(localize(str(cell)), wrapb if r == 0 else wrap)
     return tb
 
 
@@ -424,10 +492,13 @@ def main() -> None:
     SAMPLES.mkdir(exist_ok=True)
     truth_out = {}
     for key, t in TRUTH.items():
+        CURRENT.clear(); CURRENT.update(t)
         p = build_pdf(t)
         print("wrote", p.relative_to(ROOT))
-        truth_out[t["file"]] = {k: v for k, v in t.items()
-                                if k not in ("file", "project", "district", "unit_type", "developer", "floor", "spa_date")}
+        truth_out[t["file"]] = {"currency": "INR" if t.get("country") == "IN" else "AED"}
+        truth_out[t["file"]] |= {k: v for k, v in t.items()
+                                if k not in ("file", "project", "district", "unit_type", "developer", "floor", "spa_date",
+                                             "country", "city", "rera_no")}
     (ROOT / "ground_truth.json").write_text(json.dumps(truth_out, indent=2))
     print("wrote ground_truth.json")
 

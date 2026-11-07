@@ -1,7 +1,7 @@
 """Buyer Q&A agent. Answers only from the loaded contract's extracted JSON via tools.
 
 Defences:
-* Legal-advice questions are refused deterministically (regexes in rules/uae.yaml) before any LLM call.
+* Legal-advice questions are refused deterministically (regexes in rules/common.yaml and the jurisdiction pack) before any LLM call.
 * Tools return only extracted values + page + quote; contract text is wrapped as untrusted data.
 * The system prompt forbids answering from general knowledge and treats contract text as data.
 * All arithmetic (amounts, dates) is done in Python inside the tools.

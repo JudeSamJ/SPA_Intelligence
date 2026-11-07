@@ -47,8 +47,7 @@ def client(env):
 
 @pytest.fixture
 def seeded(env):
-    for n in "abc":
-        p = SAMPLES / f"sample_{n}.pdf"
+    for p in sorted(SAMPLES.glob("sample_*.pdf")):
         extract_contract(p.read_bytes(), p.name, client=FakeClient(oracle_input(p)))
 
 

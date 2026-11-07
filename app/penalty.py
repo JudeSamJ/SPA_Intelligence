@@ -1,7 +1,7 @@
 """Deterministic delay-penalty calculators. Pure Python, no LLM.
 
 Units: rates and caps are PERCENT numbers (6 means 6%, 10 means 10% of price).
-Semantics (configurable day-count in rules/uae.yaml): compensation accrues only on days
+Semantics (configurable day-count in rules/common.yaml and the jurisdiction pack): compensation accrues only on days
 of delay *after* the grace period; days <= grace_days give zero. Results are rounded
 half-up to 2 decimals.
 """
@@ -106,7 +106,7 @@ def penalty_for_contract(contract: ContractData, delay_days: int, rules: dict | 
 
 
 def simulate(contract: ContractData, scenarios: list[int] | None = None, rules: dict | None = None) -> list[dict]:
-    """Penalty table for several delay scenarios (default from rules/uae.yaml)."""
+    """Penalty table for several delay scenarios (default from rules/common.yaml and the jurisdiction pack)."""
     rules = rules or config.load_rules()
     scenarios = scenarios if scenarios is not None else rules["penalty"]["scenarios_days"]
     return [penalty_for_contract(contract, d, rules) for d in scenarios]

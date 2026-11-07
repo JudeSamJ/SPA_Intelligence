@@ -1,12 +1,5 @@
-# Jurisdiction rules for UAE (Dubai off-plan sales). Nothing here is legal advice;
-# these are configurable parameters for the deterministic calculators and the agent.
-jurisdiction: "UAE (Dubai)"
-currency: "AED"
-
-penalty:
-  day_count_basis: 365            # days per year for pro-rata accrual
-  # Compensation accrues only on days of delay AFTER the grace period has expired.
-  scenarios_days: [30, 90, 180, 365]
+# Rules shared by every jurisdiction pack (merged under the pack; the pack wins on conflicts).
+# Nothing here is legal advice; these are configurable parameters for the deterministic calculators and the agent.
 
 cashflow:
   default_period: "quarter"       # month | quarter
@@ -55,3 +48,9 @@ agent:
   refusal_message: "I can't advise on that; please contact the legal team."
 
 disclaimer: "Decision support, not legal advice."
+
+gap:
+  # How the statute-gap tab ranks a shortfall. These are product heuristics, not legal thresholds.
+  severity:
+    high_if_shortfall_ratio_gte: 0.5      # shortfall >= 50% of the statutory amount
+    medium_if_shortfall_ratio_gte: 0.2
