@@ -1,10 +1,13 @@
 """Sign-in endpoints for the browser UI. Open (no auth) by design: they are how you get a session."""
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from backend.api import auth, session
+from backend.api.deps import ApiError
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,45 +19,59 @@ def config_():
 
 @router.get("/me")
 def me(request: Request):
-    """Who am I? 200 with the identity, or 401. Works for a session cookie or an API key."""
-    p = auth.current_principal(request)
-    if p is None:
-        return {"authenticated": False, "mode": "off", "name": None, "roles": []}
-    return {"authenticated": True, "mode": auth.mode(), "name": p.display, "login": p.upn or None, "roles": sorted(p.roles)}
+    """Who am I? Always 200: {authenticated: false} when nobody is signed in (so the UI can show the login page without a failed request)."""
+    mode = auth.mode()
+    if mode == "off":
+        return {"authenticated": False, "mode": "off", "name": None, "login": None, "avatar_url": None, "roles": []}
+    try:
+        p = auth.current_principal(request)
+    except ApiError as e:
+        if e.status == 401:
+            return {"authenticated": False, "mode": mode, "name": None, "login": None, "avatar_url": None, "roles": []}
+        raise
+    return {"authenticated": True, "mode": mode, "name": p.display, "login": p.upn or None, "avatar_url": p.avatar, "roles": sorted(p.roles)}
 
 
 @router.get("/github/login")
-def github_login():
+def github_login(next: str = ""):
     if not session.enabled():
         return JSONResponse({"error": {"code": "not_found", "message": "GitHub sign-in is not configured."}}, status_code=404)
     state = session.new_state()
     resp = RedirectResponse(session.authorize_url(state), status_code=302)
-    resp.set_cookie(session.STATE_COOKIE, state, max_age=600, httponly=True, samesite="lax", secure=session.secure_cookies(), path="/api/auth")
+    kw = dict(max_age=600, httponly=True, samesite="lax", secure=session.secure_cookies(), path="/api/auth")
+    resp.set_cookie(session.STATE_COOKIE, state, **kw)
+    resp.set_cookie(session.NEXT_COOKIE, session.safe_next(next), **kw)
     return resp
 
 
-def _page(title: str, body: str, status: int) -> HTMLResponse:
-    return HTMLResponse(f"<!doctype html><meta charset=utf-8><title>{title}</title><body style='font-family:sans-serif;max-width:32rem;margin:4rem auto'>"
-                        f"<h1>{title}</h1><p>{body}</p><p><a href='/'>Back to the app</a></p>", status_code=status)
+def _fail(code: str, **extra) -> RedirectResponse:
+    """Errors go to the themed login page, which explains them; nothing about the failure beyond a short code is exposed."""
+    resp = RedirectResponse("/login?" + urlencode({"error": code, **extra}), status_code=302)
+    resp.delete_cookie(session.STATE_COOKIE, path="/api/auth")
+    resp.delete_cookie(session.NEXT_COOKIE, path="/api/auth")
+    return resp
 
 
 @router.get("/github/callback")
-def github_callback(request: Request, code: str = "", state: str = ""):
+def github_callback(request: Request, code: str = "", state: str = "", error: str = ""):
     if not session.enabled():
-        return _page("Not configured", "GitHub sign-in is not configured.", 404)
+        return JSONResponse({"error": {"code": "not_found", "message": "GitHub sign-in is not configured."}}, status_code=404)
+    if error:                                           # the user pressed Cancel at GitHub
+        return _fail("cancelled")
     if not session.same_state(state, request.cookies.get(session.STATE_COOKIE, "")):
-        return _page("Sign-in failed", "The sign-in request could not be verified. Please start again.", 400)
+        return _fail("state")
     try:
         gh = session.exchange_code(code)
-    except ValueError as e:
-        return _page("Sign-in failed", str(e), 502)
+    except ValueError:
+        return _fail("failed")
     role = session.users().get(gh["login"].lower())
-    if role is None:                                   # signed in at GitHub, but not on the allow-list
-        return _page("Access not granted", f"The GitHub account <b>{gh['login']}</b> is not allowed to use this app. Ask the owner to add it.", 403)
-    resp = RedirectResponse("/app", status_code=302)
-    resp.set_cookie(session.COOKIE, session.make_session(gh["id"], gh["login"], gh["name"], role), max_age=session.hours() * 3600,
-                    httponly=True, samesite="lax", secure=session.secure_cookies(), path="/")
+    if role is None:                                    # signed in at GitHub, but not on the allow-list
+        return _fail("not_allowed", login=gh["login"][:39])
+    resp = RedirectResponse(session.safe_next(request.cookies.get(session.NEXT_COOKIE, "")), status_code=302)
+    resp.set_cookie(session.COOKIE, session.make_session(gh["id"], gh["login"], gh["name"], role, gh.get("avatar")),
+                    max_age=session.hours() * 3600, httponly=True, samesite="lax", secure=session.secure_cookies(), path="/")
     resp.delete_cookie(session.STATE_COOKIE, path="/api/auth")
+    resp.delete_cookie(session.NEXT_COOKIE, path="/api/auth")
     return resp
 
 

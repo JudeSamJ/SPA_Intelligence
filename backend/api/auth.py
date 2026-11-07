@@ -57,6 +57,7 @@ class Principal:
     tenant: str
     raw_claims: dict = field(default_factory=dict, repr=False)
     contract: str | None = None          # apikey mode: the contract a buyer key is bound to
+    avatar: str | None = None            # GitHub sign-in: profile picture URL (GitHub image host only)
 
     @property
     def display(self) -> str:
@@ -195,7 +196,7 @@ def _session_principal(request: Request) -> Principal | None:
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get("x-requested-with", "").lower() != "spa":
         raise ApiError(403, "forbidden", "Missing X-Requested-With header.")
     return Principal(oid=c["sub"], name=str(c.get("name") or c.get("login") or ""), upn=str(c.get("login") or ""),
-                     roles={c["role"]}, tenant="github")
+                     roles={c["role"]}, tenant="github", avatar=session.safe_avatar(c.get("avatar")))
 
 
 def current_principal(request: Request) -> Principal | None:

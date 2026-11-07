@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -22,11 +23,13 @@ const setViewport = (narrow: boolean) => {
 };
 const mount = () =>
   render(
-    <PrefsProvider>
-      <MemoryRouter>
-        <TopBar />
-      </MemoryRouter>
-    </PrefsProvider>,
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <PrefsProvider>
+        <MemoryRouter>
+          <TopBar />
+        </MemoryRouter>
+      </PrefsProvider>
+    </QueryClientProvider>,
   );
 beforeEach(() => localStorage.clear());
 

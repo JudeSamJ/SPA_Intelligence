@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router-dom";
+import { UserMenu } from "../auth/UserMenu";
 import { glitchText } from "../motion/effects";
 import { Magnetic } from "../motion/Magnetic";
 import { useGo } from "../motion/Transition";
@@ -177,6 +178,7 @@ export function TopBar() {
         <>
           <div style={{ flex: 1 }} />
           <Magnetic strength={0}>{themeBtn}</Magnetic>
+          <UserMenu />
           <button
             className="chip tap"
             data-testid="menu-button"
@@ -236,6 +238,7 @@ export function TopBar() {
           {digitsChk}
           {reduceBtn}
           <Magnetic strength={0.25}>{themeBtn}</Magnetic>
+          <UserMenu />
         </>
       )}
     </header>

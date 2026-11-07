@@ -25,7 +25,7 @@ def gh(env, seeded, monkeypatch):
     monkeypatch.setenv("PUBLIC_BASE_URL", "http://localhost:8000")
     monkeypatch.setenv("SESSION_SECRET", SECRET)
     monkeypatch.setenv("GITHUB_USERS", "Alice:Spa.Reviewer,bob:Spa.Staff,evil:Spa.Admin")
-    who = {"login": "alice", "id": 11, "name": "Alice A"}
+    who = {"login": "alice", "id": 11, "name": "Alice A", "avatar_url": "https://avatars.githubusercontent.com/u/11?v=4"}
     seen = {}
 
     def handler(req: httpx.Request):
@@ -59,7 +59,8 @@ def test_login_redirects_to_github_with_state_and_exact_callback(gh):
 def test_no_session_means_401_but_signin_endpoints_are_open(gh):
     assert gh.get("/api/contracts").status_code == 401
     assert gh.get("/api/auth/config").json() == {"mode": "apikey", "github": True}
-    assert gh.get("/api/auth/me").status_code == 401
+    me = gh.get("/api/auth/me")
+    assert me.status_code == 200 and me.json()["authenticated"] is False and me.json()["mode"] == "apikey"   # no failed request for the login page
     assert gh.get("/api/health").status_code == 200
 
 
@@ -75,19 +76,20 @@ def test_allowed_user_gets_a_session_and_the_token_is_not_kept(gh):
 
 def test_state_mismatch_and_missing_state_are_rejected(gh):
     gh.get("/api/auth/github/login")
-    assert gh.get("/api/auth/github/callback", params={"code": "good", "state": "forged"}).status_code == 400
+    r = gh.get("/api/auth/github/callback", params={"code": "good", "state": "forged"})
+    assert r.status_code == 302 and r.headers["location"] == "/login?error=state"
     fresh = TestClient(create_app(), follow_redirects=False)                      # no state cookie at all
-    assert fresh.get("/api/auth/github/callback", params={"code": "good", "state": "x"}).status_code == 400
+    assert fresh.get("/api/auth/github/callback", params={"code": "good", "state": "x"}).headers["location"] == "/login?error=state"
 
 
 def test_bad_code_and_user_not_on_allow_list(gh):
     gh.get("/api/auth/github/login")
     state = gh.cookies.get(session.STATE_COOKIE)
-    assert gh.get("/api/auth/github/callback", params={"code": "wrong", "state": state}).status_code == 502
+    assert gh.get("/api/auth/github/callback", params={"code": "wrong", "state": state}).headers["location"] == "/login?error=failed"
     r = sign_in(gh, "stranger")
-    assert r.status_code == 403 and "not allowed" in r.text and gh.get("/api/contracts").status_code == 401
+    assert r.status_code == 302 and r.headers["location"] == "/login?error=not_allowed&login=stranger" and gh.get("/api/contracts").status_code == 401
     assert session.users() == {"alice": "Spa.Reviewer", "bob": "Spa.Staff"}        # the unknown role 'Spa.Admin' was ignored
-    assert sign_in(gh, "evil").status_code == 403
+    assert sign_in(gh, "evil").headers["location"].startswith("/login?error=not_allowed")
 
 
 def test_csrf_header_required_for_changes_and_roles_enforced(gh):
@@ -156,3 +158,30 @@ def test_github_login_404_when_not_configured(env, monkeypatch):
     c = TestClient(create_app(), follow_redirects=False)
     assert c.get("/api/auth/github/login").status_code == 404
     assert c.get("/api/auth/me").json()["authenticated"] is False                 # auth off: the UI needs no gate
+
+
+def test_avatar_is_shown_only_from_githubs_image_host(gh):
+    sign_in(gh)
+    me = gh.get("/api/auth/me").json()
+    assert me["avatar_url"] == "https://avatars.githubusercontent.com/u/11?v=4" and me["login"] == "alice"
+    gh.who["avatar_url"] = "https://evil.example/x.png"                              # a profile cannot point the UI at another site
+    sign_in(gh)
+    assert gh.get("/api/auth/me").json()["avatar_url"] is None
+    gh.who["avatar_url"] = "javascript:alert(1)"
+    sign_in(gh)
+    assert gh.get("/api/auth/me").json()["avatar_url"] is None
+
+
+def test_next_destination_is_limited_to_the_app(gh):
+    def land(nxt):
+        r = gh.get("/api/auth/github/login", params={"next": nxt})
+        state = parse_qs(urlparse(r.headers["location"]).query)["state"][0]
+        return gh.get("/api/auth/github/callback", params={"code": "good", "state": state}).headers["location"]
+    assert land("/app/contracts/abc/gap") == "/app/contracts/abc/gap"
+    for bad in ("https://evil.example", "//evil.example", "/other", "/app/../x", "/app//x", "javascript:1"):
+        assert land(bad) == "/app", bad
+    assert land("") == "/app"
+
+
+def test_user_cancelling_at_github_goes_back_to_the_login_page(gh):
+    assert gh.get("/api/auth/github/callback", params={"error": "access_denied"}).headers["location"] == "/login?error=cancelled"

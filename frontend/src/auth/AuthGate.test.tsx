@@ -1,73 +1,61 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import "../i18n";
 import { PrefsProvider } from "../state/prefs";
 import { jsonResponse } from "../test/helpers";
 import { AuthGate } from "./AuthGate";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const mount = () =>
+const Where = () => <p data-testid="where">{useLocation().pathname + useLocation().search}</p>;
+const mount = (start = "/app/contracts/abc/gap") =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <PrefsProvider>
-        <AuthGate>
-          <p>the app</p>
-        </AuthGate>
+        <MemoryRouter initialEntries={[start]}>
+          <Routes>
+            <Route path="/login" element={<Where />} />
+            <Route
+              path="/app/*"
+              element={
+                <AuthGate>
+                  <p>the app</p>
+                </AuthGate>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
       </PrefsProvider>
     </QueryClientProvider>,
   );
 
-const route = (map: Record<string, Response>) =>
-  vi.fn(async (u: string) => {
-    const hit = Object.entries(map).find(([k]) => u.endsWith(k));
-    return hit ? hit[1].clone() : jsonResponse({ error: { code: "x", message: "x" } }, 404);
-  });
+const me = (over: object) =>
+  vi.fn(async () => jsonResponse({ authenticated: false, mode: "off", name: null, login: null, avatar_url: null, roles: [], ...over }));
 
 describe("AuthGate", () => {
   it("shows the app unchanged when server authentication is off", async () => {
-    vi.stubGlobal("fetch", route({ "/auth/me": jsonResponse({ authenticated: false, mode: "off", name: null, roles: [] }) }));
+    vi.stubGlobal("fetch", me({}));
     mount();
     await waitFor(() => expect(screen.getByText("the app")).toBeInTheDocument());
-    expect(screen.queryByTestId("signed-in")).toBeNull();
   });
 
-  it("shows a GitHub sign-in card, not the app, when the server answers 401", async () => {
-    vi.stubGlobal(
-      "fetch",
-      route({
-        "/auth/me": jsonResponse({ error: { code: "unauthorized", message: "Sign in" } }, 401),
-        "/auth/config": jsonResponse({ mode: "apikey", github: true }),
-      }),
-    );
+  it("sends a visitor who is not signed in to the login page, remembering where they were going", async () => {
+    vi.stubGlobal("fetch", me({ mode: "apikey", authenticated: false }));
     mount();
-    const btn = await screen.findByTestId("github-signin");
-    expect(btn).toHaveAttribute("href", "/api/auth/github/login");
+    await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent("/login?next=%2Fapp%2Fcontracts%2Fabc%2Fgap"));
     expect(screen.queryByText("the app")).toBeNull();
   });
 
-  it("says sign-in is not configured when GitHub is not set up", async () => {
-    vi.stubGlobal(
-      "fetch",
-      route({
-        "/auth/me": jsonResponse({ error: { code: "unauthorized", message: "Sign in" } }, 401),
-        "/auth/config": jsonResponse({ mode: "apikey", github: false }),
-      }),
-    );
-    mount();
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/not configured/i));
-    expect(screen.queryByTestId("github-signin")).toBeNull();
-  });
-
-  it("shows the app with who is signed in once authenticated", async () => {
-    vi.stubGlobal("fetch", route({ "/auth/me": jsonResponse({ authenticated: true, mode: "apikey", name: "Alice A", roles: ["Spa.Reviewer"] }) }));
+  it("shows the app once signed in", async () => {
+    vi.stubGlobal("fetch", me({ mode: "apikey", authenticated: true, name: "Alice A", roles: ["Spa.Reviewer"] }));
     mount();
     await waitFor(() => expect(screen.getByText("the app")).toBeInTheDocument());
-    expect(screen.getByTestId("signed-in")).toHaveTextContent("Signed in as Alice A");
   });
 
   it("sends X-Requested-With on every API call (CSRF defence)", async () => {
-    const f = vi.fn(async () => jsonResponse({ authenticated: false, mode: "off", name: null, roles: [] }));
+    const f = me({});
     vi.stubGlobal("fetch", f);
     mount();
     await waitFor(() => expect(f).toHaveBeenCalled());

@@ -85,7 +85,7 @@ cd frontend && npm install && cd ..
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (269) + vitest (89)
+npm test             # pytest (272) + vitest (97)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -309,7 +309,7 @@ tried against a real tenant.**
 
 ### GitHub sign-in for the UI
 
-With `AUTH_MODE=apikey` plus the GitHub settings, the web UI asks people to sign in with GitHub and lets in only the usernames in `GITHUB_USERS` (each with `Spa.Staff` or `Spa.Reviewer`); API keys keep working for machines. Signed, HttpOnly session cookie, CSRF header on changes, allow-list re-checked on every request, reviewer names taken from the verified identity. Setup: `docs/github-signin.md`. Tested with a mocked GitHub; **not yet run against the real github.com**.
+With `AUTH_MODE=apikey` plus the GitHub settings, the web UI asks people to sign in with GitHub and lets in only the usernames in `GITHUB_USERS` (each with `Spa.Staff` or `Spa.Reviewer`); API keys keep working for machines. Signed, HttpOnly session cookie, CSRF header on changes, allow-list re-checked on every request, reviewer names taken from the verified identity. A dedicated, UAE-themed login page (`/login`) sits in front of the app, the person's GitHub picture appears at the right end of the navigation bar with a sign-out menu, and failures return to the login page with a short explanation. Setup: `docs/github-signin.md`. Tested with a mocked GitHub; **not yet run against the real github.com**.
 
 ### Power Platform (Power Automate, Copilot Studio)
 
@@ -365,8 +365,8 @@ believed correct, still unreviewed); `ae_oqood_registration`, `ae_escrow` (artic
 
 | Check | Result |
 |---|---|
-| `pytest` | 269 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
-| `vitest` | 89 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
+| `pytest` | 272 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
+| `vitest` | 97 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
 | Playwright e2e (`scripts/e2e_check.mjs`, 311 checks) | 311/311: every new page (Gap, Obligations, Playbook, ERP, Watch, Cross-check, Review queue, Accuracy) for all samples in EN and AR; highlighted evidence in the PDF panel; UI amounts equal API amounts; same-seed simulation reproducible; ack removes an alert; both planted cross-document conflicts found; ERP push refused while disabled; review correction shown as human verified; landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; scenes settle into a centred frame at Windows- and macOS-like window sizes; themed scrollbar; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |

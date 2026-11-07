@@ -575,6 +575,24 @@
     "signInGitHub": "Sign in with GitHub",
     "signedInAs": "Signed in as {{name}}",
     "signOut": "Sign out",
-    "notConfigured": "Sign-in is not configured on this server. Ask the owner."
+    "notConfigured": "Sign-in is not configured on this server. Ask the owner.",
+    "account": "Account menu for {{name}}",
+    "roleReviewer": "Reviewer",
+    "roleStaff": "Staff"
+  },
+  "login": {
+    "title": "Welcome to SPA Intelligence",
+    "subtitle": "Sign in to read your contracts, check them against the statute and simulate delay exposure.",
+    "github": "Continue with GitHub",
+    "approvedOnly": "Access is limited to approved GitHub accounts.",
+    "privacy": "We only use your GitHub name, username and picture. Nothing is posted to GitHub.",
+    "back": "Back to home",
+    "notConfigured": "Sign-in is not configured on this server. Ask the owner.",
+    "errors": {
+      "state": "The sign-in could not be verified. Please try again.",
+      "failed": "GitHub did not complete the sign-in. Please try again.",
+      "cancelled": "Sign-in was cancelled.",
+      "not_allowed": "The GitHub account \"{{login}}\" is not allowed to use this app. Ask the owner to add it."
+    }
   }
 }

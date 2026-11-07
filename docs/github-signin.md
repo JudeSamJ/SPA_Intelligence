@@ -36,6 +36,15 @@ The callback URL must match **exactly**, including `https` and no trailing slash
 
 Save and redeploy. If a variable is missing or too weak the server **refuses to start** and says which one (check the Render logs).
 
+## What people see
+
+- **Login page (`/login`):** a dedicated page in the site's UAE look (dusk sky, skyline, dunes, mashrabiya band) with one button, **Continue with GitHub**.
+  Opening anything under `/app` while signed out sends you there and, after sign-in, brings you back to where you were going (only paths inside `/app` are accepted).
+- **Friendly failures:** Cancel at GitHub, a failed or unverifiable sign-in, or a GitHub account that is not on `GITHUB_USERS` each return to the login page with a short explanation (the refused username is shown).
+- **Profile picture:** once signed in, your GitHub picture appears at the right end of the navigation bar (initials if it cannot load). Click it for your name, `@username`, role and **Sign out**.
+  The picture URL is accepted only from GitHub's own image host (`avatars.githubusercontent.com`), so a profile cannot point the app at another site.
+- Signed-in visitors who open `/login` go straight to the app. The landing page stays public.
+
 ## 3. Try it
 
 1. Open the Render URL in a private window, go to `/app`. You should see **Sign in to continue**.

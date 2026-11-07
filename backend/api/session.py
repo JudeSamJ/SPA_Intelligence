@@ -29,6 +29,9 @@ import jwt
 
 COOKIE = "spa_session"
 STATE_COOKIE = "spa_oauth_state"
+NEXT_COOKIE = "spa_next"
+AVATAR_HOST = "https://avatars.githubusercontent.com/"
+NEXT_RE = re.compile(r"^/app(/[A-Za-z0-9._~%/-]{0,200})?$")
 ROLES = ("Spa.Staff", "Spa.Reviewer")
 GITHUB_TRANSPORT: httpx.BaseTransport | None = None      # tests inject a mock: no network in tests
 
@@ -87,10 +90,22 @@ def hours() -> int:
 
 
 # ------------------------------------------------------------------ session cookie
-def make_session(github_id: int, login: str, name: str, role: str) -> str:
+def safe_avatar(url) -> str | None:
+    """Only GitHub's own image host is accepted, so a profile can never point the UI at another site."""
+    return url if isinstance(url, str) and url.startswith(AVATAR_HOST) and len(url) < 300 and " " not in url else None
+
+
+def safe_next(path: str) -> str:
+    """Where to land after sign-in: only paths inside /app (no open redirect)."""
+    return path if path and NEXT_RE.fullmatch(path) and "//" not in path and ".." not in path else "/app"
+
+
+def make_session(github_id: int, login: str, name: str, role: str, avatar: str | None = None) -> str:
     now = int(time.time())
-    return jwt.encode({"sub": f"github:{github_id}", "login": login, "name": name, "role": role,
-                       "iat": now, "exp": now + hours() * 3600}, secret(), algorithm="HS256")
+    claims = {"sub": f"github:{github_id}", "login": login, "name": name, "role": role, "iat": now, "exp": now + hours() * 3600}
+    if safe_avatar(avatar):
+        claims["avatar"] = avatar
+    return jwt.encode(claims, secret(), algorithm="HS256")
 
 
 def read_session(token: str) -> dict | None:
@@ -122,7 +137,7 @@ def same_state(a: str, b: str) -> bool:
 
 
 def exchange_code(code: str) -> dict:
-    """code -> {id, login, name}. Raises ValueError with a safe message."""
+    """code -> {id, login, name, avatar}. Raises ValueError with a safe message."""
     try:
         with httpx.Client(timeout=10, transport=GITHUB_TRANSPORT) as c:
             r = c.post("https://github.com/login/oauth/access_token", headers={"Accept": "application/json"},
@@ -135,6 +150,7 @@ def exchange_code(code: str) -> dict:
             if u.status_code != 200:
                 raise ValueError("Could not read the GitHub profile.")
             j = u.json()
-            return {"id": int(j["id"]), "login": str(j["login"]), "name": str(j.get("name") or j["login"])[:80]}
+            return {"id": int(j["id"]), "login": str(j["login"]), "name": str(j.get("name") or j["login"])[:80],
+                    "avatar": safe_avatar(j.get("avatar_url"))}
     except (httpx.HTTPError, KeyError, ValueError) as e:
         raise ValueError(str(e) if isinstance(e, ValueError) else "GitHub is unreachable.") from None
