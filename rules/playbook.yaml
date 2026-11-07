@@ -1,0 +1,78 @@
+# Company playbook as code.
+# EXAMPLE CONTENT: every threshold, term and criterion below is a fictional placeholder so the machinery can be
+# demonstrated. Replace with your company's real playbook. Nothing here is legal advice.
+version: "0.1-example"
+status: "example, replace with company-approved text"
+
+deterministic:               # evaluated in plain code, no LLM
+  - id: grace_max
+    title: "Grace period at most 90 days"
+    type: max
+    field: grace_period_days
+    threshold: 90
+    clause_type: delay
+    severity: medium
+  - id: cap_present_ok
+    title: "Delay compensation cap at most 10% of price"
+    type: max
+    field: delay_cap
+    threshold: 10
+    clause_type: delay
+    severity: medium
+  - id: plan_sums_100
+    title: "Payment plan sums to 100%"
+    type: sum_equals
+    value: 100
+    clause_type: payment
+    severity: high
+  - id: cancellation_required
+    title: "Buyer cancellation/termination clause is present"
+    type: required
+    field: cancellation_clause
+    clause_type: cancellation_forfeiture
+    severity: high
+  - id: handover_date_required
+    title: "Handover date is stated"
+    type: required
+    field: handover_date
+    clause_type: handover
+    severity: high
+  - id: forbidden_terms
+    title: "No forbidden terms"
+    type: forbidden_terms
+    terms: ["sole discretion", "non-refundable", "absolute discretion"]
+    clause_type: cancellation_forfeiture
+    severity: medium
+
+qualitative:                 # judged by a clause-specialist LLM prompt, then checked by the grounding step
+  - id: q_delay
+    clause_type: delay
+    title: "Delay compensation is payable to the buyer without conditions that defeat it"
+    criteria: ["Compensation for late handover is stated", "The buyer does not have to prove loss",
+               "Payment is not made conditional on the buyer waiving other rights"]
+    severity: high
+  - id: q_cancellation
+    clause_type: cancellation_forfeiture
+    title: "Forfeiture on buyer default is proportionate and refund of the balance is stated"
+    criteria: ["Any amount the seller may retain is limited or stated", "The balance is refunded"]
+    severity: high
+  - id: q_payment
+    clause_type: payment
+    title: "Payment terms tie construction-linked instalments to a stated stage"
+    criteria: ["Construction-linked instalments name the stage", "A written demand or reminder is required"]
+    severity: medium
+  - id: q_handover
+    clause_type: handover
+    title: "Handover date and any extension mechanism are clear"
+    criteria: ["A date is stated", "Extensions are limited to defined events"]
+    severity: medium
+  - id: q_force_majeure
+    clause_type: force_majeure
+    title: "Force majeure is narrowly defined and requires notice"
+    criteria: ["Events are listed", "The seller must notify the buyer in writing"]
+    severity: medium
+  - id: q_defects
+    clause_type: defect_liability
+    title: "A defects liability period is stated and repair is at the seller's cost"
+    criteria: ["A period is stated", "Repair is at the seller's cost"]
+    severity: medium

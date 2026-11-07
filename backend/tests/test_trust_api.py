@@ -187,3 +187,18 @@ def test_crossdoc_user_set_upload(client, seeded):
     assert {d["type"]: d["match"] for d in res["documents"]}["crm_export"] == "exact" and res["conflicts"] == []
     assert client.post("/api/crossdoc/sets/set_1/documents", params={"doc_type": "crm_export"},
                        files={"file": ("crm.csv", crm, "text/csv")}).status_code == 403
+
+
+def test_playbook_and_erp_endpoints(client, seeded, monkeypatch, tmp_path):
+    monkeypatch.setenv("SPA_AUDIT_DIR", str(tmp_path / "audit"))
+    c_ = sid("sample_c.pdf")
+    r = client.get(f"/api/contracts/{c_}/playbook").json()
+    assert r["internal_only"] and r["llm_run"] is False and r["summary"]["not_run"] == 6
+    plan = next(x for x in r["results"] if x["rule_id"] == "plan_sums_100")
+    assert plan["status"] == "fail" and plan["evidence"]["bbox"] and plan["suggestion"]["available"]
+    assert "rule_id,kind" in client.get(f"/api/contracts/{c_}/playbook", params={"format": "csv"}).text
+    ex = client.post(f"/api/contracts/{c_}/erp/export", json={"delay_days": 90, "as_of_date": "2027-01-01"}).json()
+    assert ex["mode"] == "dry_run" and ex["valid"] and ex["row_count"] >= 6 and ex["csv"].startswith("TODO_ContractReference")
+    assert ex["push_enabled"] is False
+    assert client.post(f"/api/contracts/{c_}/erp/push", json={"confirm": True}).status_code == 409
+    assert "disabled" in client.post(f"/api/contracts/{c_}/erp/push", json={"confirm": True}).json()["error"]["message"]

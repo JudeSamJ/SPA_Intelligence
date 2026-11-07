@@ -1,0 +1,15 @@
+# D365 Finance & Operations export mapping.
+# !!! PLACEHOLDERS !!!  Every entity and field name below (anything starting with TODO_) is a stand-in.
+# Confirm the real entity names and field names in YOUR environment (Data management > Data entities) and edit this file.
+# The live push refuses to run while any target name still starts with TODO_.
+placeholder: true
+entities:
+  schedule_lines: "TODO_ConfirmEntityName_ARScheduleLines"      # AR / cash-flow forecast lines
+fields:                       # source = key in our row, target = D365 field name (placeholder)
+  - {source: contract_ref,  target: "TODO_ContractReference", type: string,  required: true, max_len: 64}
+  - {source: line_type,     target: "TODO_LineType",          type: string,  required: true, max_len: 20}
+  - {source: description,   target: "TODO_Description",       type: string,  required: true, max_len: 120}
+  - {source: due_date,      target: "TODO_DueDate",           type: date,    required: true}
+  - {source: amount,        target: "TODO_Amount",            type: decimal, required: true}
+  - {source: currency,      target: "TODO_CurrencyCode",      type: string,  required: true, max_len: 3}
+  - {source: evidence_page, target: "TODO_SourcePage",        type: integer, required: false}
