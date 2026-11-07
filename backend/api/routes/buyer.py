@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 
-from app import buyer, config
+from app import buyer, buyers, config
 from app.agent import BuyerAgent
 from backend.api import auth, deps
 from backend.api.deps import ApiError
@@ -33,7 +33,13 @@ def buyer_chat(body: BuyerChatRequest, request: Request, authorization: str | No
     """AUTH_MODE=entra: an Entra token with the Spa.Buyer role, mapped to ONE contract in BUYER_ACCOUNTS.
     AUTH_MODE=off: the BUYER_TOKENS stub. Either way the contract comes from the identity, never from the request."""
     p = auth.current_principal(request)
-    if p is not None:
+    if p is not None and auth.CHANNEL in p.roles:
+        who_raw = request.headers.get("x-buyer-identity", "").strip()
+        cid = buyers.contract_for_identity(who_raw, body.channel) if who_raw else None
+        if cid is None:
+            raise ApiError(403, "forbidden", "This buyer is not linked to a contract.")
+        who = "buyer:" + buyers.normalize_identity(who_raw)
+    elif p is not None:
         cid = auth.contract_for_principal(p)
         if cid is None:
             raise ApiError(403, "forbidden", "This account is not linked to a contract.")

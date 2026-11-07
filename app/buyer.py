@@ -65,3 +65,6 @@ def audit(token: str, contract_id: str, question: str, reply, channel: str = "ap
              "citation_pages": [c["page"] for c in reply.citations], "answer": reply.answer[:500]}
     with open(d / "buyer_chat.jsonl", "a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry) + "\n")
+    from app import buyers
+    buyers.record_audit(entry["buyer"], contract_id, channel, question, reply.refused, reply.reason,
+                        reply.tool_log, entry["citation_pages"])

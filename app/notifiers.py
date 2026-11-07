@@ -1,4 +1,5 @@
-"""Outbound notifications for Power Automate (or any HTTPS webhook). Opt-in: nothing is sent unless ALERT_WEBHOOK_URL is set.
+"""Outbound notifications: a signed webhook (Power Automate or any HTTPS endpoint) and/or direct email over SMTP.
+Opt-in: nothing is sent unless ALERT_WEBHOOK_URL or SMTP_HOST + ALERT_EMAIL_TO is set.
 
 A Power Automate flow starting with "When an HTTP request is received" gives you a URL; put it in ALERT_WEBHOOK_URL. The flow then
 sends the Teams/email/WhatsApp message. We never contact end users ourselves.
@@ -84,6 +85,93 @@ class WebhookNotifier:
             "page": (alert.get("evidence") or {}).get("page")}})
 
 
+
+class EmailNotifier:
+    """Sends the designed email straight over SMTP, so the product needs no Power Automate flow.
+
+    ALERT_EMAIL_TO (comma-separated) and SMTP_HOST turn it on. SMTP_PORT (587), SMTP_USER, SMTP_PASSWORD, SMTP_FROM (defaults to
+    SMTP_USER) and SMTP_SECURITY (starttls | ssl | none) are optional. Failures are logged by type and never raise."""
+    smtp_factory = None                                  # tests inject a fake SMTP class
+
+    def __init__(self, host: str, port: int, user: str, password: str, sender: str, recipients: list[str],
+                 security: str = "starttls", timeout: float = 15.0):
+        if not recipients:
+            raise ValueError("ALERT_EMAIL_TO has no recipients.")
+        self.host, self.port, self.user, self.password = host, port, user, password
+        self.sender, self.recipients, self.security, self.timeout = sender, recipients, security, timeout
+
+    def post(self, kind: str, data: dict) -> bool:
+        if kind not in ("alert", "contract_ready", "review_needed"):
+            return False
+        import smtplib
+        from email.message import EmailMessage
+        from email.utils import formataddr
+        try:
+            from .emailcards import build_email
+            mail = data.get("email") or build_email(kind, data)
+            msg = EmailMessage()
+            msg["Subject"], msg["To"] = mail["subject"], ", ".join(self.recipients)
+            msg["From"] = formataddr((os.environ.get("EMAIL_SENDER_NAME", "SPA Intelligence"), self.sender))
+            msg.set_content(mail["text"])
+            msg.add_alternative(mail["html"], subtype="html")
+            cls = self.smtp_factory or (smtplib.SMTP_SSL if self.security == "ssl" else smtplib.SMTP)
+            with cls(self.host, self.port, timeout=self.timeout) as smtp:
+                if self.security == "starttls":
+                    smtp.starttls()
+                if self.user:
+                    smtp.login(self.user, self.password)
+                smtp.send_message(msg)
+            return True
+        except Exception as e:  # noqa: BLE001  (never include the message: it can contain addresses or credentials)
+            log.warning("email %s failed: %s", kind, type(e).__name__)
+            return False
+
+    def notify(self, alert: dict) -> None:
+        self.post("alert", {"alert": {
+            "id": alert["id"], "contract_id": alert["contract_id"], "contract_name": alert.get("contract_name", ""),
+            "event_type": alert["event_type"], "severity": alert["severity"], "message": alert["message"],
+            "due_date": alert["due_date"], "days_until": alert.get("days_until"), "label": alert.get("label"),
+            "page": (alert.get("evidence") or {}).get("page")}})
+
+
+class Hooks:
+    """Every configured outbound channel (webhook, email) behind one post()."""
+
+    def __init__(self, parts):
+        self.parts = list(parts)
+
+    def post(self, kind: str, data: dict) -> bool:
+        results = [p.post(kind, data) for p in self.parts]
+        return any(results)
+
+    def notify(self, alert: dict) -> None:
+        for p in self.parts:
+            p.notify(alert)
+
+
+def email_notifier_from_env() -> EmailNotifier | None:
+    host = os.environ.get("SMTP_HOST", "").strip()
+    to = [a.strip() for a in os.environ.get("ALERT_EMAIL_TO", "").replace(";", ",").split(",") if a.strip()]
+    if not host or not to:
+        return None
+    user = os.environ.get("SMTP_USER", "").strip()
+    sec = (os.environ.get("SMTP_SECURITY") or "starttls").strip().lower()
+    return EmailNotifier(host, int(os.environ.get("SMTP_PORT") or (465 if sec == "ssl" else 587)), user,
+                         os.environ.get("SMTP_PASSWORD", ""), os.environ.get("SMTP_FROM", "").strip() or user, to,
+                         sec if sec in ("starttls", "ssl", "none") else "starttls")
+
+
+def configured_hook() -> Hooks | None:
+    parts = []
+    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
+    if url:
+        parts.append(WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", "")))
+    em = email_notifier_from_env()
+    if em:
+        parts.append(em)
+    return Hooks(parts) if parts else None
+
+
 class CompositeNotifier:
     def __init__(self, *parts):
         self.parts = parts
@@ -97,10 +185,10 @@ class CompositeNotifier:
 
 
 def build_notifier():
-    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
-    if not url:
+    hook = configured_hook()
+    if hook is None:
         return LoggingNotifier()
-    return CompositeNotifier(LoggingNotifier(), WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", "")))
+    return CompositeNotifier(LoggingNotifier(), *hook.parts)
 
 
 # ------------------------------------------------------------------ review items
@@ -108,10 +196,9 @@ def _state_path() -> Path:
     return Path(os.environ.get("SPA_NOTIFY_STATE") or config.ROOT / "data" / "review_notified.json")
 
 
-def notify_new_review_items(items: list[dict], hook: WebhookNotifier | None = None) -> int:
+def notify_new_review_items(items: list[dict], hook=None) -> int:
     """Send each review item once (state file). items: [{contract_id, contract_name, field, status, confidence}]."""
-    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
-    hook = hook or (WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", "")) if url else None)
+    hook = hook or configured_hook()
     if hook is None:
         return 0
     p = _state_path()
@@ -145,7 +232,6 @@ def contract_summary(contract_id: str, name: str, c) -> dict:
             "warnings": len(c.warnings), "needs_review": len(review_items(c)), "model": c.model}
 
 
-def notify_contract_ready(contract_id: str, name: str, c, hook: WebhookNotifier | None = None) -> bool:
-    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
-    hook = hook or (WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", "")) if url else None)
+def notify_contract_ready(contract_id: str, name: str, c, hook=None) -> bool:
+    hook = hook or configured_hook()
     return bool(hook and hook.post("contract_ready", {"contract": contract_summary(contract_id, name, c)}))

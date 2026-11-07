@@ -16,11 +16,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import config
 from app.llm import LLMCapError, LLMError, calls_made
-from backend.api import auth
+from backend.api import auth, persistence
 from backend.api.deps import ApiError
 from backend.api.routes import public as public_routes
 from backend.api.routes import session as session_routes
-from backend.api.routes import buyer, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
+from backend.api.routes import buyer, buyers as buyers_routes, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
 from backend.api.schemas import Health
 
@@ -33,7 +33,8 @@ def _err(status: int, code: str, message: str) -> JSONResponse:
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Daily obligation recompute (APScheduler). Off when SPA_DISABLE_SCHEDULER=1."""
+    """Restore data from the database, then the daily obligation recompute (APScheduler; off when SPA_DISABLE_SCHEDULER=1)."""
+    persistence.init()
     sched = None
     if os.environ.get("SPA_DISABLE_SCHEDULER") != "1":
         from apscheduler.schedulers.background import BackgroundScheduler
@@ -46,6 +47,7 @@ async def lifespan(app: FastAPI):
     finally:
         if sched:
             sched.shutdown(wait=False)
+        persistence.shutdown()
 
 
 def create_app() -> FastAPI:
@@ -97,7 +99,7 @@ def create_app() -> FastAPI:
     auth.check_startup()                                   # AUTH_MODE=entra without settings stops the server
     staff = [Depends(auth.staff_access)]
     for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router,
-              sim.router, obligations.router, crossdoc.router, internal.router):
+              sim.router, obligations.router, crossdoc.router, internal.router, buyers_routes.router):
         app.include_router(r, prefix="/api", dependencies=staff)
     app.include_router(public_routes.router, prefix="/api")    # signed email image + logo: public by design
     app.include_router(session_routes.router, prefix="/api")   # sign-in endpoints: open by design
@@ -106,7 +108,8 @@ def create_app() -> FastAPI:
     @app.get("/api/health", response_model=Health, tags=["meta"])
     def health():
         return Health(status="ok", llm_configured=config.llm_configured(), model=config.model_tag(),
-                      llm_calls_made=calls_made(), llm_call_cap=config.MAX_LLM_CALLS, auth_mode=auth.mode())
+                      llm_calls_made=calls_made(), llm_call_cap=config.MAX_LLM_CALLS, auth_mode=auth.mode(),
+                      database=persistence.status())
 
     if config.SERVE_FRONTEND and (config.FRONTEND_DIST / "index.html").exists():
         dist = config.FRONTEND_DIST

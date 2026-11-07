@@ -79,9 +79,9 @@ def webhook_test(body: WebhookTest):
     import os
     from app import notifiers, obligations as ob
     from app.review import review_items
-    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
-    if not url:
-        raise ApiError(409, "webhook_not_configured", "ALERT_WEBHOOK_URL is not set.")
+    hook = notifiers.configured_hook()
+    if hook is None:
+        raise ApiError(409, "webhook_not_configured", "Set ALERT_WEBHOOK_URL, or SMTP_HOST and ALERT_EMAIL_TO.")
     used = "real"
     items = [(s, deps.effective_contract(s)) for s in deps.list_sources()]
     items = [(s, c) for s, c in items if c is not None]
@@ -113,7 +113,6 @@ def webhook_test(body: WebhookTest):
         else:
             used, data = "sample", {"review": {"contract_id": "", "contract_name": "sample_a.pdf", "field": "price", "status": "partial",
                                                "confidence": 0.82, "page": 3}}
-    hook = notifiers.WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", ""))
     from app.emailcards import build_email
     email = build_email(body.kind, data)
     email["subject"] = "[TEST] " + email["subject"]

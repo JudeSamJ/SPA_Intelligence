@@ -81,6 +81,8 @@ def review_field(contract_id: str, field: str, body: ReviewRequest, request: Req
         raise ApiError(422, "validation_error", str(e)) from None
     from backend.api.routes.obligations import recompute_now
     recompute_now()
+    from backend.api import persistence
+    persistence.flush_soon()                                      # keep the human decision in the database
     return {"saved": d, "disclaimer": config.DISCLAIMER}
 
 

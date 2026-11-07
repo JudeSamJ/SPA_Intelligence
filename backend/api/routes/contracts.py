@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from app import config
 from app.cashflow import CashflowUnavailable, milestone_rows
 from app.extract import load_cached
-from backend.api import deps
+from backend.api import deps, persistence
 from backend.api.deps import ApiError
 from backend.api.schemas import ContractDetail, ContractStatus, ContractSummary, PlanRow
 
@@ -70,6 +70,7 @@ async def upload(file: UploadFile = File(...), extract: bool = Query(True)):
             "name": deps.sanitize_filename(file.filename or ""),
             "uploaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}))
     src = deps.get_source(cid)
+    persistence.flush_soon()                                     # keep the uploaded PDF safe before the slow extraction
     if extract and deps.status_for(src)[0] == "not_extracted":
         _start(src, force=False)
     status, err = deps.status_for(src)

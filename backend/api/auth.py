@@ -14,6 +14,8 @@ Authorisation uses Entra *app roles* in the token's `roles` claim:
   Spa.Reviewer  everything Staff can do, plus actions that change data or spend LLM calls (review, upload/extract,
                 golden export, jurisdiction, eval runs, ERP push)
   Spa.Buyer     only POST /buyer/chat, and only for the contract mapped to that person in BUYER_ACCOUNTS
+  Spa.Channel   a messaging channel (Teams agent, WhatsApp adapter): only POST /buyer/chat, for the buyer named in the
+                X-Buyer-Identity header, whose contract is looked up in the buyer_assignments table
 
 No secret is needed by the API: it only verifies signatures with public keys. Nothing from a token is ever logged
 except a short hash of the object id (see app/buyer.py).
@@ -39,7 +41,7 @@ from backend.api.deps import ApiError
 
 log = logging.getLogger("spa.auth")
 
-STAFF, REVIEWER, BUYER = "Spa.Staff", "Spa.Reviewer", "Spa.Buyer"
+STAFF, REVIEWER, BUYER, CHANNEL = "Spa.Staff", "Spa.Reviewer", "Spa.Buyer", "Spa.Channel"
 READ_ROLES = {STAFF, REVIEWER}
 WRITE_ROLES = {REVIEWER}
 # POST routes that only compute and return results (no stored change, no LLM spend): Staff may call them.

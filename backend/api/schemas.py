@@ -27,6 +27,7 @@ class Health(BaseModel):
     llm_calls_made: int
     llm_call_cap: int
     auth_mode: Literal["off", "entra", "apikey"] = "off"
+    database: dict = {"enabled": False}
 
 
 class ContractSummary(BaseModel):

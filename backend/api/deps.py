@@ -153,6 +153,8 @@ def start_extraction(src: Source, force: bool) -> Job:
             except Exception:  # noqa: BLE001
                 pass
             recompute_now()                       # contract changed -> refresh the alert feed
+            from backend.api import persistence
+            persistence.flush_soon()              # save the new extraction to the database now
         except Exception as e:  # noqa: BLE001  (surface a safe message; never contract text)
             job.state, job.error = "error", f"{type(e).__name__}: {str(e)[:300]}"
         job.updated = time.time()
