@@ -1,0 +1,42 @@
+{
+  "brochure": {
+    "doc": "brochure.pdf",
+    "quotes": {
+      "unit_id": "Unit MCR-1204",
+      "area_sqft": "Saleable area: 1,180.00 sq ft",
+      "price": "Price: AED 2,450,000",
+      "handover_date": "Possession: 30 June 2027",
+      "payment_plan": "Payment plan: 10% / 20% / 20% / 20% / 30%",
+      "delay_rate": "Delay compensation: 6% per annum",
+      "registration_number": "Registration number: DLD-8841"
+    },
+    "values": {
+      "unit_id": "MCR-1204",
+      "area_sqft": 1180.0,
+      "price": 2450000.0,
+      "handover_date": "2027-06-30",
+      "payment_plan": [
+        10,
+        20,
+        20,
+        20,
+        30
+      ],
+      "delay_rate": 6.0,
+      "registration_number": "DLD-8841"
+    }
+  },
+  "filing": {
+    "doc": "filing.pdf",
+    "quotes": {
+      "unit_id": "Unit MCR-1204",
+      "registration_number": "Registration number: DLD-8814",
+      "handover_date": "Proposed date of completion: 30 June 2027"
+    },
+    "values": {
+      "unit_id": "MCR-1204",
+      "registration_number": "DLD-8814",
+      "handover_date": "2027-06-30"
+    }
+  }
+}

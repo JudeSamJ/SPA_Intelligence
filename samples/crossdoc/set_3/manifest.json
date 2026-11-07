@@ -1,0 +1,35 @@
+{
+  "set_id": "set_3",
+  "unit_key": "PHT-B-0807",
+  "spa": "spa.pdf",
+  "currency": "AED",
+  "documents": [
+    {
+      "type": "spa",
+      "file": "spa.pdf"
+    },
+    {
+      "type": "brochure",
+      "file": "brochure.pdf"
+    },
+    {
+      "type": "regulator_filing",
+      "file": "filing.pdf"
+    },
+    {
+      "type": "crm_export",
+      "file": "crm.csv"
+    }
+  ],
+  "crm_area_unit": "sqm",
+  "planted": [
+    {
+      "attribute": "delay_rate",
+      "docs": [
+        "brochure",
+        "spa"
+      ]
+    }
+  ],
+  "note": "SYNTHETIC. 'planted' lists the mismatches placed on purpose."
+}

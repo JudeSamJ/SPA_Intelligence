@@ -1,0 +1,42 @@
+{
+  "set_id": "set_1",
+  "unit_key": "KH-T2-1503",
+  "spa": "spa.pdf",
+  "currency": "INR",
+  "documents": [
+    {
+      "type": "spa",
+      "file": "spa.pdf"
+    },
+    {
+      "type": "brochure",
+      "file": "brochure.pdf"
+    },
+    {
+      "type": "regulator_filing",
+      "file": "filing.pdf"
+    },
+    {
+      "type": "crm_export",
+      "file": "crm.csv"
+    }
+  ],
+  "crm_area_unit": "sqft",
+  "planted": [
+    {
+      "attribute": "price",
+      "docs": [
+        "brochure",
+        "spa"
+      ]
+    },
+    {
+      "attribute": "handover_date",
+      "docs": [
+        "filing",
+        "spa"
+      ]
+    }
+  ],
+  "note": "SYNTHETIC. 'planted' lists the mismatches placed on purpose."
+}

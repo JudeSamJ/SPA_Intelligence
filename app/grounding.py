@@ -25,7 +25,7 @@ from .evidence import key, locate, set_fuzzy_threshold
 from .schema import ContractData, Grounding, GroundingCheck, Milestone, Sourced
 
 NUMERIC_FIELDS = {"price", "area_sqft", "grace_period_days", "delay_rate", "delay_cap"}
-ENTITY_FIELDS = {"buyer", "unit_id"}
+ENTITY_FIELDS = {"buyer", "unit_id", "registration_number"}
 MONTHS = {m: i for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
      "november", "december"], 1)}
@@ -131,6 +131,11 @@ def _value_check(field: str, value, quote: str, basis: str | None = None):
         ok = d in parse_dates(quote)
         return GroundingCheck(name="value_in_quote", passed=ok,
                               detail=f"date {d.isoformat()} {'found' if ok else 'not found'} in quote")
+    if isinstance(value, list) and value and all(isinstance(x, (int, float)) for x in value):
+        nums = parse_numbers(quote)
+        ok = all(any(_close(n, float(x)) for n in nums) for x in value)
+        return GroundingCheck(name="value_in_quote", passed=ok,
+                              detail=f"{len(value)} numbers {'all found' if ok else 'not all found'} in quote")
     if isinstance(value, (int, float)):
         ok = any(_close(n, float(value)) for n in parse_numbers(quote))
         return GroundingCheck(name="value_in_quote", passed=ok,

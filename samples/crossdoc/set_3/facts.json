@@ -1,0 +1,44 @@
+{
+  "brochure": {
+    "doc": "brochure.pdf",
+    "quotes": {
+      "unit_id": "Unit PHT-B-0807",
+      "area_sqft": "Saleable area: 1,025.50 sq ft",
+      "price": "Price: AED 1,875,000",
+      "handover_date": "Possession: 31 March 2028",
+      "payment_plan": "Payment plan: 10% / 10% / 10% / 15% / 15% / 10% / 30%",
+      "delay_rate": "Delay compensation: AED 10.00 per square foot per year",
+      "registration_number": "Registration number: DLD-5520"
+    },
+    "values": {
+      "unit_id": "PHT-B-0807",
+      "area_sqft": 1025.5,
+      "price": 1875000.0,
+      "handover_date": "2028-03-31",
+      "payment_plan": [
+        10,
+        10,
+        10,
+        15,
+        15,
+        10,
+        30
+      ],
+      "delay_rate": 10.0,
+      "registration_number": "DLD-5520"
+    }
+  },
+  "filing": {
+    "doc": "filing.pdf",
+    "quotes": {
+      "unit_id": "Unit PHT-B-0807",
+      "registration_number": "Registration number: DLD-5520",
+      "handover_date": "Proposed date of completion: 31 March 2028"
+    },
+    "values": {
+      "unit_id": "PHT-B-0807",
+      "registration_number": "DLD-5520",
+      "handover_date": "2028-03-31"
+    }
+  }
+}

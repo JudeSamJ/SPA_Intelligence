@@ -1,0 +1,19 @@
+# Cross-document comparison settings (product configuration, not legal content).
+unit_key:
+  # The unit key is normalised before documents are matched: lower-case, then drop these words, then drop every
+  # character that is not a letter or digit. "Unit KH-T2-1503", "kh t2 1503" and "KH-T2-1503" give the same key.
+  strip_words: ["unit", "apt", "apartment", "flat", "no", "number", "plot"]
+  fuzzy_uncertain_ratio: 85      # keys that are not equal but this similar are matched as UNCERTAIN (shown as such)
+units:
+  sqm_to_sqft: 10.7639           # physical constant (1 m2 = 10.7639 sq ft)
+tolerances:
+  price_rel: 0.0                 # prices must match exactly after normalisation
+  area_rel: 0.005                # 0.5% (brochures round carpet areas)
+  rate_abs: 0.005
+severity:                        # mismatch severity per attribute
+  price: high
+  handover_date: high
+  payment_plan: high
+  delay_rate: high
+  registration_number: high
+  area_sqft: medium

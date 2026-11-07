@@ -159,3 +159,31 @@ def test_obligations_and_alerts_api(client, seeded):
     assert client.post("/api/alerts/zzz/ack").status_code == 404
     one = client.get("/api/obligations", params={"as_of": "2025-03-10", "contract_id": sid("sample_a.pdf")}).json()
     assert {o["contract_id"] for o in one["obligations"]} == {sid("sample_a.pdf")}
+
+
+def test_crossdoc_api(client, seeded, monkeypatch):
+    sets = client.get("/api/crossdoc/sets").json()["sets"]
+    assert {s["set_id"] for s in sets} >= {"set_1", "set_2", "set_3"} and all(s["synthetic"] for s in sets if s["kind"] == "sample")
+    r = client.get("/api/crossdoc/sets/set_1").json()
+    assert set(r["pending"]) == {"brochure", "regulator_filing"} and "extract=true" in r["pending_note"]
+    # SPA + CRM only: price conflict not yet visible (brochure unread) but CRM-vs-SPA area/handover agree
+    assert r["llm_calls_made"] == 0 and r["synthetic"]
+    assert client.get("/api/crossdoc/sets/nope").status_code == 404
+    assert client.get("/api/crossdoc/sets/..%2F..%2Fetc").status_code == 404
+
+
+def test_crossdoc_user_set_upload(client, seeded):
+    cid = sid("sample_d_rera.pdf")
+    r = client.post("/api/crossdoc/sets", json={"unit_key": "KH T2 1503", "spa_contract_id": cid})
+    assert r.status_code == 201
+    sid_ = r.json()["set_id"]
+    assert client.post("/api/crossdoc/sets", json={"unit_key": "KH T2 1503"}).status_code == 409
+    crm = (SAMPLES / "crossdoc" / "set_1" / "crm.csv").read_bytes()
+    ok = client.post(f"/api/crossdoc/sets/{sid_}/documents", params={"doc_type": "crm_export"}, files={"file": ("crm.csv", crm, "text/csv")})
+    assert ok.status_code == 201
+    bad = client.post(f"/api/crossdoc/sets/{sid_}/documents", params={"doc_type": "brochure"}, files={"file": ("b.pdf", b"nope", "application/pdf")})
+    assert bad.status_code == 415
+    res = client.get(f"/api/crossdoc/sets/{sid_}").json()
+    assert {d["type"]: d["match"] for d in res["documents"]}["crm_export"] == "exact" and res["conflicts"] == []
+    assert client.post("/api/crossdoc/sets/set_1/documents", params={"doc_type": "crm_export"},
+                       files={"file": ("crm.csv", crm, "text/csv")}).status_code == 403

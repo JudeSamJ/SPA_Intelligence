@@ -17,7 +17,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import config
 from app.llm import LLMCapError, LLMError, calls_made
 from backend.api.deps import ApiError
-from backend.api.routes import cashflow, chat, contracts, obligations, penalty, sim, trust
+from backend.api.routes import cashflow, chat, contracts, crossdoc, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
 from backend.api.schemas import Health
 
@@ -91,7 +91,7 @@ def create_app() -> FastAPI:
         log.error("unhandled %s", type(e).__name__)          # type only, no message (could hold contract text)
         return _err(500, "internal_error", "Something went wrong on the server.")
 
-    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router):
+    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router, crossdoc.router):
         app.include_router(r, prefix="/api")
 
     @app.get("/api/health", response_model=Health, tags=["meta"])

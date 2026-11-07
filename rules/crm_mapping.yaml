@@ -1,0 +1,12 @@
+# Column mapping for CRM exports (CSV / Excel). Edit the right-hand side to match YOUR export.
+# A Dataverse connector can later produce the same shape; none is built here.
+unit_id: "Unit No"
+buyer: "Customer"
+price: "Agreed Price"
+area: "Area"
+area_unit: sqft            # sqft | sqm   (unit of the Area column)
+handover_date: "Possession Date"
+date_format: "%d-%m-%Y"    # strptime format of the date column
+payment_plan: "Plan %"     # slash separated percentages, e.g. 10/20/20/20/20/10
+delay_rate: "Delay Rate"
+registration_number: "RERA No"

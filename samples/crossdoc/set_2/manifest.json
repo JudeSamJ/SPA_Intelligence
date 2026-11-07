@@ -1,0 +1,49 @@
+{
+  "set_id": "set_2",
+  "unit_key": "MCR-1204",
+  "spa": "spa.pdf",
+  "currency": "AED",
+  "documents": [
+    {
+      "type": "spa",
+      "file": "spa.pdf"
+    },
+    {
+      "type": "brochure",
+      "file": "brochure.pdf"
+    },
+    {
+      "type": "regulator_filing",
+      "file": "filing.pdf"
+    },
+    {
+      "type": "crm_export",
+      "file": "crm.csv"
+    }
+  ],
+  "crm_area_unit": "sqft",
+  "planted": [
+    {
+      "attribute": "payment_plan",
+      "docs": [
+        "brochure",
+        "spa"
+      ]
+    },
+    {
+      "attribute": "area_sqft",
+      "docs": [
+        "crm",
+        "spa"
+      ]
+    },
+    {
+      "attribute": "registration_number",
+      "docs": [
+        "filing",
+        "brochure"
+      ]
+    }
+  ],
+  "note": "SYNTHETIC. 'planted' lists the mismatches placed on purpose."
+}

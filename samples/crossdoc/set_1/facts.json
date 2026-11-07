@@ -1,0 +1,43 @@
+{
+  "brochure": {
+    "doc": "brochure.pdf",
+    "quotes": {
+      "unit_id": "Unit KH-T2-1503",
+      "area_sqft": "Saleable area: 865.00 sq ft",
+      "price": "Price: INR 8,250,000",
+      "handover_date": "Possession: 31 December 2026",
+      "payment_plan": "Payment plan: 10% / 20% / 20% / 20% / 20% / 10%",
+      "delay_rate": "Delay compensation: INR 60.00 per square foot per year",
+      "registration_number": "Registration number: P99999000001"
+    },
+    "values": {
+      "unit_id": "KH-T2-1503",
+      "area_sqft": 865.0,
+      "price": 8250000.0,
+      "handover_date": "2026-12-31",
+      "payment_plan": [
+        10,
+        20,
+        20,
+        20,
+        20,
+        10
+      ],
+      "delay_rate": 60.0,
+      "registration_number": "P99999000001"
+    }
+  },
+  "filing": {
+    "doc": "filing.pdf",
+    "quotes": {
+      "unit_id": "Unit KH-T2-1503",
+      "registration_number": "Registration number: P99999000001",
+      "handover_date": "Proposed date of completion: 30 June 2027"
+    },
+    "values": {
+      "unit_id": "KH-T2-1503",
+      "registration_number": "P99999000001",
+      "handover_date": "2027-06-30"
+    }
+  }
+}
