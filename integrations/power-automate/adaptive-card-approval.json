@@ -1,0 +1,65 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "The statutory figure rests on unreviewed legal logic (no lawyer has reviewed it). Treat it as decision support, not legal advice.",
+      "wrap": true,
+      "weight": "Bolder",
+      "size": "Large",
+      "color": "Warning"
+    },
+    {
+      "type": "TextBlock",
+      "text": "@{outputs('GetStatuteGap')?['body']?['findings']?[0]?['message']}",
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Contractual",
+          "value": "@{outputs('GetStatuteGap')?['body']?['contractual']?['penalty']}"
+        },
+        {
+          "title": "Statutory",
+          "value": "@{outputs('GetStatuteGap')?['body']?['statutory']?['amount']}"
+        },
+        {
+          "title": "Shortfall",
+          "value": "@{outputs('GetStatuteGap')?['body']?['shortfall']}"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "The statutory figure rests on unreviewed legal logic (no lawyer has reviewed it). Treat it as decision support, not legal advice.",
+      "wrap": true,
+      "color": "Warning"
+    },
+    {
+      "type": "Input.Text",
+      "id": "comment",
+      "placeholder": "Comment",
+      "isMultiline": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Approve for ERP push",
+      "data": {
+        "decision": "approve"
+      }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Send to legal",
+      "data": {
+        "decision": "legal"
+      }
+    }
+  ]
+}

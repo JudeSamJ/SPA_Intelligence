@@ -1,3 +1,4 @@
+import { getToken } from "../auth/token";
 import type { components } from "./types";
 
 type S = components["schemas"];
@@ -33,7 +34,10 @@ export class ApiError extends Error {
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${BASE}${path}`, init);
+    const token = await getToken();
+    const headers = new Headers(init?.headers);
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    res = await fetch(`${BASE}${path}`, { ...init, headers });
   } catch {
     throw new ApiError(0, "network", "Could not reach the server.");
   }

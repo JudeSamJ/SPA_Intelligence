@@ -1,0 +1,84 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Field needs review",
+      "wrap": true,
+      "weight": "Bolder",
+      "size": "Large"
+    },
+    {
+      "type": "TextBlock",
+      "text": "@{triggerBody()?['review']?['contract_name']} \u00b7 @{triggerBody()?['review']?['field']}",
+      "wrap": true,
+      "isSubtle": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Status",
+          "value": "@{triggerBody()?['review']?['status']}"
+        },
+        {
+          "title": "Confidence",
+          "value": "@{triggerBody()?['review']?['confidence']}"
+        },
+        {
+          "title": "Page",
+          "value": "@{triggerBody()?['review']?['page']}"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "Open the contract in SPA Intelligence to see the highlighted source, then decide.",
+      "wrap": true,
+      "isSubtle": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "value",
+      "placeholder": "Correct value (only for Correct)"
+    },
+    {
+      "type": "Input.Text",
+      "id": "note",
+      "placeholder": "Note (optional)",
+      "isMultiline": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "Decision support, not legal advice.",
+      "wrap": true,
+      "isSubtle": true,
+      "size": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Accept",
+      "data": {
+        "action": "accept"
+      }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Correct",
+      "data": {
+        "action": "correct"
+      }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Reject",
+      "data": {
+        "action": "reject"
+      }
+    }
+  ]
+}

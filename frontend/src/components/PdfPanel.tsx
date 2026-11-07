@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
+import { authedOpen } from "../auth/token";
 import { apiX } from "../api/trust";
 import { PageViewer } from "./PageViewer";
 import type { EvidenceTarget } from "../pages/ctx";
@@ -57,7 +58,7 @@ export default function PdfPanel({
         </strong>
         <button className="chip" aria-label={t("evidence.prev")} disabled={page <= 1} onClick={() => setManual({ key, page: page - 1 })}>‹</button>
         <button className="chip" aria-label={t("evidence.next")} disabled={page >= pages} onClick={() => setManual({ key, page: page + 1 })}>›</button>
-        <a className="chip" href={api.pdfUrl(id, page)} target="_blank" rel="noreferrer">{t("evidence.openPdf")}</a>
+        <button className="chip" onClick={() => void authedOpen(api.pdfUrl(id, page))}>{t("evidence.openPdf")}</button>
         <button className="chip" onClick={onClose}>{t("terms.closePdf")}</button>
       </div>
       <p role="status" style={{ margin: 0, padding: "0.35rem 0.8rem", fontSize: "0.85rem", color: found ? "var(--ok)" : "var(--muted)" }}>

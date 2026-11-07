@@ -175,9 +175,15 @@ def recompute(items: list[tuple[str, str, ContractData]], as_of: date) -> dict:
         kept_acked = [a for aid, a in old.items() if a.get("acked") and aid not in fresh]
         result = list(fresh.values()) + kept_acked
         _save(result)
+    notifier = NOTIFIER if not isinstance(NOTIFIER, LoggingNotifier) else _configured_notifier()
     for a in new:
-        NOTIFIER.notify(a)
+        notifier.notify(a)
     return {"alerts": len(result), "new": len(new), "as_of": as_of.isoformat()}
+
+
+def _configured_notifier():
+    from .notifiers import build_notifier      # lazy: notifiers imports this module
+    return build_notifier()
 
 
 def _message(o: dict) -> str:

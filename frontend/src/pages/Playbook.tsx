@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiX, type PlaybookRow } from "../api/trust";
+import { authedOpen } from "../auth/token";
 import { EvidenceLink } from "../components/EvidenceLink";
 import { Alert, ErrorState, Skeleton } from "../components/ui";
 import { useFmt } from "../i18n/format";
@@ -72,7 +73,7 @@ export default function Playbook() {
             ))}
             <span style={{ flex: 1 }} />
             {!d.llm_run && <button className="btn btn-ghost" disabled={run.isPending} onClick={() => run.mutate()} data-testid="pb-run">{run.isPending ? t("playbook.running") : t("playbook.runLlm")}</button>}
-            <a className="btn btn-ghost" href={apiX.playbookCsvUrl(id)} download>{t("playbook.export")}</a>
+            <button className="btn btn-ghost" onClick={() => void authedOpen(apiX.playbookCsvUrl(id), `playbook_${id.slice(0, 8)}.csv`)}>{t("playbook.export")}</button>
           </div>
         )}
         {!d?.llm_run && d && <p style={{ margin: 0, color: "var(--muted)" }}>{t("playbook.llmCost")}</p>}

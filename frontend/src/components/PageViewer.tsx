@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Evidence } from "../api/trust";
+import { useAuthedSrc } from "../auth/useAuthedSrc";
 import { gsap } from "../motion/registry";
 import { usePrefs } from "../state/prefs";
 
@@ -23,6 +24,7 @@ export function PageViewer({
 }) {
   const { t } = useTranslation();
   const { tier } = usePrefs();
+  const shown = useAuthedSrc(src);
   const box = useRef<HTMLDivElement>(null);
   const [loadedSrc, setLoadedSrc] = useState("");
   const loaded = loadedSrc === src;
@@ -48,16 +50,16 @@ export function PageViewer({
   return (
     <div ref={box} data-testid="page-viewer" style={{ overflow: "auto", height, background: "#fff", borderRadius: 8 }}>
       <div style={{ position: "relative", width: "100%" }}>
-        <img
+        {shown && <img
           key={src}
-          src={src}
+          src={shown}
           alt={label}
           ref={(el) => {
             if (el?.complete && el.naturalWidth > 0) setLoadedSrc(src); // cached image: load may fire before React attaches
           }}
           onLoad={() => setLoadedSrc(src)}
           style={{ display: "block", width: "100%", height: "auto" }}
-        />
+        />}
         {loaded &&
           W > 0 &&
           rects.map((r, i) => {

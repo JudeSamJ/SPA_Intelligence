@@ -26,6 +26,7 @@ class Health(BaseModel):
     model: str
     llm_calls_made: int
     llm_call_cap: int
+    auth_mode: Literal["off", "entra"] = "off"
 
 
 class ContractSummary(BaseModel):

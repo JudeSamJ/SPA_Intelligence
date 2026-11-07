@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ from app.packs import list_packs, load_pack
 from app.review import ReviewError, add_decision, export_golden, get_item, load_store, review_items, save_store, valid_field
 from app.schema import ContractData, Evidence, Sourced
 from app.statute_gap import compute_gap, effective_jurisdiction
-from backend.api import deps
+from backend.api import auth, deps
 from backend.api.deps import ApiError
 
 router = APIRouter(tags=["trust"])
@@ -72,10 +72,10 @@ class ReviewRequest(BaseModel):
 
 
 @router.post("/contracts/{contract_id}/fields/{field:path}/review")
-def review_field(contract_id: str, field: str, body: ReviewRequest):
+def review_field(contract_id: str, field: str, body: ReviewRequest, request: Request):
     src, c = deps.get_contract(contract_id)
     try:
-        d = add_decision(c, src.id, field, body.action, body.value, body.note, body.reviewer,
+        d = add_decision(c, src.id, field, body.action, body.value, body.note, auth.actor(request, body.reviewer),
                          body.source_page, body.source_quote)
     except (ReviewError, ValueError) as e:
         raise ApiError(422, "validation_error", str(e)) from None

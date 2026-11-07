@@ -27,7 +27,13 @@ def _items():
 def recompute_now(as_of: date | None = None) -> dict:
     """Called by the daily scheduler and after any contract change (extraction, review, jurisdiction)."""
     try:
-        return ob.recompute(_items(), as_of or date.today())
+        items = _items()
+        out = ob.recompute(items, as_of or date.today())
+        from app.notifiers import notify_new_review_items
+        from app.review import review_items
+        queue = [{"contract_id": cid, "contract_name": name, **it} for cid, name, c in items for it in review_items(c)]
+        out["review_notified"] = notify_new_review_items(queue)
+        return out
     except Exception as e:  # noqa: BLE001 (never break the request that triggered it)
         log.error("recompute failed: %s", type(e).__name__)
         return {"error": type(e).__name__}

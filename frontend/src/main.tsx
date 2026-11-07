@@ -18,6 +18,9 @@ const qc = new QueryClient({
   defaultOptions: { queries: { staleTime: 15_000, refetchOnWindowFocus: false } },
 });
 
+// Sign-in is only wired when the Entra settings are present (see src/auth/entra.ts); otherwise nothing changes.
+if (import.meta.env.VITE_ENTRA_TENANT_ID) await (await import("./auth/entra")).initEntra();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={qc}>

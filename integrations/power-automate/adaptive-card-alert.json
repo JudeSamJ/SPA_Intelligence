@@ -1,0 +1,57 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "@{triggerBody()?['alert']?['event_type']}",
+      "wrap": true,
+      "weight": "Bolder",
+      "size": "Large",
+      "color": "Attention"
+    },
+    {
+      "type": "TextBlock",
+      "text": "@{triggerBody()?['alert']?['message']}",
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Contract",
+          "value": "@{triggerBody()?['alert']?['contract_name']}"
+        },
+        {
+          "title": "Due",
+          "value": "@{triggerBody()?['alert']?['due_date']}"
+        },
+        {
+          "title": "Severity",
+          "value": "@{triggerBody()?['alert']?['severity']}"
+        },
+        {
+          "title": "Source page",
+          "value": "@{triggerBody()?['alert']?['page']}"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "Decision support, not legal advice.",
+      "wrap": true,
+      "isSubtle": true,
+      "size": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Acknowledge",
+      "data": {
+        "action": "ack"
+      }
+    }
+  ]
+}

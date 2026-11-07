@@ -296,6 +296,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/contracts/{contract_id}/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Locate Quote Endpoint
+         * @description Highlight rectangles for any quote (used for chat citations).
+         */
+        get: operations["locate_quote_endpoint_api_contracts__contract_id__locate_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/contracts/{contract_id}/page/{page}.png": {
         parameters: {
             query?: never;
@@ -697,7 +717,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Buyer Chat */
+        /**
+         * Buyer Chat
+         * @description AUTH_MODE=entra: an Entra token with the Spa.Buyer role, mapped to ONE contract in BUYER_ACCOUNTS.
+         *     AUTH_MODE=off: the BUYER_TOKENS stub. Either way the contract comes from the identity, never from the request.
+         */
         post: operations["buyer_chat_api_buyer_chat_post"];
         delete?: never;
         options?: never;
@@ -1266,6 +1290,12 @@ export interface components {
             llm_calls_made: number;
             /** Llm Call Cap */
             llm_call_cap: number;
+            /**
+             * Auth Mode
+             * @default off
+             * @enum {string}
+             */
+            auth_mode: "off" | "entra";
         };
         /** JurisdictionBody */
         JurisdictionBody: {
@@ -2152,6 +2182,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EvidenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    locate_quote_endpoint_api_contracts__contract_id__locate_get: {
+        parameters: {
+            query: {
+                page?: number;
+                quote: string;
+            };
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evidence"];
                 };
             };
             /** @description Validation Error */

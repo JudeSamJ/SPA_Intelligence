@@ -6,7 +6,7 @@ import logging
 import os
 import time
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import config
 from app.llm import LLMCapError, LLMError, calls_made
+from backend.api import auth
 from backend.api.deps import ApiError
 from backend.api.routes import buyer, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
@@ -91,13 +92,17 @@ def create_app() -> FastAPI:
         log.error("unhandled %s", type(e).__name__)          # type only, no message (could hold contract text)
         return _err(500, "internal_error", "Something went wrong on the server.")
 
-    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router, sim.router, obligations.router, crossdoc.router, internal.router, buyer.router):
-        app.include_router(r, prefix="/api")
+    auth.check_startup()                                   # AUTH_MODE=entra without settings stops the server
+    staff = [Depends(auth.staff_access)]
+    for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router,
+              sim.router, obligations.router, crossdoc.router, internal.router):
+        app.include_router(r, prefix="/api", dependencies=staff)
+    app.include_router(buyer.router, prefix="/api")         # the buyer route does its own check (role + contract mapping)
 
     @app.get("/api/health", response_model=Health, tags=["meta"])
     def health():
         return Health(status="ok", llm_configured=config.llm_configured(), model=config.model_tag(),
-                      llm_calls_made=calls_made(), llm_call_cap=config.MAX_LLM_CALLS)
+                      llm_calls_made=calls_made(), llm_call_cap=config.MAX_LLM_CALLS, auth_mode=auth.mode())
 
     if config.SERVE_FRONTEND and (config.FRONTEND_DIST / "index.html").exists():
         dist = config.FRONTEND_DIST

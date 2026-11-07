@@ -1,12 +1,12 @@
 """Channel-agnostic buyer chat. A WhatsApp (or any other) adapter can call this later; none is built here."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 
 from app import buyer, config
 from app.agent import BuyerAgent
-from backend.api import deps
+from backend.api import auth, deps
 from backend.api.deps import ApiError
 from backend.api.schemas import ChatTurn, Citation
 
@@ -29,15 +29,24 @@ class BuyerChatResponse(BaseModel):
 
 
 @router.post("/chat", response_model=BuyerChatResponse, dependencies=[Depends(deps.chat_limiter)])
-def buyer_chat(body: BuyerChatRequest, authorization: str | None = Header(None)):
-    if not buyer.load_tokens():
-        raise ApiError(503, "buyer_access_not_configured", "Buyer access is not configured (set BUYER_TOKENS).")
-    token = (authorization or "").removeprefix("Bearer ").strip()
-    cid = buyer.contract_for_token(token)
-    if cid is None:
-        raise ApiError(401, "unauthorized", "Missing or invalid buyer token.")
-    _, c = deps.get_contract(cid)                      # scoped: the contract comes from the token, never from the request
+def buyer_chat(body: BuyerChatRequest, request: Request, authorization: str | None = Header(None)):
+    """AUTH_MODE=entra: an Entra token with the Spa.Buyer role, mapped to ONE contract in BUYER_ACCOUNTS.
+    AUTH_MODE=off: the BUYER_TOKENS stub. Either way the contract comes from the identity, never from the request."""
+    p = auth.current_principal(request)
+    if p is not None:
+        cid = auth.contract_for_principal(p)
+        if cid is None:
+            raise ApiError(403, "forbidden", "This account is not linked to a contract.")
+        who = "entra:" + p.oid
+    else:
+        if not buyer.load_tokens():
+            raise ApiError(503, "buyer_access_not_configured", "Buyer access is not configured (set BUYER_TOKENS).")
+        who = (authorization or "").removeprefix("Bearer ").strip()
+        cid = buyer.contract_for_token(who)
+        if cid is None:
+            raise ApiError(401, "unauthorized", "Missing or invalid buyer token.")
+    _, c = deps.get_contract(cid)                      # scoped: the contract comes from the identity, never from the request
     r = BuyerAgent(c).ask(body.message, history=[t.model_dump() for t in body.history])
-    buyer.audit(token, cid, body.message, r, body.channel)
+    buyer.audit(who, cid, body.message, r, body.channel)
     return BuyerChatResponse(answer=r.answer, refused=r.refused, reason=r.reason, tool_calls=r.tool_calls,
                              citations=[Citation(**x) for x in r.citations])

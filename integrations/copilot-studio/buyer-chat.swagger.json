@@ -1,0 +1,137 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "SPA Intelligence Buyer Assistant",
+    "version": "1.0",
+    "description": "Decision support, not legal advice. One operation: ask about your own contract."
+  },
+  "host": "<your-api-host>",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/buyer/chat": {
+      "post": {
+        "operationId": "AskBuyerAssistant",
+        "summary": "Ask the buyer assistant",
+        "description": "Answers only from the signed-in buyer's own contract, with page and quote citations. Legal-advice questions are refused with a pointer to the legal team. Requires app role Spa.Buyer.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "history": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string"
+                      }
+                    },
+                    "required": []
+                  }
+                },
+                "channel": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "answer": {
+                  "type": "string"
+                },
+                "refused": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "tool_calls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "citations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tool": {
+                        "type": "string"
+                      },
+                      "page": {
+                        "type": "integer"
+                      },
+                      "quote": {
+                        "type": "string"
+                      }
+                    },
+                    "required": []
+                  }
+                },
+                "disclaimer": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/authorize",
+      "tokenUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/token",
+      "scopes": {
+        "api://<API_CLIENT_ID>/access_as_user": "Access SPA Intelligence"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2": [
+        "api://<API_CLIENT_ID>/access_as_user"
+      ]
+    }
+  ]
+}

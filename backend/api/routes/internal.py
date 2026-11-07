@@ -4,14 +4,14 @@ from __future__ import annotations
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from app import config, playbook as pb
 from app.erp import d365
 from app.statute_gap import effective_jurisdiction
-from backend.api import deps
+from backend.api import auth, deps
 from backend.api.deps import ApiError
 from backend.api.routes.trust import AmountPaid
 
@@ -59,10 +59,10 @@ def erp_export(contract_id: str, body: ErpRequest | None = None):
 
 
 @router.post("/contracts/{contract_id}/erp/push")
-def erp_push(contract_id: str, body: ErpPush):
+def erp_push(contract_id: str, body: ErpPush, request: Request):
     src, c = deps.get_contract(contract_id)
     try:
         return d365.push(c, src.id, src.name, body.delay_days, body.as_of_date or date.today(), body.confirm,
-                         body.reviewer, _paid(body))
+                         auth.actor(request, body.reviewer), _paid(body))
     except d365.PushError as e:
         raise ApiError(409, "push_refused", str(e)) from None

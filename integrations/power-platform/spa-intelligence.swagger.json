@@ -1,0 +1,526 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "SPA Intelligence",
+    "version": "1.0",
+    "description": "Decision support, not legal advice. Contract intelligence for staff automation."
+  },
+  "host": "<your-api-host>",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/contracts": {
+      "get": {
+        "operationId": "ListContracts",
+        "summary": "List contracts",
+        "description": "Samples and uploads with extraction status. Requires app role Spa.Staff.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}": {
+      "get": {
+        "operationId": "GetContract",
+        "summary": "Get extracted terms",
+        "description": "Terms with page, quote, grounding and evidence. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/extract": {
+      "post": {
+        "operationId": "ExtractContract",
+        "summary": "Extract contract (uses 1 LLM call)",
+        "description": "Starts extraction; cached results are reused. Requires app role Spa.Reviewer.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "description": "Re-run even if cached"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/status": {
+      "get": {
+        "operationId": "GetExtractionStatus",
+        "summary": "Get extraction status",
+        "description": "Poll an extraction job. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/review-queue": {
+      "get": {
+        "operationId": "ListReviewQueue",
+        "summary": "List fields needing review",
+        "description": "Fields that are partial, ungrounded or low-confidence. Requires app role Spa.Staff.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/fields/{field}/review": {
+      "post": {
+        "operationId": "ReviewField",
+        "summary": "Record a review decision",
+        "description": "Accept, correct or reject a field. The reviewer name is taken from the signed-in user. Requires app role Spa.Reviewer.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          },
+          {
+            "name": "field",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "e.g. price, handover_date, payment_plan.2"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "accept",
+                    "correct",
+                    "reject"
+                  ]
+                },
+                "value": {},
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/statute-gap": {
+      "post": {
+        "operationId": "GetStatuteGap",
+        "summary": "Compare contract with statute",
+        "description": "Contractual vs statutory delay compensation for a delay scenario. Statutory logic is unreviewed by a lawyer. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "delay_days": {
+                  "type": "integer"
+                },
+                "as_of_date": {
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "required": [
+                "delay_days"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/obligations": {
+      "get": {
+        "operationId": "ListObligations",
+        "summary": "List obligations",
+        "description": "Dated obligations with evidence. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "as_of",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          {
+            "name": "within_days",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": ""
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "contract_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "operationId": "ListAlerts",
+        "summary": "List open alerts",
+        "description": "In-app alert feed (unacknowledged by default). Requires app role Spa.Staff.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{alert_id}/ack": {
+      "post": {
+        "operationId": "AcknowledgeAlert",
+        "summary": "Acknowledge an alert",
+        "description": "Marks the alert handled. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/erp/export": {
+      "post": {
+        "operationId": "PreviewErpExport",
+        "summary": "Preview D365 export (dry run)",
+        "description": "Validated rows and CSV; nothing is sent. Requires app role Spa.Staff.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "delay_days": {
+                  "type": "integer"
+                },
+                "as_of_date": {
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "required": []
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/erp/push": {
+      "post": {
+        "operationId": "PushToErp",
+        "summary": "Push to D365 (needs confirm)",
+        "description": "Refused unless the server enables it, the mapping has no placeholders and confirm is true. Requires app role Spa.Reviewer.",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Contract id",
+            "description": "64-character id from List contracts"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "confirm": {
+                  "type": "boolean"
+                },
+                "delay_days": {
+                  "type": "integer"
+                },
+                "as_of_date": {
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "required": [
+                "confirm"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "description": "Error: {error: {code, message}}",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/authorize",
+      "tokenUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/token",
+      "scopes": {
+        "api://<API_CLIENT_ID>/access_as_user": "Access SPA Intelligence"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2": [
+        "api://<API_CLIENT_ID>/access_as_user"
+      ]
+    }
+  ]
+}
