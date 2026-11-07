@@ -18,6 +18,7 @@ from app import config
 from app.llm import LLMCapError, LLMError, calls_made
 from backend.api import auth
 from backend.api.deps import ApiError
+from backend.api.routes import public as public_routes
 from backend.api.routes import session as session_routes
 from backend.api.routes import buyer, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
@@ -98,6 +99,7 @@ def create_app() -> FastAPI:
     for r in (contracts.router, penalty.router, cashflow.router, chat.router, eval_routes.router, trust.router,
               sim.router, obligations.router, crossdoc.router, internal.router):
         app.include_router(r, prefix="/api", dependencies=staff)
+    app.include_router(public_routes.router, prefix="/api")    # signed email image + logo: public by design
     app.include_router(session_routes.router, prefix="/api")   # sign-in endpoints: open by design
     app.include_router(buyer.router, prefix="/api")         # the buyer route does its own check (role + contract mapping)
 

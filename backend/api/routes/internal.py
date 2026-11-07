@@ -66,3 +66,56 @@ def erp_push(contract_id: str, body: ErpPush, request: Request):
                          auth.actor(request, body.reviewer), _paid(body))
     except d365.PushError as e:
         raise ApiError(409, "push_refused", str(e)) from None
+
+
+class WebhookTest(BaseModel):
+    kind: str = Field("contract_ready", pattern="^(contract_ready|alert|review_needed)$")
+
+
+@router.post("/webhook/test")
+def webhook_test(body: WebhookTest):
+    """Send ONE test event (with the designed email) to the configured webhook, so a flow can be checked without extracting anything.
+    Uses real data when the app has it, otherwise clearly labelled sample data."""
+    import os
+    from app import notifiers, obligations as ob
+    from app.review import review_items
+    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
+    if not url:
+        raise ApiError(409, "webhook_not_configured", "ALERT_WEBHOOK_URL is not set.")
+    used = "real"
+    items = [(s, deps.effective_contract(s)) for s in deps.list_sources()]
+    items = [(s, c) for s, c in items if c is not None]
+    if body.kind == "contract_ready":
+        if items:
+            s, c = items[0]
+            data = {"contract": notifiers.contract_summary(s.id, s.name, c)}
+        else:
+            used, data = "sample", {"contract": {"contract_id": "", "contract_name": "sample_a.pdf", "unit_id": "MCR-1204", "buyer": "Sample Buyer",
+                                                 "currency": "AED", "price": 2450000, "handover_date": "2027-06-30", "jurisdiction": "ae_dubai",
+                                                 "milestones": 5, "payment_plan_percent_sum": 100.0, "warnings": 0, "needs_review": 0,
+                                                 "plan": [{"name": f"Milestone {i}", "percent": 20, "due_date": None} for i in range(1, 6)]}}
+    elif body.kind == "alert":
+        al = ob.load_alerts()
+        if al:
+            a = al[0]
+            data = {"alert": {k: a.get(k) for k in ("id", "contract_id", "contract_name", "event_type", "severity", "message", "due_date",
+                                                      "days_until", "label")} | {"page": (a.get("evidence") or {}).get("page")}}
+        else:
+            used, data = "sample", {"alert": {"id": "sample", "contract_id": "", "contract_name": "sample_a.pdf", "event_type": "overdue",
+                                              "severity": "high", "message": "Sample overdue payment", "due_date": "2026-03-15",
+                                              "days_until": -237, "label": "Second Instalment (20%)", "page": 6}}
+    else:
+        q = [{"contract_id": s.id, "contract_name": s.name, **it} for s, c in items for it in review_items(c)]
+        if q:
+            r = q[0]
+            data = {"review": {"contract_id": r["contract_id"], "contract_name": r["contract_name"], "field": r["field"],
+                               "status": r.get("status"), "confidence": r.get("confidence"), "page": r.get("source_page")}}
+        else:
+            used, data = "sample", {"review": {"contract_id": "", "contract_name": "sample_a.pdf", "field": "price", "status": "partial",
+                                               "confidence": 0.82, "page": 3}}
+    hook = notifiers.WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", ""))
+    from app.emailcards import build_email
+    email = build_email(body.kind, data)
+    email["subject"] = "[TEST] " + email["subject"]
+    ok = hook.post(body.kind, {**data, "email": email, "test": True})
+    return {"sent": ok, "kind": body.kind, "data": used}

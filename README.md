@@ -85,7 +85,7 @@ cd frontend && npm install && cd ..
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (272) + vitest (97)
+npm test             # pytest (291) + vitest (97)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -313,6 +313,8 @@ With `AUTH_MODE=apikey` plus the GitHub settings, the web UI asks people to sign
 
 ### Power Platform (Power Automate, Copilot Studio)
 
+The webhook can also deliver **designed emails** (hero image card, facts, button, "With regards, <name>" with the Unlimited Innovations logo): the app builds the whole email and the flow just sends it. See `docs/email-design.md` and the previews in `docs/email-previews/`.
+
 **No IT access?** `docs/demo-without-it.md` runs everything with API keys, your laptop and a tunnel (`scripts/demo_up.sh`): outbound events to Teams/email/Excel, a custom connector with an API key, a buyer agent bound to one demo contract and an internal staff copilot.
 
 See `docs/power-platform.md`. Power BI is deliberately not part of this application. Included: an opt-in signed webhook
@@ -365,7 +367,7 @@ believed correct, still unreviewed); `ae_oqood_registration`, `ae_escrow` (artic
 
 | Check | Result |
 |---|---|
-| `pytest` | 272 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
+| `pytest` | 291 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
 | `vitest` | 97 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
 | Playwright e2e (`scripts/e2e_check.mjs`, 311 checks) | 311/311: every new page (Gap, Obligations, Playbook, ERP, Watch, Cross-check, Review queue, Accuracy) for all samples in EN and AR; highlighted evidence in the PDF panel; UI amounts equal API amounts; same-seed simulation reproducible; ack removes an alert; both planted cross-document conflicts found; ERP push refused while disabled; review correction shown as human verified; landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; scenes settle into a centred frame at Windows- and macOS-like window sizes; themed scrollbar; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |

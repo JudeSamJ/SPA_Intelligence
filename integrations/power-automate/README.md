@@ -28,6 +28,12 @@ cannot compute an HMAC, so for a flow rely on the trigger URL's own signature (k
 need to verify the HMAC, put an Azure Function (or Logic App with a function) in front; `app/notifiers.verify` shows the exact check.
 Failures to deliver are logged and retried on the next recompute for review items; alerts are sent once when first created.
 
+## Designed emails (recommended for the event flow)
+
+The app now sends a finished email (subject, HTML, image card, "With regards, <name>" and the logo) in the webhook payload. Use a single
+**Send an email (V2)** with Subject = `email subject` and Body = `email html` instead of the Switch described below. Steps and a test
+command are in `docs/email-design.md`. The Switch recipe below still works for plain-text emails.
+
 ## Flow 1: new contract arrives
 
 Trigger: *When a file is created* (SharePoint library "Contracts") or *When a new email arrives (V3)* with a PDF attachment.

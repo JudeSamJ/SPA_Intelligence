@@ -54,6 +54,12 @@ class WebhookNotifier:
         self.url, self.secret, self.timeout = url, secret, timeout
 
     def post(self, kind: str, data: dict) -> bool:
+        if kind in ("alert", "contract_ready", "review_needed") and "email" not in data:
+            try:                                    # the finished, designed email: the flow only has to send it
+                from .emailcards import build_email
+                data = {**data, "email": build_email(kind, data)}
+            except Exception as e:  # noqa: BLE001  (a design problem must never stop the plain event from being delivered)
+                log.warning("email design failed: %s", type(e).__name__)
         body = json.dumps({"type": kind, "sent_at": time.time(), **data}, separators=(",", ":")).encode()
         ts = str(int(time.time()))
         headers = {"Content-Type": "application/json", "X-SPA-Timestamp": ts}
@@ -134,6 +140,8 @@ def contract_summary(contract_id: str, name: str, c) -> dict:
             "currency": c.currency, "price": c.price.value, "handover_date": c.handover_date.value.isoformat() if c.handover_date.value else None,
             "jurisdiction": c.jurisdiction or (c.jurisdiction_detected.value if c.jurisdiction_detected else None),
             "milestones": len(c.payment_plan), "payment_plan_percent_sum": c.payment_plan_percent_sum,
+            "plan": [{"name": m.name[:40], "percent": m.percent, "due_date": m.due_date.isoformat() if m.due_date else None}
+                     for m in c.payment_plan[:10]],
             "warnings": len(c.warnings), "needs_review": len(review_items(c)), "model": c.model}
 
 
