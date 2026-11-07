@@ -568,5 +568,13 @@
     "cost": "Cost / doc (USD)",
     "costNA": "n/a (set prices)",
     "costNote": "Cost = real token or page usage × the price constants you set in rules/pricing.yaml; shown as n/a until they are set."
+  },
+  "auth": {
+    "signInTitle": "Sign in to continue",
+    "signInBody": "This app is limited to approved users. Sign in with your GitHub account; the owner decides who is allowed and with which role.",
+    "signInGitHub": "Sign in with GitHub",
+    "signedInAs": "Signed in as {{name}}",
+    "signOut": "Sign out",
+    "notConfigured": "Sign-in is not configured on this server. Ask the owner."
   }
 }

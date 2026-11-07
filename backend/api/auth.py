@@ -79,7 +79,9 @@ def check_startup() -> None:
         if not tenant or not client:
             raise RuntimeError("AUTH_MODE=entra needs ENTRA_TENANT_ID and ENTRA_CLIENT_ID.")
     elif mode() == "apikey":
-        if not api_keys():
+        from backend.api import session
+        session.check_startup()
+        if not api_keys() and not session.enabled():
             raise RuntimeError("AUTH_MODE=apikey needs API_KEYS with at least one valid key (24+ characters).")
     elif os.environ.get("AUTH_MODE", "off").strip().lower() not in ("off", ""):
         raise RuntimeError(f"Unknown AUTH_MODE '{os.environ.get('AUTH_MODE')}' (use off, entra or apikey).")
@@ -182,6 +184,20 @@ def _bearer(request: Request) -> str:
 
 
 # ------------------------------------------------------------------ FastAPI dependencies
+def _session_principal(request: Request) -> Principal | None:
+    """A GitHub-sign-in session cookie. State-changing requests must also carry X-Requested-With (CSRF defence)."""
+    from backend.api import session
+    if not session.enabled():
+        return None
+    c = session.read_session(request.cookies.get(session.COOKIE, ""))
+    if c is None:
+        return None
+    if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get("x-requested-with", "").lower() != "spa":
+        raise ApiError(403, "forbidden", "Missing X-Requested-With header.")
+    return Principal(oid=c["sub"], name=str(c.get("name") or c.get("login") or ""), upn=str(c.get("login") or ""),
+                     roles={c["role"]}, tenant="github")
+
+
 def current_principal(request: Request) -> Principal | None:
     """None in AUTH_MODE=off. Otherwise a validated principal (cached on the request)."""
     if mode() == "off":
@@ -190,9 +206,12 @@ def current_principal(request: Request) -> Principal | None:
     if p is None:
         if mode() == "apikey":
             key = request.headers.get("x-api-key", "").strip()
-            if not key:
-                raise ApiError(401, "unauthorized", "Missing X-API-Key header.")
-            p = validate_api_key(key)
+            if key:
+                p = validate_api_key(key)
+            else:
+                p = _session_principal(request)
+                if p is None:
+                    raise ApiError(401, "unauthorized", "Sign in, or send an X-API-Key header.")
         else:
             p = validate_token(_bearer(request))
         request.state.principal = p

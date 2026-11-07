@@ -766,12 +766,12 @@
     {
       "name": "palm: growth takes about the same time whether you arrive by slow scrolling or a hard flick",
       "ok": true,
-      "detail": "1600 ms vs 1616 ms"
+      "detail": "1600 ms vs 1600 ms"
     },
     {
       "name": "palm: no frame advances the growth by more than 5%",
       "ok": true,
-      "detail": "1.3% / 1.3%"
+      "detail": "1.4% / 1.4%"
     },
     {
       "name": "palm: fully grown, and stays grown after scrolling away and back",
@@ -1551,7 +1551,7 @@
     {
       "name": "fps probe (informational)",
       "ok": true,
-      "detail": "54.0 fps"
+      "detail": "53.7 fps"
     },
     {
       "name": "no console errors or page errors anywhere",

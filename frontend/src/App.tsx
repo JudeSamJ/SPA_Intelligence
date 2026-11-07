@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import { AuthGate } from "./auth/AuthGate";
 import { DisclaimerBar } from "./components/Disclaimer";
 import { TopBar } from "./components/TopBar";
 import { RouteFade, TransitionProvider } from "./motion/Transition";
@@ -20,7 +21,14 @@ export default function App() {
           <Suspense fallback={<div style={{ minHeight: "100svh" }} aria-busy="true" />}>
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/app/*" element={<AppShell />} />
+              <Route
+                path="/app/*"
+                element={
+                  <AuthGate>
+                    <AppShell />
+                  </AuthGate>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

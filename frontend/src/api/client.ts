@@ -37,6 +37,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const token = await getToken();
     const headers = new Headers(init?.headers);
     if (token) headers.set("Authorization", `Bearer ${token}`);
+    headers.set("X-Requested-With", "spa"); // CSRF defence for cookie sessions: a cross-site page cannot set this without a preflight
     res = await fetch(`${BASE}${path}`, { ...init, headers });
   } catch {
     throw new ApiError(0, "network", "Could not reach the server.");

@@ -75,6 +75,7 @@ cd frontend && npm install && cd ..
 | `BUYER_TOKENS` | `token=contract_id,...` or JSON: buyer token auth **stub** for `/buyer/chat` |
 | `ERP_PUSH_ENABLED`, `D365_TENANT_ID`, `D365_CLIENT_ID`, `D365_CLIENT_SECRET`, `D365_RESOURCE` | live D365 push (off by default; mapping names are placeholders) |
 | `AUTH_MODE`, `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `BUYER_ACCOUNTS` | Entra sign-in for the API (see `docs/entra-setup.md`); default `AUTH_MODE=off` is for local development only |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `PUBLIC_BASE_URL`, `SESSION_SECRET`, `GITHUB_USERS` | GitHub sign-in for the browser UI (see `docs/github-signin.md`); users and roles come from the allow-list |
 | `AUTH_MODE=apikey`, `API_KEYS` | demo mode without Entra registrations: `X-API-Key` header, same roles, buyer keys bound to one contract (see `docs/demo-without-it.md`) |
 | `ALERT_WEBHOOK_URL`, `ALERT_WEBHOOK_SECRET` | optional Power Automate (HTTP trigger) webhook for alerts and review items (signed, no contract text) |
 | `SPA_RATES_DIR`, `SPA_DISABLE_SCHEDULER` | rate-table folder override; turn off the daily obligation recompute |
@@ -84,7 +85,7 @@ cd frontend && npm install && cd ..
 ```bash
 npm run dev          # API on :8000 and Vite on :5173 together (or dev:backend / dev:frontend separately)
 npm run build && npm run serve    # production-style: one server on :8000 serving the built frontend (gzip + immutable caching)
-npm test             # pytest (255) + vitest (84)
+npm test             # pytest (269) + vitest (89)
 npm run lint         # eslint (typescript-eslint, react-hooks); tsc runs in `npm run build`
 npm run gen:api      # regenerate frontend/src/api/types.ts from the FastAPI OpenAPI schema
 npm run e2e          # Playwright end-to-end checks (needs `playwright`; see "Verification")
@@ -306,6 +307,10 @@ development). The server refuses to start with `entra` and missing settings, or 
 rollover, HS256 and `none` algorithm confusion, role matrix, identity provider outage -> 503). **The browser sign-in has not been
 tried against a real tenant.**
 
+### GitHub sign-in for the UI
+
+With `AUTH_MODE=apikey` plus the GitHub settings, the web UI asks people to sign in with GitHub and lets in only the usernames in `GITHUB_USERS` (each with `Spa.Staff` or `Spa.Reviewer`); API keys keep working for machines. Signed, HttpOnly session cookie, CSRF header on changes, allow-list re-checked on every request, reviewer names taken from the verified identity. Setup: `docs/github-signin.md`. Tested with a mocked GitHub; **not yet run against the real github.com**.
+
 ### Power Platform (Power Automate, Copilot Studio)
 
 **No IT access?** `docs/demo-without-it.md` runs everything with API keys, your laptop and a tunnel (`scripts/demo_up.sh`): outbound events to Teams/email/Excel, a custom connector with an API key, a buyer agent bound to one demo contract and an internal staff copilot.
@@ -360,8 +365,8 @@ believed correct, still unreviewed); `ae_oqood_registration`, `ae_escrow` (artic
 
 | Check | Result |
 |---|---|
-| `pytest` | 255 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
-| `vitest` | 84 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
+| `pytest` | 269 passed (LLM always mocked): grounding failures, hand-calculated statute-gap cases, seeded Monte Carlo reproducibility and degenerate-equals-deterministic, obligations at a fixed `as_of`, cross-document planted-error precision/recall 6/6 with 0 false positives, playbook, ERP with a mock transport, 12 buyer-agent questions incl. prompt injection and cross-contract access, eval history and regressions; penalty example 1,000,000 / 6% / 90 days / 30 grace = 9,863.01 |
+| `vitest` | 89 passed (highlight placement, badges, Gap tab from a mocked API, API client, responsive header menu, dismissible disclaimer, penalty table from mocked API, chat refusal and plain-text rendering, `dir` toggle, number settling, typewriter safety with real GSAP, EN/AR keys, WCAG contrast of both themes) |
 | `eslint`, `tsc` (strict), `prettier --check`, `vite build` | clean |
 | Playwright e2e (`scripts/e2e_check.mjs`, 311 checks) | 311/311: every new page (Gap, Obligations, Playbook, ERP, Watch, Cross-check, Review queue, Accuracy) for all samples in EN and AR; highlighted evidence in the PDF panel; UI amounts equal API amounts; same-seed simulation reproducible; ack removes an alert; both planted cross-document conflicts found; ERP push refused while disabled; review correction shown as human verified; landing in 8 theme x language x effects combinations; all 4 tabs for all 3 samples in EN, AR (RTL), day theme and reduced effects; mobile viewport; sample C flags; refusal; citation to PDF page; 9,863.01 case; banner dismiss/restore/remember; skyline lights floor by floor with step cards alternating sides and does not trap scrolling; the Palm animation takes the same time for a slow scroll and a hard flick; scenes settle into a centred frame at Windows- and macOS-like window sizes; themed scrollbar; plain orange cursor; mobile responsiveness across 6 viewports and 7 routes (no overflow, no off-screen controls, 44px touch targets, card tables, header menu); UI numbers equal API values; no console errors. Results in `docs/e2e-results.json`, screenshots in `docs/screenshots/`, demo video `docs/landing-scroll.webm` / `.gif` |
 | Bundle | 198 kB gzip on initial load; Draggable, Inertia, Morph, Physics, ScrollSmoother, ogl and the chart library are lazy chunks; 0 key-name strings and 0 GSDevTools/MotionPathHelper in JS |
