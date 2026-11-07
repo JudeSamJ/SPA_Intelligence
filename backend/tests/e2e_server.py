@@ -14,6 +14,12 @@ from pathlib import Path
 E2E_DIR = Path(os.environ.get("E2E_DIR", "/tmp/spa-e2e"))
 os.environ.setdefault("SPA_CACHE_DIR", str(E2E_DIR / "cache"))
 os.environ.setdefault("SPA_UPLOAD_DIR", str(E2E_DIR / "uploads"))
+os.environ.setdefault("SPA_REVIEW_DIR", str(E2E_DIR / "reviews"))
+os.environ.setdefault("SPA_ALERTS_PATH", str(E2E_DIR / "alerts.json"))
+os.environ.setdefault("SPA_EVAL_RUNS_DIR", str(E2E_DIR / "runs"))
+os.environ.setdefault("SPA_AUDIT_DIR", str(E2E_DIR / "audit"))
+os.environ.setdefault("SPA_RATES_DIR", str(Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "rates"))   # ILLUSTRATIVE rates
+os.environ["SPA_STUB_MODEL"] = "1"                      # eval runs made here are labelled as stub runs
 os.environ["LLM_PROVIDER"] = "azure_openai"
 os.environ["AZURE_OPENAI_DEPLOYMENT"] = "e2e-stub-model"
 os.environ.setdefault("AZURE_OPENAI_API_KEY", "stub")
@@ -24,10 +30,14 @@ import uvicorn  # noqa: E402
 from app import config, extract, llm  # noqa: E402
 from app.extract import extract_contract, file_hash  # noqa: E402
 from backend.api.main import app  # noqa: E402
-from tests.fakes import FakeClient, oracle_input  # noqa: E402
+from tests.fakes import FakeClient, facts_tool_input, judgements_tool_input, oracle_input  # noqa: E402
 
 SAMPLES = {file_hash(p.read_bytes()): p for p in sorted(config.SAMPLES_DIR.glob("*.pdf"))}
 DELAY = float(os.environ.get("E2E_EXTRACT_DELAY", "1.2"))
+CROSS = {}
+for _d in sorted((config.ROOT / "samples" / "crossdoc").glob("set_*")):
+    for _name, _which in (("brochure.pdf", "brochure"), ("filing.pdf", "filing")):
+        CROSS[file_hash((_d / _name).read_bytes())] = (_d, _which)
 
 
 class StubAdapter:
@@ -36,6 +46,13 @@ class StubAdapter:
 
     def complete(self, system, messages, tools, force_tool=None, max_tokens=1024):
         llm._count()
+        if force_tool == "record_document_facts":        # cross-document facts (brochure / filing)
+            time.sleep(0.4)
+            d, which = CROSS[file_hash(messages[0]["pdf"])]
+            return llm.LLMReply(tool_calls=[llm.ToolCall("stubf", force_tool, facts_tool_input(d, which))])
+        if force_tool == "record_clause_judgements":     # playbook clause specialists
+            time.sleep(0.4)
+            return llm.LLMReply(tool_calls=[llm.ToolCall("stubj", force_tool, judgements_tool_input(messages[0]["pages"]))])
         if force_tool:                                   # extraction
             time.sleep(DELAY)
             pdf = messages[0]["pdf"]
@@ -122,6 +139,7 @@ def seed():
 
 if __name__ == "__main__":
     extract.get_llm = lambda client=None: StubAdapter()
+    llm.get_llm = lambda client=None: StubAdapter()     # crossdoc facts + playbook import it lazily
     import app.agent as agent
     agent.get_llm = lambda client=None: StubAdapter()
     seed()

@@ -80,3 +80,31 @@ class FakeClient:
         inp = self.queue.pop(0)
         block = SimpleNamespace(type="tool_use", name="record_contract_terms", id=f"tu_{len(self.calls)}", input=inp)
         return SimpleNamespace(content=[block])
+
+
+# ---- extra oracles used by the TEST-ONLY stub server and tests ------------------------------------------------------
+def facts_tool_input(set_dir: Path, which: str) -> dict:
+    """Tool input for record_document_facts, built from samples/crossdoc/<set>/facts.json (verbatim quotes)."""
+    entry = json.loads((set_dir / "facts.json").read_text())[which]
+    pages = pdf_pages((set_dir / entry["doc"]).read_bytes())
+    v = entry["values"]
+
+    def S(attr):
+        q, val = entry["quotes"].get(attr), v.get(attr)
+        if val is None or q is None:
+            return {"value": None, "source_page": None, "source_quote": None}
+        return {"value": val, "source_page": locate_quote(pages, q), "source_quote": q}
+    return {a: S(a) for a in ("unit_id", "price", "area_sqft", "handover_date", "payment_plan", "delay_rate", "registration_number")}
+
+
+def judgements_tool_input(pages: list[str]) -> dict:
+    """Tool input for record_clause_judgements: plausible compliant judgements quoting real sentences."""
+    q = {"delay": "interest at the rate of", "cancellation_forfeiture": "may terminate this Agreement by written notice",
+         "payment": "written reminder", "handover": "shall be extended day for day", "force_majeure": "shall be extended day for day",
+         "defect_liability": "Notice of Completion"}
+    out = []
+    for ct, text in q.items():
+        pg = locate_quote(pages, text)
+        out.append({"clause_type": ct, "clause_found": pg is not None, "compliant": True if pg else None,
+                    "reason": "Stub judgement for tests.", "source_page": pg, "source_quote": text if pg else None, "confidence": 0.9})
+    return {"judgements": out}

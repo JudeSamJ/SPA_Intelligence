@@ -92,6 +92,33 @@ def analyse(set_id: str, extract: bool = Query(False, description="Allow LLM cal
     return res
 
 
+def _doc_pdf(set_id: str, doc_id: str) -> Path:
+    _, d = _find(set_id)
+    ds = cd.load_set(d)
+    doc = next((x for x in ds.documents if x.id == doc_id), None)
+    if doc is None or not doc.path.endswith(".pdf"):
+        raise ApiError(404, "not_found", "No such PDF document in this set.")
+    return Path(doc.path)
+
+
+@router.get("/sets/{set_id}/documents/{doc_id}/page/{page}.png")
+def doc_page(set_id: str, doc_id: str, page: int, scale: float = Query(1.4, ge=0.5, le=3)):
+    from fastapi.responses import Response
+    from app.evidence import render_page_png
+    import pymupdf
+    pdf = _doc_pdf(set_id, doc_id).read_bytes()
+    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
+        if not 1 <= page <= doc.page_count:
+            raise ApiError(404, "not_found", "No such page.")
+    return Response(render_page_png(pdf, page, scale), media_type="image/png", headers={"Cache-Control": "private, max-age=3600"})
+
+
+@router.get("/sets/{set_id}/documents/{doc_id}/evidence")
+def doc_evidence(set_id: str, doc_id: str, page: int = Query(1, ge=1), quote: str = Query(..., max_length=1000)):
+    from app.evidence import locate
+    return locate(_doc_pdf(set_id, doc_id).read_bytes(), page, quote)
+
+
 class NewSet(BaseModel):
     unit_key: str = Field(..., min_length=1, max_length=60)
     spa_contract_id: Optional[str] = Field(None, pattern=r"^[0-9a-f]{64}$")

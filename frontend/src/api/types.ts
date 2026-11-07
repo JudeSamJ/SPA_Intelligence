@@ -4,1140 +4,2978 @@
  */
 
 export interface paths {
-  "/api/contracts": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Contracts */
+        get: operations["list_contracts_api_contracts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List Contracts */
-    get: operations["list_contracts_api_contracts_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/upload": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload */
+        post: operations["upload_api_contracts_upload_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Upload */
-    post: operations["upload_api_contracts_upload_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/status": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status */
+        get: operations["status_api_contracts__contract_id__status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Status */
-    get: operations["status_api_contracts__contract_id__status_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/extract": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extract */
+        post: operations["extract_api_contracts__contract_id__extract_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Extract */
-    post: operations["extract_api_contracts__contract_id__extract_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_contracts__contract_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Detail */
-    get: operations["detail_api_contracts__contract_id__get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/pdf": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pdf */
+        get: operations["pdf_api_contracts__contract_id__pdf_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Pdf */
-    get: operations["pdf_api_contracts__contract_id__pdf_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/penalty": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/penalty": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Penalty */
+        post: operations["penalty_api_contracts__contract_id__penalty_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Penalty */
-    post: operations["penalty_api_contracts__contract_id__penalty_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/cashflow": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/cashflow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cashflow */
+        post: operations["cashflow_api_contracts__contract_id__cashflow_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Cashflow */
-    post: operations["cashflow_api_contracts__contract_id__cashflow_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/contracts/{contract_id}/chat": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/contracts/{contract_id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Chat */
+        post: operations["chat_api_contracts__contract_id__chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Chat */
-    post: operations["chat_api_contracts__contract_id__chat_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eval/results": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eval/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Results */
+        get: operations["results_api_eval_results_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Results */
-    get: operations["results_api_eval_results_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eval/run/status": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eval/run/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Run Status */
+        get: operations["run_status_api_eval_run_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Run Status */
-    get: operations["run_status_api_eval_run_status_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eval/run": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eval/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run */
+        post: operations["run_api_eval_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Run */
-    post: operations["run_api_eval_run_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/health": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eval/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Runs */
+        get: operations["runs_api_eval_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Health */
-    get: operations["health_api_health_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/api/eval/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Run Detail */
+        get: operations["run_detail_api_eval_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eval/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Engines */
+        get: operations["engines_api_eval_engines_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eval/bakeoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bakeoff
+         * @description Latest run per engine on the same golden set, side by side. Engines without a run show their config status.
+         */
+        get: operations["bakeoff_api_eval_bakeoff_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/evidence/{field}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence */
+        get: operations["evidence_api_contracts__contract_id__evidence__field__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/page/{page}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Page Image */
+        get: operations["page_image_api_contracts__contract_id__page__page__png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/fields/{field}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review Field */
+        post: operations["review_field_api_contracts__contract_id__fields__field__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reviews */
+        get: operations["reviews_api_contracts__contract_id__reviews_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review Queue */
+        get: operations["review_queue_api_review_queue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/golden-export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Golden Export */
+        post: operations["golden_export_api_contracts__contract_id__golden_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/jurisdiction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Jurisdiction */
+        put: operations["set_jurisdiction_api_contracts__contract_id__jurisdiction_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/packs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Packs */
+        get: operations["packs_api_packs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/statute-gap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Statute Gap */
+        post: operations["statute_gap_api_contracts__contract_id__statute_gap_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/simulation/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Defaults */
+        get: operations["defaults_api_simulation_defaults_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/montecarlo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Montecarlo */
+        post: operations["montecarlo_api_contracts__contract_id__montecarlo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portfolio/montecarlo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Portfolio Montecarlo */
+        post: operations["portfolio_montecarlo_api_portfolio_montecarlo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/obligations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obligations */
+        get: operations["obligations_api_obligations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Alerts */
+        get: operations["alerts_api_alerts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts/recompute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Alerts Recompute */
+        post: operations["alerts_recompute_api_alerts_recompute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts/{alert_id}/ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Alert Ack */
+        post: operations["alert_ack_api_alerts__alert_id__ack_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/crossdoc/sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sets */
+        get: operations["list_sets_api_crossdoc_sets_get"];
+        put?: never;
+        /** Create Set */
+        post: operations["create_set_api_crossdoc_sets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/crossdoc/sets/{set_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Analyse */
+        get: operations["analyse_api_crossdoc_sets__set_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/crossdoc/sets/{set_id}/documents/{doc_id}/page/{page}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Doc Page */
+        get: operations["doc_page_api_crossdoc_sets__set_id__documents__doc_id__page__page__png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/crossdoc/sets/{set_id}/documents/{doc_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Doc Evidence */
+        get: operations["doc_evidence_api_crossdoc_sets__set_id__documents__doc_id__evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/crossdoc/sets/{set_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Document */
+        post: operations["add_document_api_crossdoc_sets__set_id__documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/playbook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Playbook */
+        get: operations["playbook_api_contracts__contract_id__playbook_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/erp/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Erp Export */
+        post: operations["erp_export_api_contracts__contract_id__erp_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/erp/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Erp Push */
+        post: operations["erp_push_api_contracts__contract_id__erp_push_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/buyer/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Buyer Chat */
+        post: operations["buyer_chat_api_buyer_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health */
+        get: operations["health_api_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** AtRisk */
-    AtRisk: {
-      /** Delay Days */
-      delay_days: number;
-      /** Linked Amount */
-      linked_amount: number;
-      /** Linked Pct Of Plan */
-      linked_pct_of_plan?: number | null;
-      /** Penalty Exposure */
-      penalty_exposure?: number | null;
-      /** Penalty Note */
-      penalty_note?: string | null;
-      /** At Risk Total */
-      at_risk_total: number;
-      /** Plan Total */
-      plan_total: number;
-    };
-    /** Body_upload_api_contracts_upload_post */
-    Body_upload_api_contracts_upload_post: {
-      /** File */
-      file: string;
-    };
-    /** CashflowRequest */
-    CashflowRequest: {
-      /**
-       * Granularity
-       * @default quarter
-       * @enum {string}
-       */
-      granularity: "month" | "quarter";
-      /** Delay Days */
-      delay_days?: number | null;
-    };
-    /** CashflowResponse */
-    CashflowResponse: {
-      /**
-       * Granularity
-       * @enum {string}
-       */
-      granularity: "month" | "quarter";
-      /**
-       * As Of
-       * Format: date
-       */
-      as_of: string;
-      /** Price */
-      price: number;
-      /** Periods */
-      periods: components["schemas"]["Period"][];
-      /** Unscheduled */
-      unscheduled: components["schemas"]["PlanRow"][];
-      at_risk: components["schemas"]["AtRisk"];
-      /** At Risk Definition */
-      at_risk_definition: string;
-      /** Max Delay Days */
-      max_delay_days: number;
-    };
-    /** ChatRequest */
-    ChatRequest: {
-      /** Message */
-      message: string;
-      /** History */
-      history?: components["schemas"]["ChatTurn"][];
-    };
-    /** ChatResponse */
-    ChatResponse: {
-      /** Answer */
-      answer: string;
-      /** Refused */
-      refused: boolean;
-      /** Citations */
-      citations: components["schemas"]["Citation"][];
-      /** Tool Calls */
-      tool_calls: string[];
-    };
-    /** ChatTurn */
-    ChatTurn: {
-      /**
-       * Role
-       * @enum {string}
-       */
-      role: "user" | "assistant";
-      /** Content */
-      content: string;
-    };
-    /** Citation */
-    Citation: {
-      /** Tool */
-      tool: string;
-      /** Page */
-      page: number;
-      /** Quote */
-      quote: string;
-    };
-    /**
-     * ContractData
-     * @description Extraction output plus values computed deterministically in Python.
-     */
-    ContractData: {
-      buyer: components["schemas"]["Sourced_str_"];
-      unit_id: components["schemas"]["Sourced_str_"];
-      /** @description Total purchase price in AED. */
-      price: components["schemas"]["Sourced_float_"];
-      area_sqft: components["schemas"]["Sourced_float_"];
-      handover_date: components["schemas"]["Sourced_date_"];
-      grace_period_days: components["schemas"]["Sourced_int_"];
-      /** @description Number only: percent per annum if delay_basis is percent_per_annum; AED per sq ft per year if fixed_per_sqft_per_year. */
-      delay_rate: components["schemas"]["Sourced_float_"];
-      delay_basis: components["schemas"]["Sourced_Literal__percent_per_annum____fixed_per_sqft_per_year____other___"];
-      /** @description Cap on delay compensation as a percentage of the purchase price; null if no cap. */
-      delay_cap: components["schemas"]["Sourced_float_"];
-      /** Payment Plan */
-      payment_plan: components["schemas"]["Milestone"][];
-      /** @description Short summary of the buyer cancellation/termination clause; null if absent. */
-      cancellation_clause: components["schemas"]["Sourced_str_"];
-      /** Warnings */
-      warnings?: string[];
-      /** Payment Plan Percent Sum */
-      payment_plan_percent_sum?: number | null;
-      /** Source File */
-      source_file?: string | null;
-      /** File Hash */
-      file_hash?: string | null;
-      /** Model */
-      model?: string | null;
-      /** Extracted At */
-      extracted_at?: string | null;
-    };
-    /** ContractDetail */
-    ContractDetail: {
-      /** Id */
-      id: string;
-      /** Name */
-      name: string;
-      /** Pdf Url */
-      pdf_url: string;
-      contract: components["schemas"]["ContractData"];
-      /** Plan */
-      plan: components["schemas"]["PlanRow"][];
-    };
-    /** ContractStatus */
-    ContractStatus: {
-      /** Id */
-      id: string;
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: "not_extracted" | "queued" | "running" | "extracted" | "error";
-      /** Error */
-      error?: string | null;
-      /** Llm Configured */
-      llm_configured: boolean;
-      /** Model */
-      model: string;
-    };
-    /** ContractSummary */
-    ContractSummary: {
-      /** Id */
-      id: string;
-      /** Name */
-      name: string;
-      /**
-       * Source
-       * @enum {string}
-       */
-      source: "sample" | "upload";
-      /** Size Bytes */
-      size_bytes: number;
-      /** Pages */
-      pages: number;
-      /** Scanned Suspect */
-      scanned_suspect: boolean;
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: "not_extracted" | "queued" | "running" | "extracted" | "error";
-      /** Error */
-      error?: string | null;
-      /** Extracted At */
-      extracted_at?: string | null;
-      /** Model */
-      model?: string | null;
-      /**
-       * Warnings Count
-       * @default 0
-       */
-      warnings_count: number;
-      /** Buyer */
-      buyer?: string | null;
-      /** Unit Id */
-      unit_id?: string | null;
-      /** Price */
-      price?: number | null;
-    };
-    /** EvalField */
-    EvalField: {
-      /** Correct */
-      correct: number;
-      /** Total */
-      total: number;
-      /** Accuracy */
-      accuracy: number;
-      /** Quote Valid */
-      quote_valid: number;
-      /** Quote Total */
-      quote_total: number;
-      /** Quote Accuracy */
-      quote_accuracy?: number | null;
-    };
-    /** EvalOverall */
-    EvalOverall: {
-      /** Value Accuracy */
-      value_accuracy?: number | null;
-      /** Checks */
-      checks: number;
-      /** Quote Accuracy */
-      quote_accuracy?: number | null;
-      /** Quotes Checked */
-      quotes_checked: number;
-    };
-    /** EvalResults */
-    EvalResults: {
-      /** Generated At */
-      generated_at: string;
-      /** Model */
-      model: string;
-      /** Files */
-      files: string[];
-      /** Fields */
-      fields: {
-        [key: string]: components["schemas"]["EvalField"];
-      };
-      overall: components["schemas"]["EvalOverall"];
-      penalty_tests: components["schemas"]["PenaltyTests"];
-      /** Per File */
-      per_file: {
-        [key: string]: {
-          [key: string]: boolean;
+    schemas: {
+        /** AmountPaid */
+        AmountPaid: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Amount */
+            amount: number;
+            /** Label */
+            label?: string | null;
         };
-      };
+        /** AtRisk */
+        AtRisk: {
+            /** Delay Days */
+            delay_days: number;
+            /** Linked Amount */
+            linked_amount: number;
+            /** Linked Pct Of Plan */
+            linked_pct_of_plan?: number | null;
+            /** Penalty Exposure */
+            penalty_exposure?: number | null;
+            /** Penalty Note */
+            penalty_note?: string | null;
+            /** At Risk Total */
+            at_risk_total: number;
+            /** Plan Total */
+            plan_total: number;
+        };
+        /** Body_add_document_api_crossdoc_sets__set_id__documents_post */
+        Body_add_document_api_crossdoc_sets__set_id__documents_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_upload_api_contracts_upload_post */
+        Body_upload_api_contracts_upload_post: {
+            /** File */
+            file: string;
+        };
+        /** BuyerChatRequest */
+        BuyerChatRequest: {
+            /** Message */
+            message: string;
+            /** History */
+            history?: components["schemas"]["ChatTurn"][];
+            /**
+             * Channel
+             * @default api
+             */
+            channel: string;
+        };
+        /** BuyerChatResponse */
+        BuyerChatResponse: {
+            /** Answer */
+            answer: string;
+            /** Refused */
+            refused: boolean;
+            /** Reason */
+            reason?: string | null;
+            /** Tool Calls */
+            tool_calls: string[];
+            /** Citations */
+            citations: components["schemas"]["Citation"][];
+            /**
+             * Disclaimer
+             * @default Decision support, not legal advice.
+             */
+            disclaimer: string;
+        };
+        /** CashflowRequest */
+        CashflowRequest: {
+            /**
+             * Granularity
+             * @default quarter
+             * @enum {string}
+             */
+            granularity: "month" | "quarter";
+            /** Delay Days */
+            delay_days?: number | null;
+        };
+        /** CashflowResponse */
+        CashflowResponse: {
+            /**
+             * Granularity
+             * @enum {string}
+             */
+            granularity: "month" | "quarter";
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            /** Price */
+            price: number;
+            /** Periods */
+            periods: components["schemas"]["Period"][];
+            /** Unscheduled */
+            unscheduled: components["schemas"]["PlanRow"][];
+            at_risk: components["schemas"]["AtRisk"];
+            /** At Risk Definition */
+            at_risk_definition: string;
+            /** Max Delay Days */
+            max_delay_days: number;
+        };
+        /** ChatRequest */
+        ChatRequest: {
+            /** Message */
+            message: string;
+            /** History */
+            history?: components["schemas"]["ChatTurn"][];
+        };
+        /** ChatResponse */
+        ChatResponse: {
+            /** Answer */
+            answer: string;
+            /** Refused */
+            refused: boolean;
+            /** Citations */
+            citations: components["schemas"]["Citation"][];
+            /** Tool Calls */
+            tool_calls: string[];
+        };
+        /** ChatTurn */
+        ChatTurn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
+        /** Citation */
+        Citation: {
+            /** Tool */
+            tool: string;
+            /** Page */
+            page: number;
+            /** Quote */
+            quote: string;
+        };
+        /**
+         * ContractData
+         * @description Extraction output plus values computed deterministically in Python.
+         */
+        ContractData: {
+            buyer: components["schemas"]["Sourced_str_"];
+            unit_id: components["schemas"]["Sourced_str_"];
+            /** @description Total purchase price in the currency printed in the contract (a bare number). */
+            price: components["schemas"]["Sourced_float_"];
+            area_sqft: components["schemas"]["Sourced_float_"];
+            handover_date: components["schemas"]["Sourced_date_"];
+            grace_period_days: components["schemas"]["Sourced_int_"];
+            /** @description Number only: percent per annum if delay_basis is percent_per_annum; currency units per sq ft per year if fixed_per_sqft_per_year. */
+            delay_rate: components["schemas"]["Sourced_float_"];
+            delay_basis: components["schemas"]["Sourced_Literal__percent_per_annum____fixed_per_sqft_per_year____other___"];
+            /** @description Cap on delay compensation as a percentage of the purchase price; null if no cap. */
+            delay_cap: components["schemas"]["Sourced_float_"];
+            /** Payment Plan */
+            payment_plan: components["schemas"]["Milestone"][];
+            /** @description Short summary of the buyer cancellation/termination clause; null if absent. */
+            cancellation_clause: components["schemas"]["Sourced_str_"];
+            /**
+             * Dated Clauses
+             * @description Clauses that set a deadline as a number of days/months from an event (notice, inspection, defect-liability period, buyer cancellation right after prolonged delay). Empty if none.
+             */
+            dated_clauses?: components["schemas"]["DatedClause"][];
+            /** Warnings */
+            warnings?: string[];
+            /**
+             * Ungrounded Rows
+             * @description Payment-plan rows that failed grounding.
+             */
+            ungrounded_rows?: components["schemas"]["Milestone"][];
+            /** @description Pack id found by keyword scan. */
+            jurisdiction_detected?: components["schemas"]["Sourced_str_"];
+            /**
+             * Jurisdiction
+             * @description Pack id chosen by the user (overrides detection).
+             */
+            jurisdiction?: string | null;
+            /** Currency */
+            currency?: string | null;
+            /**
+             * Grounded Version
+             * @description Set by app.grounding; None = never grounded.
+             */
+            grounded_version?: number | null;
+            /** Payment Plan Percent Sum */
+            payment_plan_percent_sum?: number | null;
+            /** Source File */
+            source_file?: string | null;
+            /** File Hash */
+            file_hash?: string | null;
+            /** Model */
+            model?: string | null;
+            /** Extracted At */
+            extracted_at?: string | null;
+        };
+        /** ContractDetail */
+        ContractDetail: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Pdf Url */
+            pdf_url: string;
+            contract: components["schemas"]["ContractData"];
+            /** Plan */
+            plan: components["schemas"]["PlanRow"][];
+        };
+        /** ContractStatus */
+        ContractStatus: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_extracted" | "queued" | "running" | "extracted" | "error";
+            /** Error */
+            error?: string | null;
+            /** Llm Configured */
+            llm_configured: boolean;
+            /** Model */
+            model: string;
+        };
+        /** ContractSummary */
+        ContractSummary: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "sample" | "upload";
+            /** Size Bytes */
+            size_bytes: number;
+            /** Pages */
+            pages: number;
+            /** Scanned Suspect */
+            scanned_suspect: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_extracted" | "queued" | "running" | "extracted" | "error";
+            /** Error */
+            error?: string | null;
+            /** Extracted At */
+            extracted_at?: string | null;
+            /** Model */
+            model?: string | null;
+            /**
+             * Warnings Count
+             * @default 0
+             */
+            warnings_count: number;
+            /** Buyer */
+            buyer?: string | null;
+            /** Unit Id */
+            unit_id?: string | null;
+            /** Price */
+            price?: number | null;
+        };
+        /**
+         * DatedClause
+         * @description A clause that sets a deadline relative to an anchor event (e.g. 'within 14 days after the Notice of Completion').
+         */
+        DatedClause: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "notice_deadline" | "cancellation_right" | "defect_liability" | "other";
+            /**
+             * Description
+             * @description Short neutral label of what must happen or what right arises.
+             */
+            description: string;
+            /**
+             * Amount
+             * @description The number as stated (days or months).
+             */
+            amount: number;
+            /**
+             * Unit
+             * @enum {string}
+             */
+            unit: "days" | "months";
+            /**
+             * Anchor
+             * @description The event the period runs from.
+             * @enum {string}
+             */
+            anchor: "handover_date" | "grace_expiry" | "notice_of_completion" | "signing_date" | "other";
+            /** Source Page */
+            source_page: number;
+            /**
+             * Source Quote
+             * @description Verbatim sentence stating the period.
+             */
+            source_quote: string;
+        };
+        /** ErpPush */
+        ErpPush: {
+            /** Delay Days */
+            delay_days?: number | null;
+            /** As Of Date */
+            as_of_date?: string | null;
+            /** Amounts Paid */
+            amounts_paid?: components["schemas"]["AmountPaid"][] | null;
+            /**
+             * Confirm
+             * @default false
+             */
+            confirm: boolean;
+            /**
+             * Reviewer
+             * @default
+             */
+            reviewer: string;
+        };
+        /** ErpRequest */
+        ErpRequest: {
+            /** Delay Days */
+            delay_days?: number | null;
+            /** As Of Date */
+            as_of_date?: string | null;
+            /** Amounts Paid */
+            amounts_paid?: components["schemas"]["AmountPaid"][] | null;
+        };
+        /** EvalField */
+        EvalField: {
+            /** Correct */
+            correct: number;
+            /** Total */
+            total: number;
+            /** Accuracy */
+            accuracy: number;
+            /** Quote Valid */
+            quote_valid: number;
+            /** Quote Total */
+            quote_total: number;
+            /** Quote Accuracy */
+            quote_accuracy?: number | null;
+        };
+        /** EvalOverall */
+        EvalOverall: {
+            /** Value Accuracy */
+            value_accuracy?: number | null;
+            /** Checks */
+            checks: number;
+            /** Quote Accuracy */
+            quote_accuracy?: number | null;
+            /** Quotes Checked */
+            quotes_checked: number;
+        };
+        /** EvalResults */
+        EvalResults: {
+            /** Generated At */
+            generated_at: string;
+            /** Model */
+            model: string;
+            /** Files */
+            files: string[];
+            /** Fields */
+            fields: {
+                [key: string]: components["schemas"]["EvalField"];
+            };
+            overall: components["schemas"]["EvalOverall"];
+            penalty_tests: components["schemas"]["PenaltyTests"];
+            /** Per File */
+            per_file: {
+                [key: string]: {
+                    [key: string]: boolean;
+                };
+            };
+        };
+        /** EvalRunRequest */
+        EvalRunRequest: {
+            /**
+             * Allow Llm
+             * @default false
+             */
+            allow_llm: boolean;
+            /**
+             * Use Cache
+             * @default true
+             */
+            use_cache: boolean;
+            /**
+             * Engine
+             * @default claude_pdf
+             * @enum {string}
+             */
+            engine: "claude_pdf" | "azure_docint" | "docling";
+        };
+        /** EvalRunStatus */
+        EvalRunStatus: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "idle" | "running" | "done" | "error";
+            /**
+             * Done
+             * @default 0
+             */
+            done: number;
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
+            /** Message */
+            message?: string | null;
+        };
+        /**
+         * Evidence
+         * @description Where a value is printed. Computed server-side from the PDF, never by the LLM.
+         */
+        Evidence: {
+            /** Page */
+            page?: number | null;
+            /** Quote */
+            quote?: string | null;
+            /**
+             * Bbox
+             * @description [x0,y0,x1,y1] union box in PDF points, or null.
+             */
+            bbox?: number[] | null;
+            /**
+             * Rects
+             * @description One rect per text line (PDF points).
+             */
+            rects?: number[][];
+            /** Page Width */
+            page_width?: number | null;
+            /** Page Height */
+            page_height?: number | null;
+            /**
+             * Method
+             * @description exact | fuzzy | not_found
+             */
+            method?: string | null;
+        };
+        /** EvidenceResponse */
+        EvidenceResponse: {
+            /** Field */
+            field: string;
+            /** Value */
+            value?: unknown;
+            evidence: components["schemas"]["Evidence"];
+            /** Grounding Status */
+            grounding_status?: string | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+        };
+        /** GapRequest */
+        GapRequest: {
+            /** Delay Days */
+            delay_days: number;
+            /** As Of Date */
+            as_of_date?: string | null;
+            /** Amounts Paid */
+            amounts_paid?: components["schemas"]["AmountPaid"][] | null;
+            /** Jurisdiction */
+            jurisdiction?: string | null;
+        };
+        /** Grounding */
+        Grounding: {
+            /**
+             * Status
+             * @default not_stated
+             * @enum {string}
+             */
+            status: "grounded" | "partial" | "ungrounded" | "not_stated";
+            /** Checks */
+            checks?: components["schemas"]["GroundingCheck"][];
+            /**
+             * Claimed Value
+             * @description What the model claimed, kept only when ungrounded.
+             */
+            claimed_value?: string | null;
+        };
+        /** GroundingCheck */
+        GroundingCheck: {
+            /** Name */
+            name: string;
+            /** Passed */
+            passed: boolean;
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Health */
+        Health: {
+            /**
+             * Status
+             * @constant
+             */
+            status: "ok";
+            /** Llm Configured */
+            llm_configured: boolean;
+            /** Model */
+            model: string;
+            /** Llm Calls Made */
+            llm_calls_made: number;
+            /** Llm Call Cap */
+            llm_call_cap: number;
+        };
+        /** JurisdictionBody */
+        JurisdictionBody: {
+            /** Jurisdiction */
+            jurisdiction?: string | null;
+        };
+        /** MCRequest */
+        MCRequest: {
+            /** Trials */
+            trials?: number | null;
+            /** Seed */
+            seed?: number | null;
+            /** Family */
+            family?: ("triangular" | "lognormal" | "fixed") | null;
+            /** Params */
+            params?: {
+                [key: string]: number;
+            } | null;
+            /** As Of Date */
+            as_of_date?: string | null;
+            /** Amounts Paid */
+            amounts_paid?: components["schemas"]["AmountPaid"][] | null;
+            /** Signal Csv */
+            signal_csv?: string | null;
+        };
+        /** Milestone */
+        Milestone: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /** Name */
+            name: string;
+            /**
+             * Percent
+             * @description Percentage of the purchase price.
+             */
+            percent: number;
+            /**
+             * Due Date
+             * @description ISO date stated for this milestone, else null.
+             */
+            due_date?: string | null;
+            /**
+             * Trigger
+             * @description Event that triggers the payment, as stated, else null.
+             */
+            trigger?: string | null;
+            /** Source Page */
+            source_page: number;
+            /**
+             * Source Quote
+             * @description Verbatim text of the payment-plan row.
+             */
+            source_quote: string;
+        };
+        /** NewSet */
+        NewSet: {
+            /** Unit Key */
+            unit_key: string;
+            /** Spa Contract Id */
+            spa_contract_id?: string | null;
+            /** Currency */
+            currency?: string | null;
+        };
+        /** PenaltyRequest */
+        PenaltyRequest: {
+            /**
+             * Scenarios
+             * @description Delay days; default from rules.
+             */
+            scenarios?: number[] | null;
+        };
+        /** PenaltyResponse */
+        PenaltyResponse: {
+            terms: components["schemas"]["PenaltyTerms"];
+            /** Day Count Basis */
+            day_count_basis: number;
+            /** Default Scenarios */
+            default_scenarios: number[];
+            /** Rows */
+            rows: components["schemas"]["PenaltyRow"][];
+        };
+        /** PenaltyRow */
+        PenaltyRow: {
+            /** Delay Days */
+            delay_days: number;
+            /** Grace Days */
+            grace_days: number;
+            /** Chargeable Days */
+            chargeable_days: number;
+            /** Penalty */
+            penalty: number;
+            /** Cap Amount */
+            cap_amount?: number | null;
+            /** Cap Reached */
+            cap_reached: boolean;
+            /** Pct Of Price */
+            pct_of_price?: number | null;
+        };
+        /** PenaltyTerms */
+        PenaltyTerms: {
+            rate: components["schemas"]["Sourced_float_"];
+            basis: components["schemas"]["Sourced_str_"];
+            grace_days: components["schemas"]["Sourced_int_"];
+            cap_pct: components["schemas"]["Sourced_float_"];
+            price: components["schemas"]["Sourced_float_"];
+            area_sqft: components["schemas"]["Sourced_float_"];
+        };
+        /** PenaltyTests */
+        PenaltyTests: {
+            /** Passed */
+            passed: number;
+            /** Failed */
+            failed: number;
+            /** Total */
+            total: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+        };
+        /** Period */
+        Period: {
+            /** Period */
+            period: string;
+            /** Amount Due */
+            amount_due: number;
+            /** At Risk Amount */
+            at_risk_amount: number;
+            /** Safe Amount */
+            safe_amount: number;
+            /** Cumulative */
+            cumulative: number;
+            /** Cumulative Pct */
+            cumulative_pct: number;
+            /** Is Past */
+            is_past: boolean;
+        };
+        /** PlanRow */
+        PlanRow: {
+            /** Milestone */
+            milestone: string;
+            /** Percent */
+            percent: number;
+            /** Amount */
+            amount: number;
+            /** Due Date */
+            due_date?: string | null;
+            /** Trigger */
+            trigger?: string | null;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "handover_linked" | "construction_linked" | "time_based";
+            /** At Risk */
+            at_risk: boolean;
+            /** Source Page */
+            source_page: number;
+            /** Source Quote */
+            source_quote: string;
+        };
+        /** ReviewMark */
+        ReviewMark: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "accept" | "correct" | "reject";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Reviewer
+             * @default
+             */
+            reviewer: string;
+            /**
+             * At
+             * @default
+             */
+            at: string;
+        };
+        /** ReviewRequest */
+        ReviewRequest: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "accept" | "correct" | "reject";
+            /** Value */
+            value?: unknown;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Reviewer
+             * @default
+             */
+            reviewer: string;
+            /** Source Page */
+            source_page?: number | null;
+            /** Source Quote */
+            source_quote?: string | null;
+        };
+        /** Sourced[Literal['percent_per_annum', 'fixed_per_sqft_per_year', 'other']] */
+        Sourced_Literal__percent_per_annum____fixed_per_sqft_per_year____other___: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Value
+             * @description Extracted value, or null if the document does not state it.
+             */
+            value?: ("percent_per_annum" | "fixed_per_sqft_per_year" | "other") | null;
+            /**
+             * Source Page
+             * @description 1-based PDF page number where the value is stated.
+             */
+            source_page?: number | null;
+            /**
+             * Source Quote
+             * @description Exact verbatim text copied from that page.
+             */
+            source_quote?: string | null;
+        };
+        /** Sourced[date] */
+        Sourced_date_: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Value
+             * @description Extracted value, or null if the document does not state it.
+             */
+            value?: string | null;
+            /**
+             * Source Page
+             * @description 1-based PDF page number where the value is stated.
+             */
+            source_page?: number | null;
+            /**
+             * Source Quote
+             * @description Exact verbatim text copied from that page.
+             */
+            source_quote?: string | null;
+        };
+        /** Sourced[float] */
+        Sourced_float_: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Value
+             * @description Extracted value, or null if the document does not state it.
+             */
+            value?: number | null;
+            /**
+             * Source Page
+             * @description 1-based PDF page number where the value is stated.
+             */
+            source_page?: number | null;
+            /**
+             * Source Quote
+             * @description Exact verbatim text copied from that page.
+             */
+            source_quote?: string | null;
+        };
+        /** Sourced[int] */
+        Sourced_int_: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Value
+             * @description Extracted value, or null if the document does not state it.
+             */
+            value?: number | null;
+            /**
+             * Source Page
+             * @description 1-based PDF page number where the value is stated.
+             */
+            source_page?: number | null;
+            /**
+             * Source Quote
+             * @description Exact verbatim text copied from that page.
+             */
+            source_quote?: string | null;
+        };
+        /** Sourced[str] */
+        Sourced_str_: {
+            evidence?: components["schemas"]["Evidence"] | null;
+            grounding?: components["schemas"]["Grounding"] | null;
+            /** Confidence */
+            confidence?: number | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
+             * Human Verified
+             * @default false
+             */
+            human_verified: boolean;
+            review?: components["schemas"]["ReviewMark"] | null;
+            /**
+             * Value
+             * @description Extracted value, or null if the document does not state it.
+             */
+            value?: string | null;
+            /**
+             * Source Page
+             * @description 1-based PDF page number where the value is stated.
+             */
+            source_page?: number | null;
+            /**
+             * Source Quote
+             * @description Exact verbatim text copied from that page.
+             */
+            source_quote?: string | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
     };
-    /** EvalRunRequest */
-    EvalRunRequest: {
-      /**
-       * Allow Llm
-       * @default false
-       */
-      allow_llm: boolean;
-      /**
-       * Use Cache
-       * @default true
-       */
-      use_cache: boolean;
-    };
-    /** EvalRunStatus */
-    EvalRunStatus: {
-      /**
-       * State
-       * @enum {string}
-       */
-      state: "idle" | "running" | "done" | "error";
-      /**
-       * Done
-       * @default 0
-       */
-      done: number;
-      /**
-       * Total
-       * @default 0
-       */
-      total: number;
-      /** Message */
-      message?: string | null;
-    };
-    /** HTTPValidationError */
-    HTTPValidationError: {
-      /** Detail */
-      detail?: components["schemas"]["ValidationError"][];
-    };
-    /** Health */
-    Health: {
-      /**
-       * Status
-       * @constant
-       */
-      status: "ok";
-      /** Llm Configured */
-      llm_configured: boolean;
-      /** Model */
-      model: string;
-      /** Llm Calls Made */
-      llm_calls_made: number;
-      /** Llm Call Cap */
-      llm_call_cap: number;
-    };
-    /** Milestone */
-    Milestone: {
-      /** Name */
-      name: string;
-      /**
-       * Percent
-       * @description Percentage of the purchase price.
-       */
-      percent: number;
-      /**
-       * Due Date
-       * @description ISO date stated for this milestone, else null.
-       */
-      due_date?: string | null;
-      /**
-       * Trigger
-       * @description Event that triggers the payment, as stated, else null.
-       */
-      trigger?: string | null;
-      /** Source Page */
-      source_page: number;
-      /**
-       * Source Quote
-       * @description Verbatim text of the payment-plan row.
-       */
-      source_quote: string;
-    };
-    /** PenaltyRequest */
-    PenaltyRequest: {
-      /**
-       * Scenarios
-       * @description Delay days; default from rules.
-       */
-      scenarios?: number[] | null;
-    };
-    /** PenaltyResponse */
-    PenaltyResponse: {
-      terms: components["schemas"]["PenaltyTerms"];
-      /** Day Count Basis */
-      day_count_basis: number;
-      /** Default Scenarios */
-      default_scenarios: number[];
-      /** Rows */
-      rows: components["schemas"]["PenaltyRow"][];
-    };
-    /** PenaltyRow */
-    PenaltyRow: {
-      /** Delay Days */
-      delay_days: number;
-      /** Grace Days */
-      grace_days: number;
-      /** Chargeable Days */
-      chargeable_days: number;
-      /** Penalty */
-      penalty: number;
-      /** Cap Amount */
-      cap_amount?: number | null;
-      /** Cap Reached */
-      cap_reached: boolean;
-      /** Pct Of Price */
-      pct_of_price?: number | null;
-    };
-    /** PenaltyTerms */
-    PenaltyTerms: {
-      rate: components["schemas"]["Sourced_float_"];
-      basis: components["schemas"]["Sourced_str_"];
-      grace_days: components["schemas"]["Sourced_int_"];
-      cap_pct: components["schemas"]["Sourced_float_"];
-      price: components["schemas"]["Sourced_float_"];
-      area_sqft: components["schemas"]["Sourced_float_"];
-    };
-    /** PenaltyTests */
-    PenaltyTests: {
-      /** Passed */
-      passed: number;
-      /** Failed */
-      failed: number;
-      /** Total */
-      total: number;
-      /** Pass Rate */
-      pass_rate?: number | null;
-    };
-    /** Period */
-    Period: {
-      /** Period */
-      period: string;
-      /** Amount Due */
-      amount_due: number;
-      /** At Risk Amount */
-      at_risk_amount: number;
-      /** Safe Amount */
-      safe_amount: number;
-      /** Cumulative */
-      cumulative: number;
-      /** Cumulative Pct */
-      cumulative_pct: number;
-      /** Is Past */
-      is_past: boolean;
-    };
-    /** PlanRow */
-    PlanRow: {
-      /** Milestone */
-      milestone: string;
-      /** Percent */
-      percent: number;
-      /** Amount */
-      amount: number;
-      /** Due Date */
-      due_date?: string | null;
-      /** Trigger */
-      trigger?: string | null;
-      /**
-       * Type
-       * @enum {string}
-       */
-      type: "handover_linked" | "construction_linked" | "time_based";
-      /** At Risk */
-      at_risk: boolean;
-      /** Source Page */
-      source_page: number;
-      /** Source Quote */
-      source_quote: string;
-    };
-    /** Sourced[Literal['percent_per_annum', 'fixed_per_sqft_per_year', 'other']] */
-    Sourced_Literal__percent_per_annum____fixed_per_sqft_per_year____other___: {
-      /**
-       * Value
-       * @description Extracted value, or null if the document does not state it.
-       */
-      value?: ("percent_per_annum" | "fixed_per_sqft_per_year" | "other") | null;
-      /**
-       * Source Page
-       * @description 1-based PDF page number where the value is stated.
-       */
-      source_page?: number | null;
-      /**
-       * Source Quote
-       * @description Exact verbatim text copied from that page.
-       */
-      source_quote?: string | null;
-    };
-    /** Sourced[date] */
-    Sourced_date_: {
-      /**
-       * Value
-       * @description Extracted value, or null if the document does not state it.
-       */
-      value?: string | null;
-      /**
-       * Source Page
-       * @description 1-based PDF page number where the value is stated.
-       */
-      source_page?: number | null;
-      /**
-       * Source Quote
-       * @description Exact verbatim text copied from that page.
-       */
-      source_quote?: string | null;
-    };
-    /** Sourced[float] */
-    Sourced_float_: {
-      /**
-       * Value
-       * @description Extracted value, or null if the document does not state it.
-       */
-      value?: number | null;
-      /**
-       * Source Page
-       * @description 1-based PDF page number where the value is stated.
-       */
-      source_page?: number | null;
-      /**
-       * Source Quote
-       * @description Exact verbatim text copied from that page.
-       */
-      source_quote?: string | null;
-    };
-    /** Sourced[int] */
-    Sourced_int_: {
-      /**
-       * Value
-       * @description Extracted value, or null if the document does not state it.
-       */
-      value?: number | null;
-      /**
-       * Source Page
-       * @description 1-based PDF page number where the value is stated.
-       */
-      source_page?: number | null;
-      /**
-       * Source Quote
-       * @description Exact verbatim text copied from that page.
-       */
-      source_quote?: string | null;
-    };
-    /** Sourced[str] */
-    Sourced_str_: {
-      /**
-       * Value
-       * @description Extracted value, or null if the document does not state it.
-       */
-      value?: string | null;
-      /**
-       * Source Page
-       * @description 1-based PDF page number where the value is stated.
-       */
-      source_page?: number | null;
-      /**
-       * Source Quote
-       * @description Exact verbatim text copied from that page.
-       */
-      source_quote?: string | null;
-    };
-    /** ValidationError */
-    ValidationError: {
-      /** Location */
-      loc: (string | number)[];
-      /** Message */
-      msg: string;
-      /** Error Type */
-      type: string;
-      /** Input */
-      input?: unknown;
-      /** Context */
-      ctx?: Record<string, never>;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  list_contracts_api_contracts_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    list_contracts_api_contracts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractSummary"][];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    upload_api_contracts_upload_post: {
+        parameters: {
+            query?: {
+                extract?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ContractSummary"][];
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_api_contracts_upload_post"];
+            };
         };
-      };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-  };
-  upload_api_contracts_upload_post: {
-    parameters: {
-      query?: {
-        extract?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
+    status_api_contracts__contract_id__status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["Body_upload_api_contracts_upload_post"];
-      };
+    extract_api_contracts__contract_id__extract_post: {
+        parameters: {
+            query?: {
+                force?: boolean;
+            };
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      202: {
-        headers: {
-          [name: string]: unknown;
+    detail_api_contracts__contract_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ContractStatus"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  status_api_contracts__contract_id__status_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    pdf_api_contracts__contract_id__pdf_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    penalty_api_contracts__contract_id__penalty_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ContractStatus"];
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PenaltyRequest"] | null;
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PenaltyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  extract_api_contracts__contract_id__extract_post: {
-    parameters: {
-      query?: {
-        force?: boolean;
-      };
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    cashflow_api_contracts__contract_id__cashflow_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CashflowRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashflowResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      202: {
-        headers: {
-          [name: string]: unknown;
+    chat_api_contracts__contract_id__chat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ContractStatus"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatRequest"];
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  detail_api_contracts__contract_id__get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    results_api_eval_results_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalResults"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    run_status_api_eval_run_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ContractDetail"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalRunStatus"];
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  pdf_api_contracts__contract_id__pdf_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    run_api_eval_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EvalRunRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalRunStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    runs_api_eval_runs_get: {
+        parameters: {
+            query?: {
+                engine?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": unknown;
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  penalty_api_contracts__contract_id__penalty_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    run_detail_api_eval_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PenaltyRequest"] | null;
-      };
+    engines_api_eval_engines_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    bakeoff_api_eval_bakeoff_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["PenaltyResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  cashflow_api_contracts__contract_id__cashflow_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    evidence_api_contracts__contract_id__evidence__field__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+                field: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["CashflowRequest"] | null;
-      };
+    page_image_api_contracts__contract_id__page__page__png_get: {
+        parameters: {
+            query?: {
+                scale?: number;
+            };
+            header?: never;
+            path: {
+                contract_id: string;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    review_field_api_contracts__contract_id__fields__field__review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+                field: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["CashflowResponse"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequest"];
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  chat_api_contracts__contract_id__chat_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        contract_id: string;
-      };
-      cookie?: never;
+    reviews_api_contracts__contract_id__reviews_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ChatRequest"];
-      };
+    review_queue_api_review_queue_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    golden_export_api_contracts__contract_id__golden_export_post: {
+        parameters: {
+            query?: {
+                allow_partial?: boolean;
+            };
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ChatResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  results_api_eval_results_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    set_jurisdiction_api_contracts__contract_id__jurisdiction_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JurisdictionBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    packs_api_packs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["EvalResults"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
         };
-      };
     };
-  };
-  run_status_api_eval_run_status_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    statute_gap_api_contracts__contract_id__statute_gap_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GapRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    defaults_api_simulation_defaults_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["EvalRunStatus"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
         };
-      };
     };
-  };
-  run_api_eval_run_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    montecarlo_api_contracts__contract_id__montecarlo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MCRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["EvalRunRequest"] | null;
-      };
+    portfolio_montecarlo_api_portfolio_montecarlo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MCRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      202: {
-        headers: {
-          [name: string]: unknown;
+    obligations_api_obligations_get: {
+        parameters: {
+            query?: {
+                as_of?: string | null;
+                within_days?: number | null;
+                status?: string | null;
+                contract_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["EvalRunStatus"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  health_api_health_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    alerts_api_alerts_get: {
+        parameters: {
+            query?: {
+                include_acked?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["Health"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
     };
-  };
+    alerts_recompute_api_alerts_recompute_post: {
+        parameters: {
+            query?: {
+                as_of?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alert_ack_api_alerts__alert_id__ack_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sets_api_crossdoc_sets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    create_set_api_crossdoc_sets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewSet"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    analyse_api_crossdoc_sets__set_id__get: {
+        parameters: {
+            query?: {
+                /** @description Allow LLM calls to read uncached brochure/filing PDFs. */
+                extract?: boolean;
+            };
+            header?: never;
+            path: {
+                set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    doc_page_api_crossdoc_sets__set_id__documents__doc_id__page__page__png_get: {
+        parameters: {
+            query?: {
+                scale?: number;
+            };
+            header?: never;
+            path: {
+                set_id: string;
+                doc_id: string;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    doc_evidence_api_crossdoc_sets__set_id__documents__doc_id__evidence_get: {
+        parameters: {
+            query: {
+                page?: number;
+                quote: string;
+            };
+            header?: never;
+            path: {
+                set_id: string;
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_document_api_crossdoc_sets__set_id__documents_post: {
+        parameters: {
+            query: {
+                doc_type: string;
+            };
+            header?: never;
+            path: {
+                set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_add_document_api_crossdoc_sets__set_id__documents_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    playbook_api_contracts__contract_id__playbook_get: {
+        parameters: {
+            query?: {
+                /** @description Run the clause-specialist LLM (one call, cached). */
+                run_llm?: boolean;
+                format?: string;
+            };
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    erp_export_api_contracts__contract_id__erp_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ErpRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    erp_push_api_contracts__contract_id__erp_push_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ErpPush"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    buyer_chat_api_buyer_chat_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BuyerChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuyerChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    health_api_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
 }
