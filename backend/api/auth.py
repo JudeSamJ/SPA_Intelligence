@@ -2,6 +2,9 @@
 
 AUTH_MODE=off    (default) no authentication: local development and the test stub server only.
 AUTH_MODE=entra  every /api route except /health requires a valid Entra access token for THIS API.
+AUTH_MODE=apikey every /api route except /health requires an X-API-Key header matching a key in API_KEYS. For demos where
+                 Entra app registrations are not available. Same roles, same checks; keys are shared secrets, so use them only
+                 with demo data, over HTTPS, and rotate them after the demo.
 
 A token is accepted only if: RS256 signature verifies against the tenant's published keys (JWKS), the audience is this
 API (ENTRA_CLIENT_ID or api://ENTRA_CLIENT_ID), the issuer is this tenant, the tenant id matches, and it has not expired.
@@ -17,6 +20,8 @@ except a short hash of the object id (see app/buyer.py).
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import logging
 import os
@@ -51,6 +56,7 @@ class Principal:
     roles: set[str]
     tenant: str
     raw_claims: dict = field(default_factory=dict, repr=False)
+    contract: str | None = None          # apikey mode: the contract a buyer key is bound to
 
     @property
     def display(self) -> str:
@@ -59,7 +65,7 @@ class Principal:
 
 def mode() -> str:
     m = (os.environ.get("AUTH_MODE") or "off").strip().lower()
-    return m if m in ("off", "entra") else "off"
+    return m if m in ("off", "entra", "apikey") else "off"
 
 
 def settings() -> tuple[str, str]:
@@ -72,8 +78,11 @@ def check_startup() -> None:
         tenant, client = settings()
         if not tenant or not client:
             raise RuntimeError("AUTH_MODE=entra needs ENTRA_TENANT_ID and ENTRA_CLIENT_ID.")
+    elif mode() == "apikey":
+        if not api_keys():
+            raise RuntimeError("AUTH_MODE=apikey needs API_KEYS with at least one valid key (24+ characters).")
     elif os.environ.get("AUTH_MODE", "off").strip().lower() not in ("off", ""):
-        raise RuntimeError(f"Unknown AUTH_MODE '{os.environ.get('AUTH_MODE')}' (use off or entra).")
+        raise RuntimeError(f"Unknown AUTH_MODE '{os.environ.get('AUTH_MODE')}' (use off, entra or apikey).")
     else:
         log.warning("Authentication is OFF (AUTH_MODE=off): use only for local development.")
 
@@ -137,6 +146,34 @@ def validate_token(token: str) -> Principal:
                      roles={r for r in roles if isinstance(r, str)}, tenant=tenant, raw_claims={})
 
 
+def api_keys() -> dict[str, dict]:
+    """API_KEYS = JSON {"<key, 24+ chars>": {"name": "Demo staff", "roles": ["Spa.Reviewer"], "contract": "<64-hex, buyers only>"}}.
+    Entries that are malformed or have short keys are ignored (never accepted)."""
+    raw = os.environ.get("API_KEYS", "").strip()
+    try:
+        data = json.loads(raw) if raw else {}
+    except ValueError:
+        return {}
+    out = {}
+    for k, v in (data.items() if isinstance(data, dict) else []):
+        if isinstance(k, str) and len(k) >= 24 and isinstance(v, dict) and isinstance(v.get("roles"), list):
+            c = v.get("contract")
+            if c is None or (isinstance(c, str) and re.fullmatch(r"[0-9a-f]{64}", c)):
+                out[k] = {"name": str(v.get("name") or "API key")[:60], "roles": {r for r in v["roles"] if isinstance(r, str)}, "contract": c}
+    return out
+
+
+def validate_api_key(key: str) -> Principal:
+    found = None
+    for k, v in api_keys().items():                      # compare against every key: no early exit on a match
+        if hmac.compare_digest(k.encode(), key.encode()):
+            found = v
+    if found is None:
+        raise ApiError(401, "unauthorized", "Invalid API key.")
+    return Principal(oid="key:" + hashlib.sha256(key.encode()).hexdigest()[:12], name=found["name"], upn="", roles=found["roles"],
+                     tenant="", contract=found["contract"])
+
+
 def _bearer(request: Request) -> str:
     h = request.headers.get("authorization", "")
     if not h.lower().startswith("bearer ") or len(h) < 20:
@@ -151,7 +188,13 @@ def current_principal(request: Request) -> Principal | None:
         return None
     p = getattr(request.state, "principal", None)
     if p is None:
-        p = validate_token(_bearer(request))
+        if mode() == "apikey":
+            key = request.headers.get("x-api-key", "").strip()
+            if not key:
+                raise ApiError(401, "unauthorized", "Missing X-API-Key header.")
+            p = validate_api_key(key)
+        else:
+            p = validate_token(_bearer(request))
         request.state.principal = p
     return p
 
@@ -192,4 +235,6 @@ def buyer_accounts() -> dict[str, str]:
 def contract_for_principal(p: Principal) -> str | None:
     if BUYER not in p.roles:
         return None
+    if mode() == "apikey":
+        return p.contract
     return buyer_accounts().get(p.oid.lower())

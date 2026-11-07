@@ -173,3 +173,57 @@ def test_auth_off_keeps_everything_open(env, seeded, monkeypatch):
     monkeypatch.delenv("AUTH_MODE", raising=False)
     c = TestClient(create_app())
     assert c.get("/api/contracts").status_code == 200
+
+
+# ------------------------------------------------------------------ AUTH_MODE=apikey (demo mode without Entra registrations)
+STAFF_KEY, REV_KEY, BUYER_KEY = "staff-key-" + "a" * 20, "reviewer-key-" + "b" * 20, "buyer-key-" + "c" * 20
+
+
+@pytest.fixture
+def keyed(env, seeded, monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "apikey")
+    monkeypatch.setenv("API_KEYS", json.dumps({
+        STAFF_KEY: {"name": "Demo staff", "roles": ["Spa.Staff"]},
+        REV_KEY: {"name": "Demo reviewer", "roles": ["Spa.Reviewer"]},
+        BUYER_KEY: {"name": "Demo buyer", "roles": ["Spa.Buyer"], "contract": sid("sample_a.pdf")},
+        "short": {"name": "weak", "roles": ["Spa.Reviewer"]}}))
+    return TestClient(create_app())
+
+
+def test_apikey_requires_a_key_and_ignores_short_keys(keyed):
+    assert keyed.get("/api/health").json()["auth_mode"] == "apikey"
+    assert keyed.get("/api/contracts").status_code == 401
+    assert keyed.get("/api/contracts", headers={"X-API-Key": "wrong-wrong-wrong-wrong-wrong"}).status_code == 401
+    assert keyed.get("/api/contracts", headers={"X-API-Key": "short"}).status_code == 401           # too short to be a key
+    assert keyed.get("/api/contracts", headers={"Authorization": f"Bearer {STAFF_KEY}"}).status_code == 401   # only the header counts
+
+
+def test_apikey_role_matrix_and_verified_name(keyed):
+    cid = sid("sample_a.pdf")
+    s, r = {"X-API-Key": STAFF_KEY}, {"X-API-Key": REV_KEY}
+    assert keyed.get(f"/api/contracts/{cid}", headers=s).status_code == 200
+    assert keyed.post(f"/api/contracts/{cid}/penalty", json={}, headers=s).status_code == 200
+    assert keyed.post(f"/api/contracts/{cid}/fields/price/review", json={"action": "accept"}, headers=s).status_code == 403
+    assert keyed.get(f"/api/contracts/{cid}", headers={"X-API-Key": BUYER_KEY}).status_code == 403
+    keyed.post(f"/api/contracts/{cid}/fields/price/review", json={"action": "accept", "reviewer": "Forged Name"}, headers=r)
+    assert keyed.get(f"/api/contracts/{cid}/reviews", headers=s).json()["decisions"][0]["reviewer"] == "Demo reviewer"
+
+
+def test_apikey_buyer_is_bound_to_its_contract(keyed, tmp_path, monkeypatch):
+    monkeypatch.setenv("SPA_AUDIT_DIR", str(tmp_path / "audit"))
+    ok = keyed.post("/api/buyer/chat", json={"message": "Can I cancel and get a refund?"}, headers={"X-API-Key": BUYER_KEY})
+    assert ok.status_code == 200 and ok.json()["reason"] == "legal_advice"
+    assert keyed.post("/api/buyer/chat", json={"message": "hi"}, headers={"X-API-Key": STAFF_KEY}).status_code == 403
+    assert keyed.post("/api/buyer/chat", json={"message": "hi"}).status_code == 401
+    log = (tmp_path / "audit" / "buyer_chat.jsonl").read_text()
+    assert BUYER_KEY not in log and sid("sample_a.pdf") in log
+
+
+def test_apikey_mode_without_valid_keys_refuses_to_start(env, monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "apikey")
+    monkeypatch.setenv("API_KEYS", json.dumps({"short": {"roles": ["Spa.Staff"]}}))
+    with pytest.raises(RuntimeError, match="API_KEYS"):
+        create_app()
+    monkeypatch.delenv("API_KEYS")
+    with pytest.raises(RuntimeError, match="API_KEYS"):
+        create_app()

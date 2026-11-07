@@ -61,29 +61,36 @@ BUYER_OPS = [
 ]
 
 
-def build(ops, title, host, description):
-    paths: dict = {}
-    for path, method, d in ops:
-        paths.setdefault(path, {})[method] = d
-    return {"swagger": "2.0", "info": {"title": title, "version": "1.0", "description": description},
-            "host": host, "basePath": "/api", "schemes": ["https"], "consumes": ["application/json"], "produces": ["application/json"],
-            "paths": paths,
-            "securityDefinitions": {"oauth2": {"type": "oauth2", "flow": "accessCode",
+def _security(auth):
+    if auth == "apikey":      # demo mode without Entra registrations: AUTH_MODE=apikey on the server
+        return {"securityDefinitions": {"api_key": {"type": "apiKey", "in": "header", "name": "X-API-Key"}},
+                "security": [{"api_key": []}]}
+    return {"securityDefinitions": {"oauth2": {"type": "oauth2", "flow": "accessCode",
                                                "authorizationUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/authorize",
                                                "tokenUrl": "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/token",
                                                "scopes": {"api://<API_CLIENT_ID>/access_as_user": "Access SPA Intelligence"}}},
             "security": [{"oauth2": ["api://<API_CLIENT_ID>/access_as_user"]}]}
 
 
+def build(ops, title, host, description, auth="entra"):
+    paths: dict = {}
+    for path, method, d in ops:
+        paths.setdefault(path, {})[method] = d
+    return {"swagger": "2.0", "info": {"title": title, "version": "1.0", "description": description},
+            "host": host, "basePath": "/api", "schemes": ["https"], "consumes": ["application/json"], "produces": ["application/json"],
+            "paths": paths, **_security(auth)}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="<your-api-host>")
     a = ap.parse_args()
-    (ROOT / "integrations/power-platform/spa-intelligence.swagger.json").write_text(json.dumps(
-        build(STAFF_OPS, "SPA Intelligence", a.host, "Decision support, not legal advice. Contract intelligence for staff automation."), indent=2))
-    (ROOT / "integrations/copilot-studio/buyer-chat.swagger.json").write_text(json.dumps(
-        build(BUYER_OPS, "SPA Intelligence Buyer Assistant", a.host, "Decision support, not legal advice. One operation: ask about your own contract."), indent=2))
-    print("wrote 2 connector definitions")
+    for auth, suffix in (("entra", ""), ("apikey", ".apikey")):
+        (ROOT / f"integrations/power-platform/spa-intelligence{suffix}.swagger.json").write_text(json.dumps(
+            build(STAFF_OPS, "SPA Intelligence", a.host, "Decision support, not legal advice. Contract intelligence for staff automation.", auth), indent=2))
+        (ROOT / f"integrations/copilot-studio/buyer-chat{suffix}.swagger.json").write_text(json.dumps(
+            build(BUYER_OPS, "SPA Intelligence Buyer Assistant", a.host, "Decision support, not legal advice. One operation: ask about your own contract.", auth), indent=2))
+    print("wrote 4 connector definitions (Entra and API-key variants)")
 
 
 if __name__ == "__main__":

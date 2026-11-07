@@ -8,10 +8,11 @@ from backend.api.main import app
 
 ROOT = Path(__file__).resolve().parent.parent
 FILES = ["integrations/power-platform/spa-intelligence.swagger.json", "integrations/copilot-studio/buyer-chat.swagger.json"]
+APIKEY = [f.replace(".swagger", ".apikey.swagger") for f in FILES]
 API = app.openapi()["paths"]
 
 
-@pytest.mark.parametrize("f", FILES)
+@pytest.mark.parametrize("f", FILES + APIKEY)
 def test_every_operation_exists_in_the_api_with_unique_ids(f):
     spec = json.loads((ROOT / f).read_text())
     ids = []
@@ -37,3 +38,12 @@ def test_buyer_definition_exposes_only_buyer_chat_and_staff_one_excludes_interna
     staff = json.dumps(json.loads((ROOT / FILES[0]).read_text())["paths"])
     for internal in ("playbook", "buyer/chat", "golden-export", "eval/run", "jurisdiction"):
         assert internal not in staff
+
+
+@pytest.mark.parametrize("f", APIKEY)
+def test_apikey_variants_use_a_header_key_not_oauth(f):
+    spec = json.loads((ROOT / f).read_text())
+    assert spec["securityDefinitions"] == {"api_key": {"type": "apiKey", "in": "header", "name": "X-API-Key"}}
+    assert spec["security"] == [{"api_key": []}] and "oauth2" not in json.dumps(spec)
+    entra = json.loads((ROOT / f.replace(".apikey", "")).read_text())
+    assert spec["paths"] == entra["paths"]                      # identical operations, only the security differs

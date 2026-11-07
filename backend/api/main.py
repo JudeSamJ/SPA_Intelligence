@@ -51,7 +51,7 @@ def create_app() -> FastAPI:
                   description="Decision support, not legal advice.")
     app.add_middleware(GZipMiddleware, minimum_size=1024)   # text assets + JSON; ~70% smaller transfer
     app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_credentials=False,
-                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-API-Key"])
 
     @app.middleware("http")
     async def access_log(request: Request, call_next):

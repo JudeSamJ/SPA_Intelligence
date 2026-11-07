@@ -71,3 +71,10 @@ The approval card states that the statutory figure is unreviewed legal logic.
 - Flow runs and premium connectors (custom connector, HTTP) need the right Power Platform licence.
 - The API caps LLM calls per process (`LLM_MAX_CALLS`); do not trigger extraction on every file event in a busy library: add a condition or an approval.
 - Flows run as the connection owner; use per-user connections where identity matters (review, push).
+
+## Flow 5: contract ready → Excel row (outbound only, no tunnel)
+
+Trigger: HTTP request, filter `type == "contract_ready"`. Payload `contract`: `contract_id, contract_name, unit_id, buyer, currency, price,
+handover_date, jurisdiction, milestones, payment_plan_percent_sum, warnings, needs_review, model` (no quotes). Action: *Excel Online (Business) > Add a
+row into a table* in a workbook in your OneDrive (create a table named `Contracts` with those column headers). If `needs_review > 0` or the plan sum is not 100, also
+post a Teams message to yourself. This works with only your own accounts.

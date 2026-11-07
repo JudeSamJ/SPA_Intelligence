@@ -76,3 +76,21 @@ def test_failed_delivery_is_retried_next_time(monkeypatch, tmp_path):
     items = [{"contract_id": "c" * 64, "field": "price"}]
     assert nf.notify_new_review_items(items, hook(lambda r: httpx.Response(500))) == 0
     assert nf.notify_new_review_items(items, hook(lambda r: httpx.Response(200))) == 1
+
+
+def test_contract_ready_event_has_headline_facts_and_no_text(monkeypatch):
+    from pathlib import Path
+    from app.extract import extract_from_llm, pdf_pages, postprocess
+    from app.schema import ContractData
+    from tests.fakes import FakeClient, oracle_input
+    p = Path("samples/sample_c.pdf")
+    b = p.read_bytes()
+    c = postprocess(ContractData(**extract_from_llm(b, FakeClient(oracle_input(p))).model_dump()), pdf_pages(b), b)
+    got = []
+    h = hook(lambda r: (got.append(r.content), httpx.Response(200))[1])
+    assert nf.notify_contract_ready("c" * 64, "sample_c.pdf", c, h) is True
+    j = json.loads(got[0])
+    assert j["type"] == "contract_ready" and j["contract"]["price"] == 3980000.0 and j["contract"]["payment_plan_percent_sum"] == 95
+    assert j["contract"]["warnings"] >= 1 and "quote" not in got[0].decode().lower()
+    monkeypatch.delenv("ALERT_WEBHOOK_URL", raising=False)
+    assert nf.notify_contract_ready("c" * 64, "x", c) is False          # opt-in: nothing sent without a webhook

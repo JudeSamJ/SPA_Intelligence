@@ -124,3 +124,20 @@ def notify_new_review_items(items: list[dict], hook: WebhookNotifier | None = No
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(sorted(seen & current | (seen - current))))     # keep history; resolved items stay "seen"
     return sent
+
+
+# ------------------------------------------------------------------ contract ready
+def contract_summary(contract_id: str, name: str, c) -> dict:
+    """Headline facts for a flow (e.g. add a row to an Excel table or a Teams post). No quotes, no contract text."""
+    from .review import review_items
+    return {"contract_id": contract_id, "contract_name": name, "unit_id": c.unit_id.value, "buyer": c.buyer.value,
+            "currency": c.currency, "price": c.price.value, "handover_date": c.handover_date.value.isoformat() if c.handover_date.value else None,
+            "jurisdiction": c.jurisdiction or (c.jurisdiction_detected.value if c.jurisdiction_detected else None),
+            "milestones": len(c.payment_plan), "payment_plan_percent_sum": c.payment_plan_percent_sum,
+            "warnings": len(c.warnings), "needs_review": len(review_items(c)), "model": c.model}
+
+
+def notify_contract_ready(contract_id: str, name: str, c, hook: WebhookNotifier | None = None) -> bool:
+    url = os.environ.get("ALERT_WEBHOOK_URL", "").strip()
+    hook = hook or (WebhookNotifier(url, os.environ.get("ALERT_WEBHOOK_SECRET", "")) if url else None)
+    return bool(hook and hook.post("contract_ready", {"contract": contract_summary(contract_id, name, c)}))
