@@ -7,7 +7,8 @@ import { RouteFade, TransitionProvider } from "./motion/Transition";
 import { loadDevtools } from "./motion/registry";
 
 const Landing = lazy(() => import("./pages/Landing"));
-const AppShell = lazy(() => import("./pages/AppShell"));
+const RoleSwitch = lazy(() => import("./pages/RoleSwitch"));
+const Reset = lazy(() => import("./pages/Reset"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Login = lazy(() => import("./pages/Login"));
 
@@ -23,11 +24,12 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/reset" element={<Reset />} />
               <Route
                 path="/app/*"
                 element={
                   <AuthGate>
-                    <AppShell />
+                    <RoleSwitch />
                   </AuthGate>
                 }
               />

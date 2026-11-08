@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { request } from "../api/client";
+import { kindOf } from "./roles";
 import { useAuth } from "./useAuth";
 
 const initials = (s: string) =>
@@ -36,7 +37,7 @@ export function UserMenu() {
 
   if (!u?.authenticated || u.mode === "off") return null;
   const name = u.name ?? u.login ?? "";
-  const role = u.roles.includes("Spa.Reviewer") ? t("auth.roleReviewer") : t("auth.roleStaff");
+  const role = t(`auth.role.${kindOf(u)}`);
   return (
     <div ref={box} style={{ position: "relative", flex: "none" }}>
       <button

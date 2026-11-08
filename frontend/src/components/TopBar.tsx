@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router-dom";
+import { kindOf, navFor } from "../auth/roles";
+import { useAuth } from "../auth/useAuth";
 import { UserMenu } from "../auth/UserMenu";
 import { glitchText } from "../motion/effects";
 import { Magnetic } from "../motion/Magnetic";
@@ -23,6 +25,8 @@ export function TopBar() {
   const [open, setOpen] = useState(false);
   const bar = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
+  const authMe = useAuth();
+  const nav = navFor(kindOf(authMe.data), !!authMe.data);
 
   useEffect(() => setOpen(false), [pathname, narrow]);
 
@@ -70,7 +74,7 @@ export function TopBar() {
       }}
       className={({ isActive }) => {
         // "App" covers the contract views only, so it must not light up on the sibling sections that have their own link.
-        const on = isActive && !(to === "/app" && /^\/app\/(watch|crosscheck|review|buyers|accuracy)(\/|$)/.test(pathname));
+        const on = isActive && !(to === "/app" && /^\/app\/(watch|crosscheck|review|buyers|users|accuracy)(\/|$)/.test(pathname));
         return `rounded-full font-semibold ${big ? "px-4 py-3 text-base" : "px-3 py-1.5 text-sm"} ${on ? "bg-surface2 text-fg" : "text-muted hover:text-fg"}`;
       }}
       style={big ? { minHeight: 48, display: "flex", alignItems: "center" } : undefined}
@@ -210,12 +214,14 @@ export function TopBar() {
             >
               <nav aria-label={t("common.mainNav")} style={{ display: "grid", gap: 2 }}>
                 {navLink("/", t("nav.home"), true)}
-                {navLink("/app", t("nav.app"), true)}
-                {navLink("/app/watch", t("nav.watch"), true)}
-                {navLink("/app/crosscheck", t("nav.crosscheck"), true)}
-                {navLink("/app/review", t("nav.review"), true)}
-                {navLink("/app/buyers", t("nav.buyers"), true)}
-                {navLink("/app/accuracy", t("nav.accuracy"), true)}
+                {nav.app && navLink("/app", t("nav.app"), true)}
+                {nav.mine && navLink("/app", t("nav.myContract"), true)}
+                {nav.watch && navLink("/app/watch", t("nav.watch"), true)}
+                {nav.crosscheck && navLink("/app/crosscheck", t("nav.crosscheck"), true)}
+                {nav.review && navLink("/app/review", t("nav.review"), true)}
+                {nav.buyers && navLink("/app/buyers", t("nav.buyers"), true)}
+                {nav.users && navLink("/app/users", t("nav.users"), true)}
+                {nav.accuracy && navLink("/app/accuracy", t("nav.accuracy"), true)}
               </nav>
               <div style={{ height: 1, background: "var(--line)", margin: "4px 0" }} />
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -230,12 +236,14 @@ export function TopBar() {
         <>
           <nav aria-label={t("common.mainNav")} style={{ display: "flex", gap: 2, marginInlineStart: 8 }}>
             {navLink("/", t("nav.home"))}
-            {navLink("/app", t("nav.app"))}
-            {navLink("/app/watch", t("nav.watch"))}
-            {navLink("/app/crosscheck", t("nav.crosscheck"))}
-            {navLink("/app/review", t("nav.review"))}
-            {navLink("/app/buyers", t("nav.buyers"))}
-            {navLink("/app/accuracy", t("nav.accuracy"))}
+            {nav.app && navLink("/app", t("nav.app"))}
+            {nav.mine && navLink("/app", t("nav.myContract"))}
+            {nav.watch && navLink("/app/watch", t("nav.watch"))}
+            {nav.crosscheck && navLink("/app/crosscheck", t("nav.crosscheck"))}
+            {nav.review && navLink("/app/review", t("nav.review"))}
+            {nav.buyers && navLink("/app/buyers", t("nav.buyers"))}
+            {nav.users && navLink("/app/users", t("nav.users"))}
+            {nav.accuracy && navLink("/app/accuracy", t("nav.accuracy"))}
           </nav>
           <div style={{ flex: 1 }} />
           {langBtn}

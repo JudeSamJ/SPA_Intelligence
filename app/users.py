@@ -91,7 +91,9 @@ def list_users() -> list[dict]:
     with db.connection() as cx:
         rows = cx.execute("select user_id, email, name, role, created_at, last_login_at, updated_by from app_users "
                           "order by (role is null) desc, lower(email)").fetchall()
+        linked = {r[0] for r in cx.execute("select identity from buyer_assignments where active").fetchall()}
     return [{"user_id": r[0], "email": r[1], "name": r[2], "role": r[3], "admin": is_admin(r[1]),
+             "via_assignment": r[3] is None and r[1].strip().lower() in linked,     # a buyer by contract link, with no role row
              "created_at": r[4].isoformat(timespec="seconds"),
              "last_login_at": r[5].isoformat(timespec="seconds") if r[5] else None, "updated_by": r[6]} for r in rows]
 

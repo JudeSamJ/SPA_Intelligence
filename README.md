@@ -433,4 +433,4 @@ real, labelled evaluation set · mobile performance (prefetch the contract/cash-
 ## Database (Supabase / PostgreSQL)
 
 Set `DATABASE_URL` and the app keeps its data in PostgreSQL, so nothing is lost when the host restarts. Leave it unset and the app runs on local files as before.
-Setup, the connection check, buyer linking and direct email are in [docs/supabase-setup.md](docs/supabase-setup.md). The business reasoning is in [docs/business-logic.md](docs/business-logic.md).
+Setup, the connection check, buyer linking and direct email are in [docs/supabase-setup.md](docs/supabase-setup.md). The business reasoning is in [docs/business-logic.md](docs/business-logic.md). Sign-in with roles (administrator, reviewer, staff, buyer) is described at the end of the Supabase guide.

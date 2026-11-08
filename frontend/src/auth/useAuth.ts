@@ -8,6 +8,7 @@ export interface Me {
   login: string | null;
   avatar_url: string | null;
   roles: string[];
+  pending?: boolean;
 }
 
 /** Who is signed in. The server always answers 200 (authenticated: false when nobody is), so no failed request is logged. */

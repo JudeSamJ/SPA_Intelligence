@@ -38,7 +38,9 @@
     "watch": "Obligations",
     "crosscheck": "Cross-check",
     "review": "Review queue",
-    "buyers": "Buyers"
+    "buyers": "Buyers",
+    "myContract": "My contract",
+    "users": "Users"
   },
   "landing": {
     "eyebrow": "UAE off-plan property contracts",
@@ -579,7 +581,16 @@
     "notConfigured": "Sign-in is not configured on this server. Ask the owner.",
     "account": "Account menu for {{name}}",
     "roleReviewer": "Reviewer",
-    "roleStaff": "Staff"
+    "roleStaff": "Staff",
+    "role": {
+      "off": "Local",
+      "anon": "Guest",
+      "pending": "Waiting for approval",
+      "buyer": "Buyer",
+      "staff": "Staff",
+      "reviewer": "Reviewer",
+      "admin": "Administrator"
+    }
   },
   "login": {
     "title": "Welcome to SPA Intelligence",
@@ -594,6 +605,29 @@
       "failed": "GitHub did not complete the sign-in. Please try again.",
       "cancelled": "Sign-in was cancelled.",
       "not_allowed": "The GitHub account \"{{login}}\" is not allowed to use this app. Ask the owner to add it."
+    },
+    "or": "or",
+    "approvedEmail": "Your account must be approved by an administrator before you can see any contract.",
+    "email": {
+      "title": {
+        "signin": "Sign in",
+        "signup": "Create an account",
+        "forgot": "Reset your password"
+      },
+      "email": "Email",
+      "password": "Password",
+      "passwordHelp": "At least 10 characters.",
+      "submit": {
+        "signin": "Sign in",
+        "signup": "Create account",
+        "forgot": "Send reset link"
+      },
+      "toSignin": "I already have an account",
+      "toSignup": "Create an account",
+      "toForgot": "Forgot your password?",
+      "confirmed": "Your email is confirmed. You can sign in now.",
+      "checkEmailSignup": "Check your email and open the link we sent to confirm your address. Then sign in.",
+      "checkEmailForgot": "If that address has an account, a reset link is on its way."
     }
   },
   "buyers": {
@@ -616,5 +650,52 @@
       "email": "Email",
       "api": "API"
     }
+  },
+  "reset": {
+    "title": "Choose a new password",
+    "password": "New password",
+    "again": "Repeat the password",
+    "mismatch": "The two passwords do not match.",
+    "submit": "Save password",
+    "done": "Your password has been changed.",
+    "toLogin": "Go to sign in",
+    "noToken": "This reset link is missing or has expired. Request a new one from the sign-in page."
+  },
+  "pending": {
+    "title": "Waiting for approval",
+    "body": "You are signed in as {{email}}, but an administrator has not given your account access yet.",
+    "hint": "Ask your administrator to approve you. Once they do, press Check again.",
+    "check": "Check again"
+  },
+  "buyerHome": {
+    "title": "Ask about your contract",
+    "intro": "Questions are answered only from your own contract ({{name}}), with the page and the exact words it came from.",
+    "examples": "For example: When is my handover date? What happens if the seller is late? What are my payment milestones?",
+    "ask": "Ask about your contract",
+    "send": "Send",
+    "referred": "Referred to the legal team",
+    "notLinkedTitle": "No contract is linked to your account yet",
+    "notLinkedBody": "Ask the sales team to link your email address to your contract. Then reload this page."
+  },
+  "users": {
+    "title": "Users and roles",
+    "intro": "Everyone who signs up appears here with no access. Give each person one role. Changes apply immediately.",
+    "empty": "Nobody has signed in yet.",
+    "admin": "Administrator",
+    "pending": "Waiting for a role",
+    "role": "Role",
+    "roleFor": "Role for {{email}}",
+    "noRole": "No access",
+    "roles": {
+      "staff": "Staff",
+      "reviewer": "Reviewer",
+      "buyer": "Buyer"
+    },
+    "help": {
+      "staff": "Staff: reads every contract, calculation and alert.",
+      "reviewer": "Reviewer: everything staff can do, plus uploads, reviews and linking buyers.",
+      "buyer": "Buyer: asks questions about their own contract only. A buyer whose email is linked to a contract gets this role automatically."
+    },
+    "viaLink": "Buyer (linked to a contract)"
   }
 }

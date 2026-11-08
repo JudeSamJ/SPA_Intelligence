@@ -76,3 +76,68 @@ Then use **POST /api/webhook/test** (reviewer) to send a test email. The Power A
 - Rotate the database password in Supabase (**Project Settings → Database**) if it was ever shared, and update Render.
 - This layer was tested against a real PostgreSQL 16, but the live Supabase connection must be checked by running
   `scripts/check_supabase.py` with your own connection string.
+
+---
+
+# Sign-in and roles (Supabase Auth)
+
+Docs: https://supabase.com/docs/guides/auth · https://supabase.com/docs/guides/auth/redirect-urls ·
+https://supabase.com/docs/guides/auth/passwords · https://supabase.com/docs/guides/auth/auth-smtp
+
+People sign in with email and password through Supabase Auth. The app talks to Supabase from the server and keeps its own
+HttpOnly session cookie, so the browser never holds a Supabase token. **Roles are stored in this app's database**
+(`app_users`), not in anything the user can edit about themselves.
+
+## Who can do what
+
+| Role | How someone gets it | Can |
+|---|---|---|
+| **Administrator** | Their email is listed in `ADMIN_EMAILS` | Everything a reviewer can, plus **Users**: give people a role |
+| **Reviewer** | An administrator sets it | Read everything, upload, extract, review fields, link buyers, send test alerts |
+| **Staff** | An administrator sets it | Read every contract, calculation, alert and the accuracy page. Cannot change anything |
+| **Buyer** | An administrator sets it, **or** automatically when their confirmed email is linked to a contract on the **Buyers** page | Ask questions about their own contract only |
+| *(no role)* | Anyone who signs up | Sees a "waiting for approval" page and no data |
+
+Removing a role, or unlinking a buyer, takes effect on the person's very next request (the role is checked on every call).
+Machine callers (Teams agent, WhatsApp adapter) keep using `X-API-Key` with the `Spa.Channel` role.
+
+## One-time setup
+
+1. **Supabase → Authentication → Providers → Email:** enable it and turn **Confirm email ON**. This matters: a buyer is
+   recognised by their email address, so the address must be proven.
+2. **Authentication → URL Configuration:** set **Site URL** to your app URL, and add these **Redirect URLs**:
+   `https://<your-app>/login` and `https://<your-app>/reset`.
+3. **Authentication → SMTP Settings:** add a custom SMTP server. Supabase's built-in sender is limited to a few emails an
+   hour, which is not enough for real confirmation and reset emails.
+4. **Project Settings → API:** copy the **Project URL** and the **anon public** key. (Never use the `service_role` key here.)
+5. On Render, set these (Environment):
+
+   | Variable | Value |
+   |---|---|
+   | `AUTH_MODE` | `supabase` |
+   | `SUPABASE_URL` | `https://<ref>.supabase.co` |
+   | `SUPABASE_ANON_KEY` | the anon public key |
+   | `SESSION_SECRET` | 32+ random characters (signs the session cookie) |
+   | `PUBLIC_BASE_URL` | `https://<your-app>` |
+   | `ADMIN_EMAILS` | your email, comma-separated for more than one |
+   | `DATABASE_URL` | the Session pooler string (see above) |
+   | `API_KEYS` | optional: only for machine channels (`Spa.Channel`) |
+
+   The server **refuses to start** if any of these is missing, so a half-configured sign-in can never leave the app open.
+6. Open the app, choose **Create an account** with the email you put in `ADMIN_EMAILS`, confirm the email, and sign in.
+   You are the administrator. Open **Users** to approve everyone else.
+
+## Day to day
+
+- **New staff member:** they create an account and confirm their email. You open **Users** and choose *Staff* or *Reviewer*.
+- **New buyer:** open **Buyers**, link their email to their contract. When they create an account with that email, they land
+  on their own contract chat. No further step.
+- **Forgot password:** the sign-in page has a reset link; the new password is set on the `/reset` page.
+
+## Limits
+
+- Passwords are 10 to 72 characters (Supabase hashes them; this app never stores them).
+- Sign-in attempts are limited to 10 per minute per address; Supabase applies its own limits too.
+- This was tested against a faithful stand-in for Supabase Auth and a real PostgreSQL. The first real sign-in against your
+  Supabase project is yours to confirm: create the admin account and check that **Users** opens.
+- No social or single-sign-on login yet (GitHub sign-in still works alongside it if configured).

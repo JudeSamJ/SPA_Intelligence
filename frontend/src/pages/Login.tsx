@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { request } from "../api/client";
+import { EmailSignIn } from "../auth/EmailSignIn";
 import { needsSignIn, safeNext, useAuth } from "../auth/useAuth";
 import { Skeleton } from "../components/ui";
 import { useMotion } from "../motion/mm";
@@ -30,7 +31,7 @@ export default function Login() {
   const next = safeNext(params.get("next"));
   const err = params.get("error");
   const me = useAuth();
-  const cfg = useQuery({ queryKey: ["auth-config"], queryFn: () => request<{ mode: string; github: boolean }>("/auth/config"), retry: false });
+  const cfg = useQuery({ queryKey: ["auth-config"], queryFn: () => request<{ mode: string; github: boolean; email?: boolean }>("/auth/config"), retry: false });
   const card = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -100,7 +101,11 @@ export default function Login() {
 
           {me.isLoading || cfg.isLoading ? (
             <Skeleton h={48} />
-          ) : cfg.data?.github ? (
+          ) : cfg.data?.github || cfg.data?.email ? (
+            <>
+              {cfg.data?.email && <EmailSignIn confirmed={params.get("confirmed") === "1"} />}
+              {cfg.data?.email && cfg.data?.github && <p style={{ margin: 0, color: "#b9c4cc" }}>{t("login.or")}</p>}
+              {cfg.data?.github && (
             <a
               className="btn"
               data-testid="github-signin"
@@ -109,12 +114,14 @@ export default function Login() {
             >
               <GitHubMark /> {t("login.github")}
             </a>
+              )}
+            </>
           ) : (
             <p role="alert" style={{ margin: 0, color: "#ffd9d0" }}>{t("login.notConfigured")}</p>
           )}
 
-          <p style={{ margin: 0, fontSize: "0.85rem", color: "#b9c4cc" }}>{t("login.approvedOnly")}</p>
-          <p style={{ margin: 0, fontSize: "0.8rem", color: "#9fb0bb" }}>{t("login.privacy")}</p>
+          <p style={{ margin: 0, fontSize: "0.85rem", color: "#b9c4cc" }}>{t(cfg.data?.email ? "login.approvedEmail" : "login.approvedOnly")}</p>
+          {!cfg.data?.email && <p style={{ margin: 0, fontSize: "0.8rem", color: "#9fb0bb" }}>{t("login.privacy")}</p>}
           <a href="/" style={{ color: "#f1cf8a", justifySelf: "center", minHeight: 44, display: "inline-flex", alignItems: "center" }}>
             {t("login.back")}
           </a>

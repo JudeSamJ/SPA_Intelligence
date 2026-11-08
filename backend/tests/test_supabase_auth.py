@@ -236,6 +236,16 @@ def test_a_buyer_without_an_assignment_gets_no_access_and_unlinking_cuts_it(app_
     assert bella.post("/api/buyer/chat", json={"message": "hi"}, headers=H).status_code == 403
 
 
+def test_user_list_marks_buyers_who_have_access_only_through_a_link(app_):
+    admin = client_for(app_, "boss@company.com")
+    client_for(app_, "bella@buyer.com")
+    client_for(app_, "rita@company.com")
+    admin.post("/api/buyers", json={"contract_id": A, "identity": "bella@buyer.com"}, headers=H)
+    rows = {u["email"]: u for u in admin.get("/api/users").json()["users"]}
+    assert rows["bella@buyer.com"]["via_assignment"] is True and rows["bella@buyer.com"]["role"] is None
+    assert rows["rita@company.com"]["via_assignment"] is False and rows["rita@company.com"]["role"] is None
+
+
 def test_two_buyers_never_see_each_others_contract(app_, gt):
     gt.add("dan@buyer.com")
     admin = client_for(app_, "boss@company.com")
