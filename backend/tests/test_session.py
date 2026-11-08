@@ -58,7 +58,7 @@ def test_login_redirects_to_github_with_state_and_exact_callback(gh):
 
 def test_no_session_means_401_but_signin_endpoints_are_open(gh):
     assert gh.get("/api/contracts").status_code == 401
-    assert gh.get("/api/auth/config").json() == {"mode": "apikey", "github": True}
+    assert gh.get("/api/auth/config").json() == {"mode": "apikey", "github": True, "email": False}
     me = gh.get("/api/auth/me")
     assert me.status_code == 200 and me.json()["authenticated"] is False and me.json()["mode"] == "apikey"   # no failed request for the login page
     assert gh.get("/api/health").status_code == 200

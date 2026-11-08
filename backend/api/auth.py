@@ -14,6 +14,7 @@ Authorisation uses Entra *app roles* in the token's `roles` claim:
   Spa.Reviewer  everything Staff can do, plus actions that change data or spend LLM calls (review, upload/extract,
                 golden export, jurisdiction, eval runs, ERP push)
   Spa.Buyer     only POST /buyer/chat, and only for the contract mapped to that person in BUYER_ACCOUNTS
+  Spa.Admin     (supabase mode) listed in ADMIN_EMAILS: also manages users and their roles
   Spa.Channel   a messaging channel (Teams agent, WhatsApp adapter): only POST /buyer/chat, for the buyer named in the
                 X-Buyer-Identity header, whose contract is looked up in the buyer_assignments table
 
@@ -68,7 +69,12 @@ class Principal:
 
 def mode() -> str:
     m = (os.environ.get("AUTH_MODE") or "off").strip().lower()
-    return m if m in ("off", "entra", "apikey") else "off"
+    return m if m in ("off", "entra", "apikey", "supabase") else "off"
+
+
+def keys_mode() -> bool:
+    """Modes where X-API-Key machine keys are accepted (apikey, and supabase for channel/service keys)."""
+    return mode() in ("apikey", "supabase")
 
 
 def settings() -> tuple[str, str]:
@@ -86,8 +92,21 @@ def check_startup() -> None:
         session.check_startup()
         if not api_keys() and not session.enabled():
             raise RuntimeError("AUTH_MODE=apikey needs API_KEYS with at least one valid key (24+ characters).")
+    elif mode() == "supabase":
+        from backend.api import session
+        from app import db
+        missing = [v for v in ("SUPABASE_URL", "SUPABASE_ANON_KEY", "PUBLIC_BASE_URL", "ADMIN_EMAILS", "DATABASE_URL")
+                   if not os.environ.get(v, "").strip()]
+        if missing:
+            raise RuntimeError("AUTH_MODE=supabase needs " + ", ".join(missing) + ".")
+        if len(session.secret()) < 32:
+            raise RuntimeError("SESSION_SECRET must be at least 32 characters.")
+        if not session.base_url().startswith(("https://", "http://localhost", "http://127.0.0.1")):
+            raise RuntimeError("PUBLIC_BASE_URL must be https (http only for localhost).")
+        if not db.enabled():
+            raise RuntimeError("AUTH_MODE=supabase needs DATABASE_URL (roles are stored in the database).")
     elif os.environ.get("AUTH_MODE", "off").strip().lower() not in ("off", ""):
-        raise RuntimeError(f"Unknown AUTH_MODE '{os.environ.get('AUTH_MODE')}' (use off, entra or apikey).")
+        raise RuntimeError(f"Unknown AUTH_MODE '{os.environ.get('AUTH_MODE')}' (use off, entra, apikey or supabase).")
     else:
         log.warning("Authentication is OFF (AUTH_MODE=off): use only for local development.")
 
@@ -190,13 +209,20 @@ def _bearer(request: Request) -> str:
 def _session_principal(request: Request) -> Principal | None:
     """A GitHub-sign-in session cookie. State-changing requests must also carry X-Requested-With (CSRF defence)."""
     from backend.api import session
-    if not session.enabled():
+    if not session.cookies_enabled():
         return None
     c = session.read_session(request.cookies.get(session.COOKIE, ""))
     if c is None:
         return None
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get("x-requested-with", "").lower() != "spa":
         raise ApiError(403, "forbidden", "Missing X-Requested-With header.")
+    if c.get("prov") == "supabase":
+        from app import users
+        try:
+            roles = users.principal_roles(c["sub"].removeprefix("sb:"), c["email"])     # the database decides, on every request
+        except Exception:  # noqa: BLE001
+            raise ApiError(503, "database_unavailable", "The user database is not reachable right now.") from None
+        return Principal(oid=c["sub"], name=str(c.get("name") or c["email"]), upn=c["email"], roles=roles, tenant="supabase")
     return Principal(oid=c["sub"], name=str(c.get("name") or c.get("login") or ""), upn=str(c.get("login") or ""),
                      roles={c["role"]}, tenant="github", avatar=session.safe_avatar(c.get("avatar")))
 
@@ -207,7 +233,7 @@ def current_principal(request: Request) -> Principal | None:
         return None
     p = getattr(request.state, "principal", None)
     if p is None:
-        if mode() == "apikey":
+        if keys_mode():
             key = request.headers.get("x-api-key", "").strip()
             if key:
                 p = validate_api_key(key)
@@ -225,6 +251,16 @@ def _needs_write(request: Request) -> bool:
     if request.method in ("GET", "HEAD", "OPTIONS"):
         return False
     return not any(rx.search(request.url.path) for rx in READ_ONLY_POSTS)
+
+
+ADMIN = "Spa.Admin"
+
+
+def require_admin(request: Request) -> None:
+    """Applied to user-management routes: only people listed in ADMIN_EMAILS."""
+    p = current_principal(request)
+    if p is None or ADMIN not in p.roles:
+        raise ApiError(403, "forbidden", "Only an administrator can do this.")
 
 
 def staff_access(request: Request) -> None:
@@ -257,6 +293,11 @@ def buyer_accounts() -> dict[str, str]:
 def contract_for_principal(p: Principal) -> str | None:
     if BUYER not in p.roles:
         return None
+    if keys_mode() and p.contract:
+        return p.contract
+    if mode() == "supabase":
+        from app import buyers
+        return buyers.contract_for_identity(p.upn, "web")          # the buyer's confirmed email -> their one contract
     if mode() == "apikey":
         return p.contract
     return buyer_accounts().get(p.oid.lower())

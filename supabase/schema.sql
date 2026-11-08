@@ -59,6 +59,20 @@ create table if not exists public.audit_log (
 );
 create index if not exists audit_log_contract_idx on public.audit_log (contract_id, at desc);
 
+-- People who have signed in (AUTH_MODE=supabase). role = null means "signed up, waiting for an admin".
+-- user_id is Supabase Auth's user id. Roles are decided HERE, never by anything the user can edit about themselves.
+create table if not exists public.app_users (
+    user_id       text primary key,
+    email         text not null,
+    name          text not null default '',
+    role          text check (role in ('staff', 'reviewer', 'buyer')),
+    created_at    timestamptz not null default now(),
+    last_login_at timestamptz,
+    updated_by    text not null default ''
+);
+create unique index if not exists app_users_email_idx on public.app_users (lower(email));
+
+alter table public.app_users         enable row level security;
 alter table public.app_files         enable row level security;
 alter table public.contracts         enable row level security;
 alter table public.buyer_assignments enable row level security;

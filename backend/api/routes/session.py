@@ -14,7 +14,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.get("/config")
 def config_():
-    return {"mode": auth.mode(), "github": session.enabled()}
+    from backend.api import supabase_auth
+    return {"mode": auth.mode(), "github": session.enabled(), "email": supabase_auth.enabled() and auth.mode() == "supabase"}
 
 
 @router.get("/me")
@@ -29,7 +30,8 @@ def me(request: Request):
         if e.status == 401:
             return {"authenticated": False, "mode": mode, "name": None, "login": None, "avatar_url": None, "roles": []}
         raise
-    return {"authenticated": True, "mode": mode, "name": p.display, "login": p.upn or None, "avatar_url": p.avatar, "roles": sorted(p.roles)}
+    return {"authenticated": True, "mode": mode, "name": p.display, "login": p.upn or None, "avatar_url": p.avatar, "roles": sorted(p.roles),
+            "pending": mode == "supabase" and not p.roles}
 
 
 @router.get("/github/login")

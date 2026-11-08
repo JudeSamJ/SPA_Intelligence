@@ -45,7 +45,7 @@ def pg(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", TEST_URL)
     db.close()
     with psycopg.connect(TEST_URL, autocommit=True) as cx:
-        for t in ("audit_log", "buyer_assignments", "contracts", "app_files"):
+        for t in ("audit_log", "buyer_assignments", "contracts", "app_files", "app_users"):
             cx.execute(f"drop table if exists public.{t} cascade")
     yield TEST_URL
     persistence.shutdown()

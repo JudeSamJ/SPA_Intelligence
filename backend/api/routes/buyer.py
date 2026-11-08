@@ -28,6 +28,24 @@ class BuyerChatResponse(BaseModel):
     disclaimer: str = config.DISCLAIMER
 
 
+class BuyerMe(BaseModel):
+    linked: bool
+    contract_name: str | None = None
+
+
+@router.get("/me", response_model=BuyerMe)
+def buyer_me(request: Request):
+    """For the buyer's own page: the name of the contract they may ask about (never its id or any content)."""
+    p = auth.current_principal(request)
+    cid = auth.contract_for_principal(p) if p is not None else None
+    if cid is None:
+        return BuyerMe(linked=False)
+    try:
+        return BuyerMe(linked=True, contract_name=deps.get_source(cid).name)
+    except ApiError:
+        return BuyerMe(linked=False)
+
+
 @router.post("/chat", response_model=BuyerChatResponse, dependencies=[Depends(deps.chat_limiter)])
 def buyer_chat(body: BuyerChatRequest, request: Request, authorization: str | None = Header(None)):
     """AUTH_MODE=entra: an Entra token with the Spa.Buyer role, mapped to ONE contract in BUYER_ACCOUNTS.

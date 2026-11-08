@@ -37,7 +37,13 @@ GITHUB_TRANSPORT: httpx.BaseTransport | None = None      # tests inject a mock: 
 
 
 def enabled() -> bool:
+    """GitHub sign-in is configured (kept name for compatibility)."""
     return bool(os.environ.get("GITHUB_CLIENT_ID", "").strip())
+
+
+def cookies_enabled() -> bool:
+    """Any browser sign-in that uses the session cookie."""
+    return enabled() or bool(os.environ.get("SUPABASE_URL", "").strip())
 
 
 def users() -> dict[str, str]:
@@ -108,15 +114,25 @@ def make_session(github_id: int, login: str, name: str, role: str, avatar: str |
     return jwt.encode(claims, secret(), algorithm="HS256")
 
 
+def make_supabase_session(user_id: str, email: str, name: str = "") -> str:
+    """A session for a Supabase Auth user. It carries identity only; the role is looked up in the database on every request."""
+    now = int(time.time())
+    return jwt.encode({"sub": f"sb:{user_id}", "email": email, "name": name, "prov": "supabase", "iat": now,
+                       "exp": now + hours() * 3600}, secret(), algorithm="HS256")
+
+
 def read_session(token: str) -> dict | None:
-    """Verified claims, or None. The allow-list is re-checked on every request, so removing a user takes effect at once."""
+    """Verified claims, or None. GitHub sessions re-check the allow-list on every request; Supabase sessions re-check the database
+    role in the principal, so removing a user takes effect at once either way."""
     if not token or not secret():
         return None
     try:
-        c = jwt.decode(token, secret(), algorithms=["HS256"], options={"require": ["exp", "sub", "role"]})
+        c = jwt.decode(token, secret(), algorithms=["HS256"], options={"require": ["exp", "sub"]})
     except jwt.PyJWTError:
         return None
-    if users().get(str(c.get("login", "")).lower()) != c.get("role"):
+    if c.get("prov") == "supabase":
+        return c if str(c.get("sub", "")).startswith("sb:") and c.get("email") else None
+    if "role" not in c or users().get(str(c.get("login", "")).lower()) != c.get("role"):
         return None
     return c
 

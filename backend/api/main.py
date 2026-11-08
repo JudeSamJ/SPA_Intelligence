@@ -19,6 +19,8 @@ from app.llm import LLMCapError, LLMError, calls_made
 from backend.api import auth, persistence
 from backend.api.deps import ApiError
 from backend.api.routes import public as public_routes
+from backend.api.routes import supabase_auth as supabase_routes
+from backend.api.routes import users as users_routes
 from backend.api.routes import session as session_routes
 from backend.api.routes import buyer, buyers as buyers_routes, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
@@ -103,6 +105,8 @@ def create_app() -> FastAPI:
         app.include_router(r, prefix="/api", dependencies=staff)
     app.include_router(public_routes.router, prefix="/api")    # signed email image + logo: public by design
     app.include_router(session_routes.router, prefix="/api")   # sign-in endpoints: open by design
+    app.include_router(supabase_routes.router, prefix="/api")  # email sign-in endpoints: open by design (rate limited, CSRF header)
+    app.include_router(users_routes.router, prefix="/api", dependencies=[Depends(auth.staff_access), Depends(auth.require_admin)])
     app.include_router(buyer.router, prefix="/api")         # the buyer route does its own check (role + contract mapping)
 
     @app.get("/api/health", response_model=Health, tags=["meta"])
