@@ -180,6 +180,15 @@ def test_password_reset_uses_the_recovery_token_once_over_the_api(app_, gt):
     assert app_.post("/api/auth/supabase/reset", json={"token": "good-recovery-token", "password": "short"}, headers=H).status_code == 422
 
 
+def test_new_style_publishable_keys_go_in_the_apikey_header_only(app_, gt, monkeypatch):
+    monkeypatch.setenv("SUPABASE_ANON_KEY", "sb_publishable_abc123")
+    app_.post("/api/auth/supabase/login", json={"email": "rita@company.com", "password": "correct-horse-battery"}, headers=H)
+    assert gt.calls[-1][3] == ""                                           # no Authorization header with a non-JWT key
+    monkeypatch.setenv("SUPABASE_ANON_KEY", "eyJlegacy.jwt.anon")
+    app_.post("/api/auth/supabase/login", json={"email": "rita@company.com", "password": "correct-horse-battery"}, headers=H)
+    assert gt.calls[-1][3] == "Bearer eyJlegacy.jwt.anon"
+
+
 # ------------------------------------------------------------------ RBAC
 def test_admin_assigns_roles_and_they_take_effect_immediately(app_):
     admin, rita, sam = client_for(app_, "boss@company.com"), client_for(app_, "rita@company.com"), client_for(app_, "sam@company.com")

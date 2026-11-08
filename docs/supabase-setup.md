@@ -109,7 +109,7 @@ Machine callers (Teams agent, WhatsApp adapter) keep using `X-API-Key` with the 
    `https://<your-app>/login` and `https://<your-app>/reset`.
 3. **Authentication → SMTP Settings:** add a custom SMTP server. Supabase's built-in sender is limited to a few emails an
    hour, which is not enough for real confirmation and reset emails.
-4. **Project Settings → API:** copy the **Project URL** and the **anon public** key. (Never use the `service_role` key here.)
+4. **Project Settings → API Keys:** copy the **Publishable key** (`sb_publishable_...`) or, on older projects, the **anon public** key, and use it as `SUPABASE_ANON_KEY`. Copy the **Project URL** too. Never use a **secret** or `service_role` key here.
 5. On Render, set these (Environment):
 
    | Variable | Value |

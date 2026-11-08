@@ -56,7 +56,10 @@ def check_password(pw: str) -> str:
 
 def _call(method: str, path: str, body: dict | None = None, bearer: str | None = None, query: dict | None = None):
     headers = {"apikey": anon_key(), "Content-Type": "application/json"}
-    headers["Authorization"] = f"Bearer {bearer or anon_key()}"
+    if bearer:
+        headers["Authorization"] = f"Bearer {bearer}"          # the user's own token (password reset)
+    elif not anon_key().startswith("sb_"):
+        headers["Authorization"] = f"Bearer {anon_key()}"      # legacy JWT anon key; the new sb_publishable_ keys are not JWTs and go in apikey only
     u = f"{url()}/auth/v1/{path}" + ("?" + urlencode(query) if query else "")
     try:
         with httpx.Client(timeout=10, transport=TRANSPORT) as c:
