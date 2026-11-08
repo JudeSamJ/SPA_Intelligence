@@ -93,7 +93,7 @@ python eval/run_eval.py --yes      # extraction accuracy vs ground_truth.json (u
 ```
 
 Extraction costs 1 LLM call (2 if the first answer fails validation) and is cached by file hash and model. Nothing calls the
-model on page load: extraction runs only when you click **Extract** (or upload), and the API refuses scanned PDFs.
+model on page load: extraction runs only when you click **Extract** (or upload), and scanned PDFs are read with OCR when an engine is configured (otherwise refused).
 
 ## API (`/api`, JSON; errors are `{"error": {"code", "message"}}`)
 
@@ -416,7 +416,7 @@ endpoint serves a valid inline PDF).
   changed (project names/locations; sample C is now a Downtown unit `OTC-2106`), so cached extractions no longer match and
   `eval/results.json` is stale. Re-run extraction and `python eval/run_eval.py --yes` (3 samples, about 3 LLM calls).
 - `gpt-5.4-mini` behaviour on these prompts is verified only on the original samples; prompts may need tuning.
-- Scanned PDFs are detected and refused (no OCR yet). English contracts only.
+- Scanned PDFs are read with OCR (Docling and/or a Qwen vision model, see [docs/ocr.md](docs/ocr.md)); with no engine configured they are refused with the reason. English contracts only.
 - "At risk" is keyword-based on milestone text (a heuristic); penalty exposure is compensation the buyer could be owed, so it is shown separately as well as summed.
 - The legal-advice gate is regex plus prompt based: it can over-refuse (any question containing "cancel") and can miss new phrasings.
 - Rate limits and the call cap are in-memory and per process; there is no authentication or database. Put auth in front before exposing a keyed server publicly.

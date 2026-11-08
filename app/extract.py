@@ -111,6 +111,8 @@ def postprocess(data: ContractData, pages: list[str], pdf_bytes: bytes | None = 
         warnings = [w for w in warnings if not w.startswith("Quote for ")]   # grounding reports these precisely
         data.warnings = []
         ground_contract(data, pdf_bytes, pages)
+        from .ocr import apply_flags
+        apply_flags(data, pdf_bytes)                  # scanned pages: name them and send low-agreement values to review
         grounding_notes = list(data.warnings)
 
     if data.payment_plan:

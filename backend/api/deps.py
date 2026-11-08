@@ -50,6 +50,30 @@ def _display_name(path: Path, kind: str) -> str:
     return path.name
 
 
+def _stable_id(path: Path, kind: str) -> str | None:
+    """An upload that was OCR'd is stored as a different file (searchable copy) but keeps the id of what the user uploaded."""
+    if kind != "upload":
+        return None
+    try:
+        i = json.loads(path.with_suffix(".meta.json").read_text()).get("id")
+    except (OSError, ValueError):
+        return None
+    return i if isinstance(i, str) and ID_RE.match(i) else None
+
+
+def write_meta(path: Path, **updates) -> None:
+    """Merge fields into an upload's .meta.json atomically."""
+    mp = path.with_suffix(".meta.json")
+    try:
+        meta = json.loads(mp.read_text())
+    except (OSError, ValueError):
+        meta = {}
+    meta.update(updates)
+    tmp = mp.with_name(mp.name + ".tmp")
+    tmp.write_text(json.dumps(meta))
+    tmp.replace(mp)
+
+
 def _scan(dirpath: Path, kind: str) -> list[Source]:
     out: list[Source] = []
     if not dirpath.exists():
@@ -62,7 +86,7 @@ def _scan(dirpath: Path, kind: str) -> list[Source]:
         if src is None:
             data = p.read_bytes()
             stats = pdf_stats(data)
-            src = Source(file_hash(data), _display_name(p, kind), kind, p, st.st_size,
+            src = Source(_stable_id(p, kind) or file_hash(data), _display_name(p, kind), kind, p, st.st_size,
                          stats["pages"], stats["scanned_suspect"])
             with _lock:
                 _hash_cache[key] = src
@@ -135,14 +159,20 @@ JOBS: dict[str, Job] = {}
 def start_extraction(src: Source, force: bool) -> Job:
     with _lock:
         existing = JOBS.get(src.id)
-        if existing and existing.state in ("queued", "running"):
+        if existing and existing.state in ("queued", "running", "ocr"):
             return existing
         job = JOBS[src.id] = Job()
 
     def run():
         job.state = "running"
         try:
-            extract_contract(src.path.read_bytes(), source_name=src.name, use_cache=not force)
+            data = src.path.read_bytes()
+            from app import ocr
+            if src.kind == "upload" and ocr.pages_needing_ocr(data) and ocr.enabled():
+                job.state = "ocr"                              # scanned pages: read them first, then extract as usual
+                data = _ocr_in_place(src, data)
+                job.state = "running"
+            extract_contract(data, source_name=src.name, use_cache=not force)
             job.state = "done"
             from backend.api.routes.obligations import recompute_now
             try:
@@ -163,9 +193,27 @@ def start_extraction(src: Source, force: bool) -> Job:
     return job
 
 
+def _ocr_in_place(src: Source, data: bytes) -> bytes:
+    """Make the upload searchable. The user's original is kept untouched under originals/; the working copy keeps the same contract id."""
+    from app import ocr
+    searchable, report = ocr.make_searchable(data)
+    orig_dir = src.path.parent / "originals"
+    orig_dir.mkdir(exist_ok=True)
+    keep = orig_dir / f"{src.id}.pdf"
+    if not keep.exists():
+        keep.write_bytes(data)
+    write_meta(src.path, id=src.id, ocr={"engine": report["engine"], "verifier": report["verifier"],
+                                         "pages": sorted(int(p) for p in report["pages"]), "unread": report["unread"],
+                                         "original_sha256": file_hash(data)})
+    tmp = src.path.with_name(src.path.name + ".tmp")
+    tmp.write_bytes(searchable)
+    tmp.replace(src.path)                                       # atomic: a reader sees the old file or the new one, never half
+    return searchable
+
+
 def status_for(src: Source) -> tuple[str, str | None]:
     job = JOBS.get(src.id)
-    if job and job.state in ("queued", "running"):
+    if job and job.state in ("queued", "running", "ocr"):
         return job.state, None
     if load_cached(src.path.read_bytes()) is not None:
         return "extracted", None

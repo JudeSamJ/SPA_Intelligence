@@ -24,6 +24,7 @@ from backend.api.routes import users as users_routes
 from backend.api.routes import session as session_routes
 from backend.api.routes import buyer, buyers as buyers_routes, cashflow, chat, contracts, crossdoc, internal, obligations, penalty, sim, trust
 from backend.api.routes import eval as eval_routes
+from app import ocr as _ocr
 from backend.api.schemas import Health
 
 log = logging.getLogger("spa.api")
@@ -50,6 +51,12 @@ async def lifespan(app: FastAPI):
         if sched:
             sched.shutdown(wait=False)
         persistence.shutdown()
+
+
+def ocr_status() -> dict:
+    """Public and minimal: is scanned-PDF reading switched on, and by which engines. Details never include keys or settings."""
+    primary, verifier, _ = _ocr.choose()
+    return {"enabled": primary is not None, "engine": primary.name if primary else None, "verified": verifier is not None}
 
 
 def create_app() -> FastAPI:
@@ -113,7 +120,7 @@ def create_app() -> FastAPI:
     def health():
         return Health(status="ok", llm_configured=config.llm_configured(), model=config.model_tag(),
                       llm_calls_made=calls_made(), llm_call_cap=config.MAX_LLM_CALLS, auth_mode=auth.mode(),
-                      database=persistence.status())
+                      database=persistence.status(), ocr=ocr_status())
 
     if config.SERVE_FRONTEND and (config.FRONTEND_DIST / "index.html").exists():
         dist = config.FRONTEND_DIST

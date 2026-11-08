@@ -7,7 +7,7 @@ import pymupdf
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from fastapi.responses import FileResponse
 
-from app import config
+from app import config, ocr
 from app.cashflow import CashflowUnavailable, milestone_rows
 from app.extract import load_cached
 from backend.api import deps, persistence
@@ -79,9 +79,9 @@ async def upload(file: UploadFile = File(...), extract: bool = Query(True)):
 
 
 def _start(src: deps.Source, force: bool):
-    if src.scanned_suspect:
-        raise ApiError(422, "scanned_pdf", "This PDF looks scanned (almost no extractable text). "
-                                           "Scanned documents are not supported yet.")
+    if src.scanned_suspect and not (ocr.enabled() and ocr.pages_needing_ocr(src.path.read_bytes())):
+        raise ApiError(422, "scanned_pdf", "This PDF looks scanned (almost no extractable text) and reading scans is not set up on "
+                                           "this server. " + (lambda m: m[:1].upper() + m[1:])(ocr.choose()[2]) + ".")
     if not config.llm_configured():
         raise ApiError(503, "llm_not_configured", config.setup_hint())
     return deps.start_extraction(src, force)

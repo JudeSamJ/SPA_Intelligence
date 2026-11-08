@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "re
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ApiError, api, type ContractSummary } from "../api/client";
-import { useStatus, useUpload } from "../api/hooks";
+import { useHealth, useStatus, useUpload } from "../api/hooks";
 import { useFmt } from "../i18n/format";
 import { coinBurst } from "../motion/effects";
 import { Flip } from "../motion/registry";
@@ -18,7 +18,7 @@ function StatusChip({ c }: { c: ContractSummary }) {
       ? "var(--ok)"
       : c.status === "error"
         ? "var(--danger)"
-        : c.status === "running" || c.status === "queued"
+        : c.status === "running" || c.status === "queued" || c.status === "ocr"
           ? "var(--info)"
           : "var(--muted)";
   return (
@@ -91,6 +91,7 @@ function Upload({ onReady }: { onReady: (id: string) => void }) {
   const { t } = useTranslation();
   const { tier } = usePrefs();
   const up = useUpload();
+  const ocrOn = !!useHealth().data?.ocr?.enabled;
   const qc = useQueryClient();
   const [id, setId] = useState<string | undefined>();
   const [over, setOver] = useState(false);
@@ -157,7 +158,7 @@ function Upload({ onReady }: { onReady: (id: string) => void }) {
               ? t("shell.reading")
               : t("shell.dropTitle")}
         </strong>
-        <small style={{ color: "var(--muted)" }}>{t("shell.dropHint")}</small>
+        <small style={{ color: "var(--muted)" }}>{t(ocrOn ? "shell.dropHintOcr" : "shell.dropHint")}</small>
         <input
           type="file"
           accept="application/pdf,.pdf"

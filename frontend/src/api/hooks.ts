@@ -11,7 +11,7 @@ export const useContracts = () =>
     queryFn: api.contracts,
     refetchInterval: (q) => {
       const rows = q.state.data as ContractSummary[] | undefined;
-      return rows?.some((c) => c.status === "queued" || c.status === "running") ? 1200 : false;
+      return rows?.some((c) => c.status === "queued" || c.status === "ocr" || c.status === "running") ? 1200 : false;
     },
   });
 

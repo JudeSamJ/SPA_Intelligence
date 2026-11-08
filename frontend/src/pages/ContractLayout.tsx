@@ -116,15 +116,19 @@ export default function ContractLayout() {
     [id, q.data, openPdf, openEvidence],
   );
 
+  const ocrOn = !!useHealth().data?.ocr?.enabled;
   if (list.isLoading || q.isLoading) return <Skeleton h={360} />;
   const summary = known;
   if (summary && summary.status !== "extracted") {
     return (
       <EmptyState title={t("shell.notExtractedTitle")} body={summary?.name}>
-        {summary?.scanned_suspect ? (
+        {summary?.scanned_suspect && !ocrOn ? (
           <Alert tone="warn">{t("shell.scanned")}</Alert>
         ) : (
-          <ExtractControls id={id} force={false} />
+          <>
+            {summary?.scanned_suspect && <Alert tone="info">{t("shell.scannedOcr")}</Alert>}
+            <ExtractControls id={id} force={false} />
+          </>
         )}
       </EmptyState>
     );

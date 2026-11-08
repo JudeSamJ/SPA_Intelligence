@@ -969,7 +969,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "not_extracted" | "queued" | "running" | "extracted" | "error";
+            status: "not_extracted" | "queued" | "ocr" | "running" | "extracted" | "error";
             /** Error */
             error?: string | null;
             /** Llm Configured */
@@ -998,7 +998,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "not_extracted" | "queued" | "running" | "extracted" | "error";
+            status: "not_extracted" | "queued" | "ocr" | "running" | "extracted" | "error";
             /** Error */
             error?: string | null;
             /** Extracted At */
@@ -1296,6 +1296,10 @@ export interface components {
              * @enum {string}
              */
             auth_mode: "off" | "entra" | "apikey" | "supabase";
+            /** Database */
+            database?: { [key: string]: unknown };
+            /** Ocr */
+            ocr?: { enabled?: boolean; engine?: string | null; verified?: boolean };
         };
         /** JurisdictionBody */
         JurisdictionBody: {

@@ -120,7 +120,8 @@
       "extracted": "Extracted",
       "running": "Extracting…",
       "queued": "Queued",
-      "error": "Failed"
+      "error": "Failed",
+      "ocr": "Reading scanned pages…"
     },
     "pickTitle": "Pick a contract to begin",
     "pickBody": "Choose a sample on the left or upload your own SPA.",
@@ -134,9 +135,11 @@
     "extracting": "Extracting contract terms…",
     "extractFailed": "Extraction failed",
     "notConfigured": "The model is not configured on the server. Add the settings to .env.",
-    "scanned": "This PDF looks scanned (almost no extractable text). Scanned documents are not supported yet.",
+    "scanned": "This PDF looks scanned (almost no extractable text) and reading scans is not set up on this server.",
     "extractedAt": "Extracted {{when}} with {{model}}",
-    "tabs": "Contract sections"
+    "tabs": "Contract sections",
+    "dropHintOcr": "PDF only, up to 20 MB. Scans are read with OCR.",
+    "scannedOcr": "This PDF looks scanned. Its pages will be read with OCR first; values from pages the two readers disagree on are sent to review."
   },
   "tabs": {
     "terms": "Terms",

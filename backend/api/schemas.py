@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from app.schema import ContractData, Sourced
 
-Status = Literal["not_extracted", "queued", "running", "extracted", "error"]
+Status = Literal["not_extracted", "queued", "ocr", "running", "extracted", "error"]
 
 
 class ErrorBody(BaseModel):
@@ -28,6 +28,7 @@ class Health(BaseModel):
     llm_call_cap: int
     auth_mode: Literal["off", "entra", "apikey", "supabase"] = "off"
     database: dict = {"enabled": False}
+    ocr: dict = {"enabled": False}
 
 
 class ContractSummary(BaseModel):
