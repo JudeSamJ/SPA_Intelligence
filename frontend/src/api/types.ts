@@ -1295,7 +1295,7 @@ export interface components {
              * @default off
              * @enum {string}
              */
-            auth_mode: "off" | "entra" | "apikey";
+            auth_mode: "off" | "entra" | "apikey" | "supabase";
         };
         /** JurisdictionBody */
         JurisdictionBody: {

@@ -313,6 +313,26 @@ def test_logout_clears_the_session(app_):
     assert c.get("/api/contracts").status_code == 401
 
 
+def test_health_works_in_supabase_mode_and_reports_the_database(app_):
+    """Regression: the response schema once rejected auth_mode 'supabase', so /api/health returned 500 on a deployed server."""
+    r = app_.get("/api/health")
+    assert r.status_code == 200
+    h = r.json()
+    assert h["auth_mode"] == "supabase" and h["status"] == "ok" and h["database"]["enabled"] is True
+
+
+@pytest.mark.parametrize("mode", ["off", "apikey", "supabase"])
+def test_health_answers_for_every_auth_mode(env, pg, monkeypatch, mode):
+    monkeypatch.setenv("AUTH_MODE", mode)
+    for k, v in {"SUPABASE_URL": "https://p.supabase.co", "SUPABASE_ANON_KEY": "anon-public-key-123456", "SESSION_SECRET": SECRET,
+                 "PUBLIC_BASE_URL": "http://localhost:8000", "ADMIN_EMAILS": "a@b.co",
+                 "API_KEYS": json.dumps({CHAN: {"name": "k", "roles": ["Spa.Channel"]}})}.items():
+        monkeypatch.setenv(k, v)
+    with TestClient(create_app()) as c:
+        r = c.get("/api/health")
+        assert r.status_code == 200 and r.json()["auth_mode"] == mode
+
+
 def test_config_endpoint_reports_email_sign_in(app_):
     cfg = app_.get("/api/auth/config").json()
     assert cfg["mode"] == "supabase" and cfg["email"] is True

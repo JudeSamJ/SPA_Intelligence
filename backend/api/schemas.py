@@ -26,7 +26,7 @@ class Health(BaseModel):
     model: str
     llm_calls_made: int
     llm_call_cap: int
-    auth_mode: Literal["off", "entra", "apikey"] = "off"
+    auth_mode: Literal["off", "entra", "apikey", "supabase"] = "off"
     database: dict = {"enabled": False}
 
 
